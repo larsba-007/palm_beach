@@ -99,7 +99,7 @@ await check('Final screen and leaving: PLAY AGAIN and PARTY MENU, RESIGN returns
     }
     const game = fs.readFileSync('js/game.js', 'utf8');
     assert.match(game, /export function confirmResign\(\) \{[\s\S]{0,260}if \(state\.pb\) \{[\s\S]{0,200}leavePalmBeachTable\(false\);\s*return;/);
-    assert.match(game, /export function leavePalmBeachTable\(playAgain = false\) \{\s*leavePalmBeachMatch\(\);\s*state\.pb = null;/);
+    assert.match(game, /export function leavePalmBeachTable\(playAgain = false\) \{\s*if \(state\.pb && state\.pb\.closeTutorial\) state\.pb\.closeTutorial\(\);\s*leavePalmBeachMatch\(\);\s*state\.pb = null;/);
     assert.match(game, /onFinished: \(choice\) => leavePalmBeachTable\(choice === 'AGAIN'\)/);
 });
 

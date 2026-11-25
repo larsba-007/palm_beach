@@ -50,7 +50,9 @@ await check('Reward in words', () => {
 
 await check('The screen plays the game through the rules engine: one place asks the players, one place shows what happened', () => {
     const match = fs.readFileSync('js/pb/match.js', 'utf8');
-    assert.match(match, /playGame\(game, askPlayer, \{ rng, emit \}\)/, 'the engine runs the match');
+    // The engine runs the match (a tutorial lesson may give its own part of the game to play: step 2.2).
+    assert.match(match, /play = playGame/);
+    assert.match(match, /await play\(game, askPlayer, \{ rng, emit \}\)/, 'the engine runs the match');
     for (const request of ['CHOOSE_CARD', 'REROLL', 'DIAMOND_TRADE', 'BID']) assert.ok(match.includes(`case '${request}'`), `answers ${request}`);
     for (const event of ['ROUND_START', 'TURN_START', 'ROLL', 'FLIP_FAILED', 'CARD_FLIPPED', 'DIAMOND_TRADE', 'FLIPPING_DONE', 'GAME_OVER']) {
         assert.ok(match.includes(`case '${event}'`), `shows ${event}`);

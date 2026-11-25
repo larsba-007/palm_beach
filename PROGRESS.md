@@ -251,3 +251,24 @@ Lars decided: one short guided game (not text screens), the learner plays Bright
 - `TUTORIAL_SCRIPT.md`: Claude's proposal for every bubble text and click, in four chapters (Flip cards, The Luxury Auction, Diamonds, The ending). **Waiting for Lars's approval.** No tutorial code is written yet.
 - Open: where the tutorial starts from (two choices on the start screen, or a button on the party menu). Claude recommends two choices on the start screen, with a small tutorial link kept on the party menu.
 - Next after approval: step 2.2, the tutorial engine.
+
+## Version 2, step 2.2: the tutorial engine (25 Nov 2026)
+
+Lars approved `TUTORIAL_SCRIPT.md`. Built and checked:
+
+- `js/pb/tutorial_engine.js` (no screen code): builds a lesson's fixed table, fixes the dice, and a "guide" that answers the rules engine's questions from the script. The real rules play the lesson; a script that asks for something the rules do not allow stops with an error.
+- `js/pb/tutorial_lessons.js`: the lessons as data. **Chapters 1 and 2 are in** (needed to prove the engine). Chapters 3 and 4 come in step 2.3.
+- `js/pb/tutorial_view.js`: the bubble, the pulsing ring around the thing it points at, and the click lock (only the asked-for card or button can be clicked).
+- `js/pb/match.js` takes a guide and a part of the game to play; a normal match is unchanged. `js/rules/engine.js`: the start of a round is its own step (`startRound`), no rule changed.
+- `tests/pb_tutorial.test.js`: 9 checks. Chapters 1 and 2 are played to the end and must end on the script's numbers; the bubble texts must equal `TUTORIAL_SCRIPT.md` word for word; broken scripts are caught.
+- `npm run check`: ALL 24 CHECKS PASSED.
+- Browser: both chapters played through with an automatic clicker that also tried wrong clicks (all blocked); RESIGN in the middle removes the bubble.
+
+Good to know:
+- **No button yet.** The TUTORIAL button is step 2.3. Until then a lesson starts only from the browser console: `startPalmBeachLesson('flip-cards')`.
+- The learner is named "Bright Shell" on the table (not "You"), so the game's own messages read well ("BRIGHT SHELL WINS THE SPORTS CAR FOR 9 Au"). The bubbles say "you".
+- Three steps for Roxana's bids (2.2b, 2.4b, 2.6b) have no row of their own in the script; they are the "Roxana raises / passes" of the row before.
+
+Open for Lars:
+- Where the tutorial starts from: A (two choices on the start screen, Claude's recommendation), B (button on the party menu) or C.
+- Next: step 2.3 (chapters 3 and 4, the TUTORIAL button, PLAY A REAL GAME at the end, replay of single chapters).

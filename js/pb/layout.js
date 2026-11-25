@@ -128,3 +128,40 @@ export function scaleSprite(sprite, size) {
     const [w, h] = sprite.size.split(' ').map(v => parseFloat(v) * f);
     return { x: sprite.x * f, y: sprite.y * f, size: `${w}px ${h}px` };
 }
+
+// ---- Tutorial (step 2.2): where the bubble stands -------------------------------------------------------
+
+export const CANVAS = Object.freeze({ width: 3840, height: 2160 });
+
+/**
+ * Places the tutorial bubble beside the thing it points at, inside the table and without covering that thing.
+ * The bubble stands below its target if there is room (else above, right, left); a tall target (a player panel) gets it to the right.
+ * @param {{left: number, top: number, width: number, height: number}|null} target  in table pixels; null = nothing to point at
+ * @param {{width: number, height: number}} size  the bubble's size
+ * @param {string|null} [prefer]  'right', 'left', 'below' or 'above': tried first
+ */
+export function tutorBubblePosition(target, size, prefer = null) {
+    const gap = 40;
+    const edge = 20;
+    const clamp = (v, max) => Math.round(Math.max(edge, Math.min(v, max - edge)));
+    const maxLeft = CANVAS.width - size.width;
+    const maxTop = CANVAS.height - size.height;
+    if (!target) return { left: Math.round(maxLeft / 2), top: 420, side: 'none' };
+
+    const midLeft = clamp(target.left + target.width / 2 - size.width / 2, maxLeft);
+    const midTop = clamp(target.top + target.height / 2 - size.height / 2, maxTop);
+    const places = {
+        right: { left: target.left + target.width + gap, top: midTop },
+        left: { left: target.left - gap - size.width, top: midTop },
+        below: { left: midLeft, top: target.top + target.height + gap },
+        above: { left: midLeft, top: target.top - gap - size.height }
+    };
+    const fits = (p) => p.left >= edge && p.left <= maxLeft - edge && p.top >= edge && p.top <= maxTop - edge;
+    // Below is the first choice: a bubble beside a card would hide the other cards of the row being played.
+    const tall = target.height > 2 * target.width;
+    const order = tall ? ['right', 'left', 'below', 'above'] : ['below', 'above', 'right', 'left'];
+    if (prefer && places[prefer]) order.unshift(prefer);       // a lesson step may ask for a side
+    const side = order.find(s => fits(places[s]));
+    if (!side) return { left: Math.round(maxLeft / 2), top: edge, side: 'none' };
+    return { left: Math.round(places[side].left), top: Math.round(places[side].top), side };
+}

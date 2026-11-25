@@ -71,13 +71,18 @@ export async function playStartPowers(ctx) {
 
 // ---- One round: initiative, card flipping phase, Luxury Auction(s) ---------------------------------
 export async function playRound(ctx, round) {
+    await startRound(ctx, round);
+    await playFlippingPhase(ctx);
+    await playLuxuryAuctions(ctx);
+    await ctx.emit({ type: 'ROUND_END', round }, ctx.game);
+}
+
+/** The start of a round: the lowest initiative number becomes the start player. (Its own step, so a tutorial lesson can play one part of a round.) */
+export async function startRound(ctx, round) {
     const { game, emit } = ctx;
     game.round = round;
     game.startPlayer = startPlayerForRound(game, round);
     await emit({ type: 'ROUND_START', round, startPlayer: game.startPlayer }, game);
-    await playFlippingPhase(ctx);
-    await playLuxuryAuctions(ctx);
-    await emit({ type: 'ROUND_END', round }, game);
 }
 
 // ---- Card flipping phase ---------------------------------------------------------------------------

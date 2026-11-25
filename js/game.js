@@ -7,6 +7,9 @@ import { state } from './state.js';
 import { createPalmBeachGame, renderPalmBeachTable, clearPalmBeachTable } from './pb/table.js';
 import { renderPalmBeachPanels, clearPalmBeachPanels } from './pb/panels.js';
 import { runPalmBeachMatch, leavePalmBeachMatch } from './pb/match.js';
+import { createLessonGame } from './pb/tutorial_engine.js';
+import { getLesson, nextLesson, TUTORIAL_LESSONS } from './pb/tutorial_lessons.js';
+import { runPalmBeachLesson } from './pb/tutorial_view.js';
 import { SUPPORT_US } from './support_links.js';
 import { setupBoard, initPlayerCards, updateUI, updateCardVisuals, animateCellFlip, flyTextAnimation, flyCardAnimation, rollDiceVisual, getCharacterCardStyle, loadHighScores, setupAuctionVisuals, showAuctionBonusPopup, animateAuctionWin, triggerWaveAnimation, animateJaegaSetup, animateRoxanaSetup, showVariationSplash, centerBoardView, highlightTargetCell, clearTargetHighlight, showTurnBanner, hideDiceOverlay } from './ui.js';
 import * as Debug from './debug.js';
@@ -2880,7 +2883,32 @@ async function runBotTurn(bot) {
 }
 
 /** PALM BEACH: ends the match on the table and goes back to the menu (or straight into a new match). */
+/**
+ * PALM BEACH tutorial (step 2.2): plays one lesson on the table, then the next one, then goes back to the menu.
+ * Step 2.2 has no button for it yet (the TUTORIAL button comes in step 2.3): it is started from a table that is
+ * already on screen, with window.startPalmBeachLesson('flip-cards').
+ */
+export function startPalmBeachLesson(lessonId = TUTORIAL_LESSONS[0].id) {
+    if (state.pb && state.pb.closeTutorial) state.pb.closeTutorial();
+    leavePalmBeachMatch();
+    const pb = createLessonGame(getLesson(lessonId));
+    state.pb = pb;
+    if (typeof window !== 'undefined') window.pb = pb;
+    pb.refresh = () => {
+        renderPalmBeachTable(pb.game);
+        renderPalmBeachPanels(pb.game);
+    };
+    runPalmBeachLesson(pb, { isCurrent: () => state.pb === pb }).then(() => {
+        if (state.pb !== pb) return;
+        const next = nextLesson(lessonId);
+        if (next) startPalmBeachLesson(next.id);
+        else leavePalmBeachTable(false);
+    }).catch(() => {});
+}
+if (typeof window !== 'undefined') window.startPalmBeachLesson = startPalmBeachLesson;
+
 export function leavePalmBeachTable(playAgain = false) {
+    if (state.pb && state.pb.closeTutorial) state.pb.closeTutorial();
     leavePalmBeachMatch();
     state.pb = null;
     if (typeof window !== 'undefined' && window.app) {

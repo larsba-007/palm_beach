@@ -3073,6 +3073,76 @@ input[type=range]::-webkit-slider-runnable-track {
 .pb-dialog-btn-primary { background: #F3C80D; border-color: #F3C80D; color: #0f172a; }
 .pb-dialog-btn-primary:hover { background: #ffd92e; }
 
+/* Tutorial (step 2.2): the bubble and the ring around the thing it points at. Above the game's own popups. */
+#pb-tutor {
+    position: absolute;
+    box-sizing: border-box;
+    padding: 36px 44px 40px;
+    background-color: rgba(38, 56, 92, 0.96);
+    border: 4px solid #F3C80D;
+    font-family: 'Overpass', sans-serif;
+    color: #ffffff;
+    z-index: 2300;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+}
+.pb-tutor-head {
+    font-weight: 900;
+    font-size: 30px;
+    letter-spacing: 0.14em;
+    color: #F3C80D;
+}
+.pb-tutor-text {
+    font-weight: 400;
+    font-size: 46px;
+    line-height: 1.28;
+    padding-top: 16px;
+}
+.pb-tutor-note {
+    font-weight: 300;
+    font-style: italic;
+    font-size: 34px;
+    line-height: 1.3;
+    padding-top: 22px;
+    color: rgba(255, 255, 255, 0.85);
+}
+.pb-tutor-note-label {
+    font-style: normal;
+    font-weight: 900;
+    font-size: 26px;
+    letter-spacing: 0.1em;
+    color: #DA795A;
+}
+#pb-tutor-next {
+    display: block;
+    width: 300px;
+    height: 96px;
+    margin: 30px 0 0 512px;
+    border-radius: 48px;
+    border: 4px solid #F3C80D;
+    background: #F3C80D;
+    color: #0f172a;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 900;
+    font-size: 40px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+}
+#pb-tutor-next:hover { background: #ffd92e; }
+#pb-tutor-ring {
+    position: absolute;
+    box-sizing: border-box;
+    border: 8px solid #F3C80D;
+    border-radius: 22px;
+    box-shadow: 0 0 40px 10px rgba(243, 200, 13, 0.55);
+    pointer-events: none;
+    z-index: 2200;
+    animation: pb-tutor-pulse 1.2s ease-in-out infinite;
+}
+@keyframes pb-tutor-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
 /* Rewards flying to the player's panel. */
 .pb-flyer { z-index: 1500; }
 .pb-flyer-gold {

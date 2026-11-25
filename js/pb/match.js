@@ -27,7 +27,7 @@ import {
  * @param {{game: object, rng: object}} pb  the Palm Beach game made in js/pb/table.js
  * @param {{isCurrent?: () => boolean}} [options]  isCurrent says whether this match is still the one on the table
  */
-export async function runPalmBeachMatch(pb, { isCurrent = () => true, onFinished = () => {}, boardGameLink = '' } = {}) {
+export async function runPalmBeachMatch(pb, { isCurrent = () => true, onFinished = () => {}, boardGameLink = '', play = playGame, guide = null } = {}) {
     const { game, rng } = pb;
     ensureCheatSheetButton();
     const cardEl = (cardId) => document.getElementById(`pb-card-${cardId}`);
@@ -52,7 +52,16 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true, onFinished
         });
     }
 
+    // The tutorial (js/pb/tutorial_engine.js) puts a guide between the game and the screen: the guide decides the
+    // answer from the lesson script, and uses the screen only to wait for the learner's click.
     async function askPlayer(request) {
+        if (!isCurrent()) return stopped();
+        if (!guide) return askOnScreen(request);
+        const answer = await guide.ask(request, game, askOnScreen);
+        return isCurrent() ? answer : stopped();
+    }
+
+    async function askOnScreen(request) {
         if (!isCurrent()) return stopped();
         switch (request.type) {
             case 'CHOOSE_CARD':
@@ -190,7 +199,7 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true, onFinished
     }
 
     try {
-        return await playGame(game, askPlayer, { rng, emit });
+        return await play(game, askPlayer, { rng, emit });
     } catch (error) {
         console.error('[Palm Beach] The match stopped on an error:', error);
         throw error;
