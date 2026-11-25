@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boca Raton: The Board Game</title>
+  <!-- Favicon link pointing to the file if located in assets/ folder -->
+  <link rel="icon" href="assets/favicon.ico">
+  <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@200;400;700;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+  <style>
+    @keyframes attention-pulse {
+
+      0%,
+      100% {
+        transform: rotate(-45deg) scale(1);
+      }
+
+      50% {
+        transform: rotate(-45deg) scale(1.1);
+      }
+    }
+
+    .animate-attention {
+      animation: attention-pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes edit-pulse {
+      0%, 100% { transform: scale(1); filter: brightness(1); }
+      50% { transform: scale(1.02); filter: brightness(1.15); }
+    }
+    .animate-edit-pulse {
+      animation: edit-pulse 2s infinite ease-in-out;
+    }
+    .animate-edit-pulse:focus {
+      animation: none;
+      transform: scale(1.02);
+      filter: brightness(1.2);
+    }
+
+    /* High-Res Assets for CSS-based backgrounds (Start Screen) */
+
+
+
+    .bg-tournament {
+      background-image: url('/assets/tournament.webp');
+    }
+
+    @media (-webkit-min-device-pixel-ratio: 1.25),
+    (min-resolution: 120dpi) {
+      .bg-tournament {
+        background-image: url('/assets/tournament@2x.webp');
+      }
+    }
+
+    /* Custom Scrollbar for News and Hall of Fame */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+  <script>
+    // Anti-Flash: Instantly nuke the splash screen on hard reloads before the body even paints
+    if (sessionStorage.getItem('skipSplash') === 'true') {
+      document.write('<style>#splash-screen { display: none !important; opacity: 0 !important; transition: none !important; }</style>');
+    }
+  </script>
+  <script type="importmap">
+{
+ "imports": {
+  "@google/genai": "https://esm.run/@google/genai",
+  "vite": "https://esm.sh/vite@^7.3.0",
+  "@tailwindcss/vite": "https://esm.sh/@tailwindcss/vite@^4.1.18",
+  "electron": "https://esm.sh/electron@^39.2.7"
+ }
+}
+</script>
+</head>
+
+<body class="h-screen w-screen flex bg-black overflow-hidden relative">
+
+  <!-- DYNAMIC SHADER BACKGROUND (FULL SCREEN) -->
+  <canvas id="shader-bg"></canvas>
+
+  <!-- STEAM OVERLAY FIX (CANVAS TICKER) -->
+
+  <!-- Forces full-screen texture invalidation so Steam Overlay renders at 60 FPS -->
+  <canvas id="steam-overlay-canvas" class="fixed inset-0 pointer-events-none z-[2147483647]"></canvas>
+  <script>
+    (function initSteamOverlayFix() {
+      const canvas = document.getElementById('steam-overlay-canvas');
+      if (!canvas) return;
+      // Web Party Edition has no Steam overlay: Vite replaces the placeholder with the edition name
+      if ('%VITE_GAME_EDITION%' === 'web') { canvas.remove(); return; }
+      const ctx = canvas.getContext('2d', { alpha: true });
+      
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resize);
+      resize();
+
+      let toggle = 0;
+      function forcePaint() {
+        if (!ctx) return;
+        ctx.clearRect(0, 0, 1, 1);
+        // Draw a 0.1% opacity pixel that bounces back and forth 
+        // to force Chromium to invalidate the Canvas bounds
+        ctx.fillStyle = "rgba(0,0,0, 0.001)"; 
+        toggle ^= 1;
+        ctx.fillRect(toggle, 0, 1, 1);
+        requestAnimationFrame(forcePaint);
+      }
+      forcePaint();
+    })();
+  </script>
+
+  <!-- SPLASH SCREEN -->
+  <div id="splash-screen"
+    class="fixed inset-0 z-[300] bg-black flex flex-col items-center justify-center duration-1000 overflow-hidden">
+    <img src="assets/splash.webp" alt=""
+      class="absolute inset-0 w-full h-full object-cover z-0">
+    <button onclick="if(window.app) window.app.enterGame()"
+      class="absolute bottom-24 left-1/2 -translate-x-1/2 z-50 bg-[#F3C80D] text-white font-black text-[40px] px-16 py-6 rounded-2xl animate-pulse uppercase tracking-widest shadow-[0_0_30px_rgba(243,200,13,0.5)] hover:bg-[#F3C80D]/80 hover:scale-105 transition-all duration-300 cursor-pointer">
+      START GAME
+    </button>
+    <div class="absolute bottom-4 right-4 z-50">
+      <img src="assets/backhans_games_logo.webp"
+        srcset="assets/backhans_games_logo.webp 1x, assets/backhans_games_logo@2x.webp 2x" alt="Backhans Games"
+        class="w-[100px] drop-shadow-xl ">
+    </div>
+    <div class="absolute bottom-4 left-4 z-50 text-white/40 font-mono text-[14px] select-none pointer-events-none" id="splash-version-info">
+      Loading version...
+    </div>
+  </div>
+
+  <!-- AUTO PILOT INDICATOR -->
+  <div id="auto-pilot-indicator">AUTO-PILOT MODE</div>
+
+  <!-- UNIFIED DEBUG PANEL -->
+  <div id="unified-debug-panel"
+    class="fixed top-4 right-4 w-[450px] h-[600px] bg-slate-900/95 rounded-xl shadow-2xl z-[900] hidden flex flex-col overflow-hidden backdrop-blur-md">
+    <div class="flex bg-slate-800 border-b border-slate-700">
+      <button onclick="Debug.switchTab('logs')" id="tab-logs"
+        class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-yellow-400 border-b-2 border-yellow-400 bg-slate-900/50">System
+        Logs</button>
+      <button onclick="Debug.switchTab('ai')" id="tab-ai"
+        class="flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors">AI
+        Status & Feed</button>
+      <button onclick="app.toggleDebugPanel()"
+        class="px-4 text-slate-500 hover:text-white text-xl">&times;</button>
+    </div>
+
+    <!-- Tab: Logs -->
+    <div id="panel-logs" class="flex-1 overflow-y-auto p-4 font-mono text-[10px] space-y-1">
+      <div id="debug-console"></div>
+    </div>
+
+    <!-- Tab: AI -->
+    <div id="panel-ai" class="hidden flex-1 flex flex-col overflow-hidden">
+      <div class="p-3 bg-black/40 border-b border-slate-700">
+        <table class="w-full text-[10px] text-left">
+          <thead>
+            <tr class="text-slate-500 uppercase tracking-tighter">
+              <th class="pb-1">Visitor</th>
+              <th class="pb-1">Char</th>
+              <th class="pb-1">Fiscal</th>
+              <th class="pb-1">Risk</th>
+            </tr>
+          </thead>
+          <tbody id="ai-monitor-stats"></tbody>
+        </table>
+      </div>
+      <div id="ai-monitor-feed" class="flex-1 overflow-y-auto p-3 space-y-2 font-mono text-[10px]"></div>
+    </div>
+
+    <!-- DEBUG CONTROLS -->
+    <div class="px-4 py-2 bg-slate-800 border-t border-slate-700 flex items-center justify-between gap-2">
+        <span class="text-[10px] text-slate-400 uppercase tracking-widest font-black">Set Cleared Gambit:</span>
+        <div class="flex gap-2">
+            <input type="number" id="debug-gambit-input" min="0" max="50" value="5" class="w-16 bg-slate-900 text-white text-xs px-2 py-1 rounded border border-slate-600 text-center font-mono">
+            <button onclick="window.debugSetGambitLevel(document.getElementById('debug-gambit-input').value)" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1 rounded text-[10px] font-black uppercase tracking-wider transition-colors">Set</button>
+        </div>
+    </div>
+
+  </div>
+
+  
+
+  
+  <!-- UI v2 CONTAINER (PARALLEL SYSTEM) -->
+  <div id="ui-v2-container" class="fixed inset-0 z-[200] flex items-center justify-center pointer-events-none [&>*]:pointer-events-auto">
+
+    <!-- UNIFIED COMPENDIUM OVERLAY (Fixed Inset-0 to ensure blur covers EVERYTHING) -->
+    <div id="compendium-modal" class="hidden fixed inset-0 z-[3500] bg-transparent backdrop-blur-2xl pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+        <div class="flex items-center justify-center w-full h-full">
+            <!-- Scaled Content Wrapper (Matches ui-v2-content scale behavior) -->
+            <div id="compendium-scale-wrapper" class="w-[3840px] h-[2160px] relative shrink-0 origin-center compendium-scale-target">
+                
+                <div class="relative w-full h-full">
+                    
+                    <!-- BACK BUTTON (Aligned with Nav - 100px Top) -->
+                    <button id="compendium-back-btn" onclick="app.closeCompendium()" class="absolute top-[100px] left-[150px] flex items-center gap-4 text-white hover:text-[#F3C80D] transition-all cursor-pointer">
+                        <span class="text-[60px] font-black uppercase font-overpass leading-none">← BACK</span>
+                    </button>
+
+                    <!-- Settings Button (Cogwheel) -->
+                    <button onclick="app.toggleSettings()" class="absolute bottom-[48px] right-[167px] z-[60] text-white hover:text-[#F3C80D] transition-transform hover:rotate-90 hover:scale-110 drop-shadow-lg cursor-pointer pointer-events-auto">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+
+                    <!-- TOP NAVIGATION (Refactored for Inline Menu Swap) -->
+                    <nav class="compendium-nav absolute top-[100px] left-1/2 -translate-x-1/2 flex flex-row nowrap gap-12 items-center">
+                        
+                        <!-- MAIN MENU -->
+                        <div id="comp-nav-MAIN" class="flex flex-row nowrap gap-12 items-center">
+                            <button id="comp-tab-CHARACTERS" class="compendium-nav-item active" onclick="app.setCompendiumTab('CHARACTERS')">LOCALS</button>
+                            <button id="comp-tab-BOTS" class="compendium-nav-item" onclick="app.setCompendiumTab('BOTS')">VISITORS</button>
+                            <button id="comp-nav-trigger-CARDS" class="compendium-nav-item" onclick="app.setCompendiumMenuState('SUB_CARDS')">CARDS</button>
+                            <button id="comp-tab-RULES" class="compendium-nav-item" onclick="app.setCompendiumTab('RULES')">RULES</button>
+                            <button id="comp-nav-trigger-EXTRA" class="compendium-nav-item" onclick="app.setCompendiumMenuState('SUB_EXTRA')">EXTRA</button>
+                        </div>
+
+                        <!-- SUB_CARDS MENU -->
+                        <div id="comp-nav-SUB_CARDS" class="hidden flex flex-row nowrap gap-12 items-center">
+                            <button class="compendium-nav-item text-slate-400 hover:text-white" onclick="app.setCompendiumMenuState('MAIN')">[ &lt; BACK ]</button>
+                            <button id="comp-tab-LUXURY" class="compendium-nav-item" onclick="app.setCompendiumTab('LUXURY')">LUXURY CARDS</button>
+                            <button id="comp-tab-BLOCK_BONUS" class="compendium-nav-item whitespace-nowrap" onclick="app.setCompendiumTab('BLOCK_BONUS')">BLOCK BONUS CARDS +5</button>
+                            <button id="comp-tab-PROPERTY" class="compendium-nav-item" onclick="app.setCompendiumTab('PROPERTY')">PROPERTY CARDS</button>
+                            <button id="comp-tab-LANDMARKS" class="compendium-nav-item" onclick="app.setCompendiumTab('LANDMARKS')">LANDMARKS</button>
+                        </div>
+
+                        <!-- SUB_EXTRA MENU -->
+                        <div id="comp-nav-SUB_EXTRA" class="hidden flex flex-row nowrap gap-12 items-center">
+                            <button class="compendium-nav-item text-slate-400 hover:text-white" onclick="app.setCompendiumMenuState('MAIN')">[ &lt; BACK ]</button>
+                            <button id="comp-tab-PROFILE" class="compendium-nav-item" onclick="app.setCompendiumTab('PROFILE')">MEMBER PROFILE</button>
+                            <button id="comp-tab-LORE" class="compendium-nav-item" onclick="app.setCompendiumTab('LORE')">LORE</button>
+                            <button id="comp-tab-BOARD_GAME" class="compendium-nav-item" onclick="app.setCompendiumTab('BOARD_GAME')">BOARD GAME</button>
+                            <button id="comp-tab-ABOUT" class="compendium-nav-item" onclick="app.setCompendiumTab('ABOUT')">ABOUT US</button>
+                        </div>
+
+                    </nav>
+
+                    <!-- MAIN CONTENT WINDOW (2440x1660 - 250px Top Offset) -->
+                    <div id="compendium-window" class="v2-panel absolute top-[250px] left-1/2 -translate-x-1/2 w-[2840px] h-[1660px] relative overflow-visible">
+                        
+                        <!-- TAB CONTENT: GALLERY (Characters/Bots) -->
+                        <div id="view-gallery" class="w-full h-full relative transition-opacity duration-300">
+                            
+                            <!-- Internal Title -->
+                            <h1 id="gallery-header" class="absolute top-[60px] left-1/2 -translate-x-1/2 text-[64px] font-black text-white uppercase tracking-[0.2em] font-overpass m-0 leading-none">CHARACTER GALLERY</h1>
+          
+                            <!-- GRID SIDE -->
+                            <div id="gallery-grid-container" class="absolute top-[430px] left-[190px] w-[1450px]">
+                                <div id="gallery-grid" class="grid grid-cols-5 gap-[50px]"></div>
+                            </div>
+          
+                            <!-- DETAIL SIDE -->
+                            <div id="gallery-detail-side" class="absolute top-[100px] right-[150px] w-[550px] flex flex-col">
+                                <div id="gallery-detail-image" class="w-[550px] h-[825px] rounded-xl shadow-2xl bg-slate-800 bg-no-repeat shrink-0 transition-all duration-300"></div>
+                                
+                                <div id="gallery-detail-text" class="w-[550px] mt-[20px] flex flex-col shrink-0 text-left">
+                                    <h2 id="gallery-detail-name" class="text-[48px] font-black text-white uppercase font-overpass leading-none tracking-widest mb-6">NAME</h2>
+                                    <div id="gallery-detail-ability" class="text-[28px] font-normal text-white font-overpass leading-relaxed"></div>
+                                </div>
+                            </div>
+          
+                        </div>
+
+                        <!-- TAB CONTENT: LUXURY CARDS (Tiered Layout) -->
+                        <div id="view-luxury" class="hidden w-full h-full relative transition-opacity duration-300">
+                            <h1 class="absolute top-[60px] left-1/2 -translate-x-1/2 text-[64px] font-black text-white uppercase tracking-[0.2em] font-overpass m-0 leading-none">LUXURY CARDS</h1>
+                            
+                            <!-- Tier I -->
+                            <div class="absolute top-[120px] left-[600px] w-[250px] flex flex-col items-center">
+                                <div class="text-[60px] font-black text-white font-overpass mb-4">I</div>
+                                <div id="luxury-grid-1" class="flex flex-col gap-[20px] mt-[10px]"></div>
+                            </div>
+
+                            <!-- Tier II -->
+                            <div class="absolute top-[120px] left-[1170px] w-[520px] flex flex-col items-center">
+                                <div class="text-[60px] font-black text-white font-overpass mb-4">II</div>
+                                <div id="luxury-grid-2" class="grid grid-cols-2 gap-[20px] mt-[10px]"></div>
+                            </div>
+
+                            <!-- Tier III -->
+                            <div class="absolute top-[120px] left-[2010px] w-[250px] flex flex-col items-center">
+                                <div class="text-[60px] font-black text-white font-overpass mb-4">III</div>
+                                <div id="luxury-grid-3" class="flex flex-col gap-[20px] mt-[10px]"></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: BLOCK BONUS CARDS (3 Columns) -->
+                        <div id="view-block-bonus" class="hidden w-full h-full relative transition-opacity duration-300">
+                            <h1 class="absolute top-[60px] left-1/2 -translate-x-1/2 text-[64px] font-black text-white uppercase tracking-[0.2em] font-overpass m-0 leading-none whitespace-nowrap text-center">BLOCK BONUS CARDS +5</h1>
+                            
+                            <!-- Info Panel (Rules & Distribution) -->
+                            <div class="absolute top-[280px] left-[620px] w-[650px] p-10 v2-glass-plate text-left font-overpass text-white">
+                                <h2 class="text-[40px] font-black text-[#F3C80D] uppercase tracking-wider mb-6">RULES & DISTRIBUTION</h2>
+                                <p class="text-[28px] font-[300] leading-relaxed mb-6">
+                                    The <strong class="font-bold">BLOCK</strong> cards have hidden bonus cards. Flipping a bonus card gives you <span class="text-[#F3C80D] font-bold">+5 Au</span>, for a total of <span class="text-[#F3C80D] font-bold">8 Au</span>.
+                                </p>
+                                <div class="border-t border-white/10 my-6"></div>
+                                <h3 class="text-[32px] font-black text-white uppercase mb-4">BONUS CARD COUNTS</h3>
+                                <ul class="space-y-4 text-[26px] font-[200]">
+                                    <li class="flex items-center gap-3">
+                                        <span class="w-3 h-3 rounded-full bg-[#F3C80D]"></span>
+                                        <span><strong>Column 3:</strong> 2 bonus cards (always)</span>
+                                    </li>
+                                    <li class="flex items-center gap-3">
+                                        <span class="w-3 h-3 rounded-full bg-[#F3C80D]"></span>
+                                        <span><strong>Columns 4-6:</strong> 0-5 bonus cards (shuffled)</span>
+                                    </li>
+                                    <li class="flex items-center gap-3">
+                                        <span class="w-3 h-3 rounded-full bg-[#F3C80D]"></span>
+                                        <span><strong>Column 7:</strong> 0-2 bonus cards (shuffled)</span>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <!-- Col 3 (Gameboard Col 3) -->
+                            <div class="absolute top-[160px] left-[1390px] w-[250px] flex flex-col items-center">
+                                <div class="text-[60px] font-black text-white font-overpass mb-4">3</div>
+                                <div id="block-bonus-grid-1" class="flex flex-col gap-[20px]"></div>
+                            </div>
+
+                            <!-- Col 4-6 (Gameboard Cols 4-6) -->
+                            <div class="absolute top-[160px] left-[1680px] w-[250px] flex flex-col items-center">
+                                <div class="text-[60px] font-black text-white font-overpass mb-4">4-6</div>
+                                <div id="block-bonus-grid-2" class="flex flex-col gap-[20px]"></div>
+                            </div>
+
+                            <!-- Col 7 (Gameboard Col 7) -->
+                            <div class="absolute top-[160px] left-[1970px] w-[250px] flex flex-col items-center">
+                                <div class="text-[60px] font-black text-white font-overpass mb-4">7</div>
+                                <div id="block-bonus-grid-3" class="flex flex-col gap-[20px]"></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: LANDMARKS (Lore & Grid) -->
+                        <div id="view-landmarks" class="hidden w-full h-full relative transition-opacity duration-300">
+                            <h1 class="absolute top-[60px] left-1/2 -translate-x-1/2 text-[64px] font-black text-white uppercase tracking-[0.2em] font-overpass m-0 leading-none">LANDMARKS</h1>
+                            
+
+                            <!-- LEFT DESCRIPTION BOX (950x750 - Anchored at 810px from top) -->
+                            <div id="landmark-description-box" class="absolute top-[810px] left-[300px] w-[950px] h-[750px] p-[50px] flex flex-col pointer-events-none">
+                                <div id="landmark-detail-name" class="text-[30px] font-[900] text-white font-overpass mb-1"></div>
+                                <div id="landmark-detail-place" class="text-[30px] font-[900] text-white font-overpass mb-6"></div>
+                                <div id="landmark-detail-desc" class="text-[30px] font-[200] text-white font-overpass leading-relaxed"></div>
+                            </div>
+
+                            <!-- CARD GRID (Anchored at 350px from top, 470px from left) -->
+                            <div class="absolute top-[350px] left-[670px] flex gap-[20px]">
+                                <!-- Column 1: LAGOON (Col 0) -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center">COLUMN 1<br>LAGOON</div>
+                                    <div id="landmark-col-1" class="flex flex-col gap-[20px]"></div>
+                                </div>
+                                <!-- Column 2: WATERFRONT (Col 1) -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center">2<br>WATERFRONT</div>
+                                    <div id="landmark-col-2" class="flex flex-col gap-[20px]"></div>
+                                </div>
+                                <!-- Column 3: BLOCK (Col 2) -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center">3<br>BLOCK</div>
+                                    <div id="landmark-col-3" class="flex flex-col gap-[20px]"></div>
+                                </div>
+                                <!-- Column 4-6: BLOCK (Col 3,4,5) -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center">4-6<br>BLOCK</div>
+                                    <div id="landmark-col-4-6" class="flex flex-col gap-[20px]"></div>
+                                </div>
+                                <!-- Column 7: BLOCK (Col 6) -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center">7<br>BLOCK</div>
+                                    <div id="landmark-col-7" class="flex flex-col gap-[20px]"></div>
+                                </div>
+                                <!-- Column 8: WATERFRONT (Col 7) -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center">8<br>WATERFRONT</div>
+                                    <div id="landmark-col-8" class="flex flex-col gap-[20px]"></div>
+                                </div>
+                                <!-- Column 9: ATLANTIC (Col 8) -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center">9<br>ATLANTIC</div>
+                                    <div id="landmark-col-9" class="flex flex-col gap-[20px]"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: PROPERTY CARDS (Auction & Details) -->
+                        <div id="view-property" class="hidden w-full h-full relative transition-opacity duration-300">
+                            <h1 class="absolute top-[60px] left-1/2 -translate-x-1/2 text-[64px] font-black text-white uppercase tracking-[0.2em] font-overpass m-0 leading-none whitespace-nowrap text-center">AUCTION CARDS/PROPERTY CARDS</h1>
+                            
+                            <!-- Property Selectors (Anchored so cards sit at 500px from plate top) -->
+                            <div class="absolute top-[425px] left-[480px] flex gap-[125px]">
+                                <!-- II Spanish River -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center h-[75px] flex items-center justify-center">II<br>SPANISH RIVER PARK</div>
+                                    <div id="prop-thumb-2" onclick="app.selectPropertyItem(2)" class="landmark-comp-card"></div>
+                                </div>
+                                <!-- III Gulf Stream -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center h-[75px] flex items-center justify-center">III<br>GULF STREAM GOLF CLUB</div>
+                                    <div id="prop-thumb-1" onclick="app.selectPropertyItem(1)" class="landmark-comp-card"></div>
+                                </div>
+                                <!-- IV Mar-a-Lago -->
+                                <div class="flex flex-col items-center w-[250px]">
+                                    <div class="text-[24px] font-black text-white font-overpass uppercase mb-4 text-center h-[75px] flex items-center justify-center">IV<br>MAR-A-LAGO</div>
+                                    <div id="prop-thumb-0" onclick="app.selectPropertyItem(0)" class="landmark-comp-card"></div>
+                                </div>
+                            </div>
+
+                            <!-- Big Auction Card (1000x500, Anchored at 836px from top) -->
+                            <div id="property-auction-card" class="absolute top-[836px] left-[480px] w-[1000px] h-[500px] rounded-xl border-4 border-slate-700 bg-slate-900 shadow-2xl bg-no-repeat" style="background-size: 1000px 1500px;"></div>
+
+                            <!-- Description Panel (Anchored at 300px from top, 1510px from left, 750px width) -->
+                            <div class="absolute top-[300px] left-[1610px] w-[750px] flex flex-col">
+                                <div class="text-[48px] font-black text-[#F3C80D] font-overpass mb-8 uppercase">DESCRIPTION:</div>
+                                <div id="property-detail-desc" class="text-[30px] font-[200] text-white font-overpass leading-relaxed"></div>
+                            </div>
+                        </div>
+
+                        <!-- TAB CONTENT: GENERIC (Profile, Rules, etc) -->
+                        <div id="view-generic" class="hidden w-full h-full relative transition-opacity duration-300">
+                            <h2 id="comp-view-title" class="absolute top-[60px] left-1/2 -translate-x-1/2 text-[64px] font-black text-white uppercase tracking-[0.2em] font-overpass m-0 leading-none whitespace-nowrap text-center">VIEW TITLE</h2>
+                            <div id="comp-view-body" class="w-full h-full pt-[250px] pb-[100px] overflow-y-auto custom-scrollbar flex flex-col items-center justify-start"></div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="ui-v2-content" class="w-[3840px] h-[2160px] relative shrink-0 origin-center transition-transform duration-300 pointer-events-none [&>*]:pointer-events-auto">
+
+      <div id="panel-1-hub" class="absolute inset-0 w-full h-full pointer-events-none">
+        <!-- LOGO (Centered, in line with Compendium at top-[100px], 1.2x bigger: 1920px width) -->
+        <img id="v2-main-logo" src="assets/game_logo.webp" class="absolute top-[100px] left-1/2 -translate-x-1/2 w-[1920px] object-contain z-[500] drop-shadow-2xl pointer-events-none" alt="Gold Coast Gambits Logo">
+
+        <!-- TOP-RIGHT: COMPENDIUM (Matches Panel 2 & Panel 3 header style) -->
+        <button onclick="app.showCompendium()" class="absolute top-[100px] right-[250px] text-[60px] font-black text-white/50 uppercase font-overpass leading-none hover:text-[#F3C80D] cursor-pointer transition-colors pointer-events-auto">? COMPENDIUM</button>
+
+        <!-- CENTER: MAIN PLAY NAVIGATION + QUIT (Top at 860px aligns bottom of 50 SOLO GAMBITS at screen y-center 1080px) -->
+        <nav class="main-menu-nav absolute top-[860px] left-1/2 -translate-x-1/2 flex flex-col items-center pointer-events-auto">
+            <button class="main-menu-item active whitespace-nowrap" onclick="app.goToGambitsV2()">50 SOLO GAMBITS</button>
+            <button class="main-menu-item whitespace-nowrap" onclick="app.goToSetupV2()">PLAY BOARD GAME</button>
+            <button id="btn-quit-desktop" class="main-menu-item quit-item whitespace-nowrap steam-only" onclick="app.quitToDesktop()">QUIT</button>
+            <button id="wishlist-btn" class="hidden" onclick="app.openWishlist()"></button>
+        </nav>
+
+        <!-- BOTTOM-LEFT: DISCORD (2x bigger: 64px) & VERSION -->
+        <button onclick="app.openDiscordOverlay()" class="steam-only absolute bottom-[110px] left-[167px] font-overpass font-black text-[64px] text-white/70 hover:text-[#F3C80D] uppercase tracking-wider transition-colors cursor-pointer pointer-events-auto whitespace-nowrap">
+          FIND PLAYERS ON DISCORD ↗
+        </button>
+        <div class="absolute bottom-[48px] left-[167px] text-white/30 font-mono text-[24px] select-none pointer-events-none" id="hub-version-info">
+          Loading version...
+        </div>
+      </div>
+
+      <!-- PANEL 2: MATCH SETUP REDESIGN -->
+      <div id="panel-2-setup" class="absolute inset-0 hidden pointer-events-none [&>*]:pointer-events-auto">
+        <div class="relative w-[3840px] h-[2160px]">
+          
+          <!-- Header / Breadcrumb -->
+          <button onclick="app.goToMainHub()" class="hide-on-web absolute top-[100px] left-[250px] text-[60px] font-black text-white uppercase font-overpass leading-none hover:text-[#F3C80D] transition-colors cursor-pointer z-50">‹ MAIN MENU</button>
+          <button onclick="app.showCompendium()" class="absolute top-[100px] right-[250px] text-[60px] font-black text-white/50 uppercase font-overpass leading-none hover:text-[#F3C80D] cursor-pointer transition-colors pointer-events-auto">? COMPENDIUM</button>
+
+                    <!-- Main Backplate (V2 Panel style, same size/position as Compendium window) -->
+          <div class="v2-panel absolute top-[250px] left-1/2 -translate-x-1/2 w-[2840px] h-[1660px] overflow-visible">
+            
+            <!-- Game Variations Section -->
+            <div class="hide-on-web absolute top-[60px] w-full font-overpass font-black text-[40px] text-white text-center uppercase tracking-[0.15em] drop-shadow-md">GAME VARIATIONS</div>
+
+            <!-- RED REEF -->
+            <div class="hide-on-web absolute top-[90px] left-[120px] w-[560px] font-overpass font-black text-[44px] text-white text-center uppercase">RED REEF</div>
+            <div id="v3-var-jaega" data-variation="RED_REEF" onclick="app.setVariation('JAEGA')" class="hide-on-web absolute top-[150px] left-[120px] w-[560px] h-[410px] bg-slate-900 border-4 border-white/30 rounded-[20px] bg-cover bg-center overflow-hidden cursor-pointer transition-all shadow-lg hover:border-white/60" style="background-image: url('/assets/open_luxury_cards.webp');"><div id="v3-var-lock-jaega" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10"></div></div>
+            <div class="hide-on-web absolute top-[575px] left-[120px] w-[560px] font-overpass font-light text-[32px] text-white/70 text-center uppercase leading-tight">OPEN LUXURY<br>CLOSED AUCTION</div>
+
+            <!-- SPANISH -->
+            <div class="hide-on-web absolute top-[90px] left-[800px] w-[560px] font-overpass font-black text-[44px] text-white text-center uppercase">SPANISH</div>
+            <div id="v3-var-roxana" data-variation="SPANISH" onclick="app.setVariation('ROXANA')" class="hide-on-web absolute top-[150px] left-[800px] w-[560px] h-[410px] bg-slate-900 border-4 border-white/30 rounded-[20px] bg-cover bg-center overflow-hidden cursor-pointer transition-all shadow-lg hover:border-white/60" style="background-image: url('/assets/open_property_cards.webp');"><div id="v3-var-lock-roxana" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10"></div></div>
+            <div class="hide-on-web absolute top-[575px] left-[800px] w-[560px] font-overpass font-light text-[32px] text-white/70 text-center uppercase leading-tight">CLOSED LUXURY<br>OPEN AUCTION</div>
+
+            <!-- BOCA -->
+            <div class="hide-on-web absolute top-[90px] left-[1480px] w-[560px] font-overpass font-black text-[44px] text-white text-center uppercase">BOCA</div>
+            <div id="v3-var-none" data-variation="BOCA_RATON" onclick="app.setVariation('NONE')" class="hide-on-web absolute top-[150px] left-[1480px] w-[560px] h-[410px] bg-slate-900 border-4 border-white/30 rounded-[20px] bg-cover bg-center overflow-hidden cursor-pointer transition-all shadow-lg hover:border-white/60" style="background-image: url('/assets/open_none.webp');"><div id="v3-var-lock-none" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10"></div></div>
+            <div class="hide-on-web absolute top-[575px] left-[1480px] w-[560px] font-overpass font-light text-[32px] text-white/70 text-center uppercase leading-tight">CLOSED LUXURY<br>CLOSED AUCTION</div>
+
+            <!-- MIZNER -->
+            <div class="hide-on-web absolute top-[90px] left-[2160px] w-[560px] font-overpass font-black text-[44px] text-white text-center uppercase">MIZNER</div>
+            <div id="v3-var-tournament" data-variation="MIZNER" onclick="app.setVariation('TOURNAMENT')" class="hide-on-web absolute top-[150px] left-[2160px] w-[560px] h-[410px] bg-slate-900 border-4 border-white/30 rounded-[20px] bg-cover bg-center overflow-hidden cursor-pointer transition-all shadow-lg hover:border-white/60" style="background-image: url('/assets/open_all.webp');"><div id="v3-var-lock-tournament" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/60 z-10"></div></div>
+            <div class="hide-on-web absolute top-[575px] left-[2160px] w-[560px] font-overpass font-light text-[32px] text-white/70 text-center uppercase leading-tight">OPEN LUXURY<br>OPEN AUCTION</div>
+
+            <!-- LOCALS (NUMBER OF PLAYERS) -->
+            <div class="hide-on-web absolute top-[760px] left-[120px] w-[430px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">LOCALS<br>(NUMBER OF PLAYERS)</div>
+            
+            <div id="v3-human-1" onclick="app.setHumanCount(1)" class="absolute top-[840px] left-[120px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">1</div>
+            <input type="text" id="v3-input-name-0" value="LOCAL 1" maxlength="11" onfocus="this.select()" style="caret-color: white;" class="absolute top-[840px] left-[260px] w-[290px] h-[110px] rounded-[20px] bg-white/20 border-2 border-white/30 font-overpass font-black text-[36px] text-white text-center outline-none uppercase transition-all focus:border-[#F3C80D] focus:bg-white/30 hover:bg-white/25 cursor-text caret-white placeholder-white/50 animate-edit-pulse shadow-md">
+            
+            <div id="v3-human-2" onclick="app.setHumanCount(2)" class="absolute top-[980px] left-[120px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">2</div>
+            <input type="text" id="v3-input-name-1" value="LOCAL 2" maxlength="11" onfocus="this.select()" style="caret-color: white;" class="absolute top-[980px] left-[260px] w-[290px] h-[110px] rounded-[20px] bg-white/20 border-2 border-white/30 font-overpass font-black text-[36px] text-white text-center outline-none uppercase transition-all focus:border-[#F3C80D] focus:bg-white/30 hover:bg-white/25 cursor-text caret-white placeholder-white/50 animate-edit-pulse shadow-md">
+            
+            <div id="v3-human-3" onclick="app.setHumanCount(3)" class="absolute top-[1120px] left-[120px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">3</div>
+            <input type="text" id="v3-input-name-2" value="LOCAL 3" maxlength="11" onfocus="this.select()" style="caret-color: white;" class="absolute top-[1120px] left-[260px] w-[290px] h-[110px] rounded-[20px] bg-white/20 border-2 border-white/30 font-overpass font-black text-[36px] text-white text-center outline-none uppercase transition-all focus:border-[#F3C80D] focus:bg-white/30 hover:bg-white/25 cursor-text caret-white placeholder-white/50 animate-edit-pulse shadow-md">
+            
+            <div id="v3-human-4" onclick="app.setHumanCount(4)" class="absolute top-[1260px] left-[120px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">4</div>
+            <input type="text" id="v3-input-name-3" value="LOCAL 4" maxlength="11" onfocus="this.select()" style="caret-color: white;" class="absolute top-[1260px] left-[260px] w-[290px] h-[110px] rounded-[20px] bg-white/20 border-2 border-white/30 font-overpass font-black text-[36px] text-white text-center outline-none uppercase transition-all focus:border-[#F3C80D] focus:bg-white/30 hover:bg-white/25 cursor-text caret-white placeholder-white/50 animate-edit-pulse shadow-md">
+
+            <!-- NUMBER OF VISITORS -->
+            <div class="hide-on-web absolute top-[760px] left-[690px] w-[250px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">NUMBER OF<br>VISITORS</div>
+            
+            <div id="v3-bot-0" onclick="app.setBotCount(0)" class="hide-on-web absolute top-[840px] left-[760px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">0</div>
+            <div id="v3-bot-1" onclick="app.setBotCount(1)" class="hide-on-web absolute top-[980px] left-[760px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">1</div>
+            <div id="v3-bot-2" onclick="app.setBotCount(2)" class="hide-on-web absolute top-[1120px] left-[760px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">2</div>
+            <div id="v3-bot-3" onclick="app.setBotCount(3)" class="hide-on-web absolute top-[1260px] left-[760px] w-[110px] h-[110px] rounded-full bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md">3</div>
+
+            <!-- VISITORS FUNDS SHOW RANDOM SELECTION (3 Cards: 20% larger, 700x1200 proportion -> 300x514) -->
+            <div class="hide-on-web absolute top-[760px] left-[1020px] w-[980px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">VISITORS FUNDS SHOW RANDOM SELECTION</div>
+            
+            <div id="v3-visitor-img-1" onclick="app.openBotSelection(1)" class="hide-on-web absolute top-[840px] left-[1020px] w-[300px] h-[514px] bg-slate-800 border-4 border-white/30 rounded-[20px] cursor-pointer hover:border-white/60 transition duration-200 bg-no-repeat overflow-hidden shadow-lg" style="background-origin: border-box;">
+              <div class="absolute inset-0 flex items-center justify-center font-overpass font-black text-[32px] text-white/30 uppercase text-center pointer-events-none">SELECT<br>VISITOR</div>
+            </div>
+            <div id="v3-visitor-name-1" class="hide-on-web absolute top-[1370px] left-[1020px] w-[300px] text-[24px] font-black text-white uppercase tracking-widest font-overpass text-center drop-shadow-md"></div>
+
+            <div id="v3-visitor-img-2" onclick="app.openBotSelection(2)" class="hide-on-web absolute top-[840px] left-[1360px] w-[300px] h-[514px] bg-slate-800 border-4 border-white/30 rounded-[20px] cursor-pointer hover:border-white/60 transition duration-200 bg-no-repeat overflow-hidden shadow-lg" style="background-origin: border-box;">
+              <div class="absolute inset-0 flex items-center justify-center font-overpass font-black text-[32px] text-white/30 uppercase text-center pointer-events-none">SELECT<br>VISITOR</div>
+            </div>
+            <div id="v3-visitor-name-2" class="hide-on-web absolute top-[1370px] left-[1360px] w-[300px] text-[24px] font-black text-white uppercase tracking-widest font-overpass text-center drop-shadow-md"></div>
+
+            <div id="v3-visitor-img-3" onclick="app.openBotSelection(3)" class="hide-on-web absolute top-[840px] left-[1700px] w-[300px] h-[514px] bg-slate-800 border-4 border-white/30 rounded-[20px] cursor-pointer hover:border-white/60 transition duration-200 bg-no-repeat overflow-hidden shadow-lg" style="background-origin: border-box;">
+              <div class="absolute inset-0 flex items-center justify-center font-overpass font-black text-[32px] text-white/30 uppercase text-center pointer-events-none">SELECT<br>VISITOR</div>
+            </div>
+            <div id="v3-visitor-name-3" class="hide-on-web absolute top-[1370px] left-[1700px] w-[300px] text-[24px] font-black text-white uppercase tracking-widest font-overpass text-center drop-shadow-md"></div>
+
+            <!-- DRAFTING MODE LOCALS -->
+            <div class="hide-on-web absolute top-[760px] left-[2160px] w-[500px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">DRAFTING MODE LOCALS</div>
+            
+            <div id="v3-setup-random" data-mode="PRE_SELECTED" onclick="app.setSetupMode('RANDOM')" class="absolute top-[840px] left-[2160px] w-[500px] h-[110px] rounded-[20px] bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md"><div id="v3-lock-random" class="hidden absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[20px] z-10"></div>RANDOM</div>
+            <div id="v3-setup-pair" data-mode="PICK_2" onclick="app.setSetupMode('PAIR')" class="absolute top-[980px] left-[2160px] w-[500px] h-[110px] rounded-[20px] bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md"><div id="v3-lock-pair" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-[20px] z-10"></div>PICK 2</div>
+            <div id="v3-setup-open" data-mode="OPEN_DRAFT" onclick="app.setSetupMode('OPEN')" class="absolute top-[1120px] left-[2160px] w-[500px] h-[110px] rounded-[20px] bg-white/20 border-4 border-white/30 font-overpass font-black text-[36px] text-white flex items-center justify-center cursor-pointer transition-all hover:bg-white/30 hover:border-white/60 shadow-md"><div id="v3-lock-open" class="hidden absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-[20px] z-10"></div>OPEN DRAFT</div>
+
+            <!-- START MATCH (Centered at bottom, symmetric margins) -->
+            <div id="v3-start-match" onclick="app.startGame()" class="absolute top-[1480px] left-[1120px] w-[600px] h-[120px] rounded-full bg-[#F3C80D] font-overpass font-black text-[48px] text-black flex items-center justify-center cursor-pointer hover:scale-105 transition-transform shadow-[0_0_30px_rgba(243,200,13,0.3)] border-4 border-white/30">START MATCH</div>
+
+            <!-- WEB PARTY EDITION: party menu elements (web-only, hidden on Steam builds; positions in index.css) -->
+            <div class="web-only absolute top-[80px] w-full font-overpass font-black text-[72px] text-white text-center uppercase tracking-[0.12em] drop-shadow-md">READY TO PLAY?</div>
+            <div class="web-only absolute top-[180px] w-full font-overpass font-light text-[40px] text-white/85 text-center normal-case drop-shadow-md">Grab your friends. Let the games begin.</div>
+            <div class="web-only absolute top-[250px] left-[520px] w-[960px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">HOW MANY PLAYERS? TAP 2, 3 OR 4 AND TYPE THE NAMES</div>
+            <div class="web-only absolute top-[250px] left-[1720px] w-[600px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">CHARACTER DRAFT</div>
+            <div class="web-only absolute top-[880px] left-[1720px] w-[600px] font-overpass font-light text-[28px] text-white/70 uppercase leading-snug">RANDOM: EVERYONE GETS A RANDOM CHARACTER.<br><br>PICK 2: EACH PLAYER GETS TWO CHARACTERS AND KEEPS ONE.<br><br>OPEN DRAFT: TAKE TURNS CHOOSING ANY FREE CHARACTER.</div>
+            <div id="v3-support-btn" onclick="app.showSupportModal()" onmouseenter="app.preloadSupportBanner()" ontouchstart="app.preloadSupportBanner()" class="web-only absolute top-[1280px] left-[310px] w-[700px] h-[150px] rounded-full bg-white/15 border-4 border-white/60 font-overpass font-black text-[48px] text-white flex items-center justify-center cursor-pointer hover:scale-105 hover:border-[#F3C80D] transition-transform uppercase">SUPPORT US<svg class="w-[56px] h-[56px] ml-5 shrink-0" viewBox="0 0 24 24" fill="#ff4d6d" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+            <div id="v3-tutorial-btn" onclick="app.startWebTutorial()" class="web-only absolute top-[1280px] left-[1830px] w-[700px] h-[150px] rounded-full bg-white/15 border-4 border-white/60 font-overpass font-black text-[48px] text-white flex items-center justify-center cursor-pointer hover:scale-105 hover:border-[#F3C80D] transition-transform uppercase">TUTORIAL</div>
+            <div class="web-only absolute top-[1450px] left-[1830px] w-[700px] font-overpass font-light text-[28px] text-white/60 text-center uppercase leading-tight">PLAY THE GUIDED FIRST LEVEL TO LEARN THE RULES</div>
+          </div>
+
+        </div>
+      </div>
+
+      <div id="panel-3-gambits-v2" class="absolute inset-0 hidden pointer-events-none [&>*]:pointer-events-auto">
+        <div id="gambit-v2-stage" class="relative w-[3840px] h-[2160px]">
+            
+            <!-- HEADER ELEMENTS ABOVE THE PLATE -->
+            <button onclick="app.goToMainHub()" class="absolute top-[100px] left-[250px] text-[60px] font-black text-white uppercase font-overpass leading-none hover:text-[#F3C80D] transition-colors cursor-pointer z-50">‹ MAIN MENU</button>
+            
+            <h2 id="gambit-title-v2" class="absolute top-[100px] left-1/2 -translate-x-1/2 text-[60px] font-black text-white uppercase font-overpass leading-none tracking-wide text-center">GAMBIT IV: THE SPANISH RIVER AFFAIR</h2>
+
+            <button onclick="app.showCompendium()" class="absolute top-[100px] right-[250px] text-[60px] font-black text-white/50 uppercase font-overpass leading-none hover:text-[#F3C80D] cursor-pointer transition-colors pointer-events-auto">? COMPENDIUM</button>
+
+            <!-- SINGLE UNIFORM BACKPLATE -->
+            <div class="v2-panel absolute top-[250px] left-1/2 -translate-x-1/2 w-[3400px] h-[1660px] overflow-visible">
+                
+                <!-- LEFT COLUMN: GRID -->
+                <div class="absolute top-[105px] left-[40px] w-[1100px] flex flex-col">
+                    <div id="gambit-grid-v2" class="flex flex-col w-full"></div>
+                </div>
+
+                <!-- RIGHT COLUMN TOP ROW: OBJECTIVE & GAME VARIATION -->
+                <div class="absolute top-[100px] left-[1340px] w-[1810px] flex justify-between">
+                    <!-- Objective -->
+                    <div class="w-[760px] flex flex-col">
+                        <div class="text-[40px] font-black text-white uppercase font-overpass leading-none tracking-widest mb-6">OBJECTIVE:</div>
+                        <div class="h-[300px] w-full flex items-start overflow-visible">
+                            <span id="stat-obj-v2" class="font-light text-white text-[32px] leading-relaxed uppercase"></span>
+                        </div>
+                        
+                        <!-- Accept Challenge Button under objective text (Fixed Position for 6 text rows) -->
+                        <button id="btn-start-gambit-v2" onclick="app.startGambit()" class="btn-v2-glossy w-[600px] h-[120px] px-[80px] text-[48px] font-overpass font-black leading-none uppercase whitespace-nowrap gambit-start-glow mt-[30px] justify-center items-center flex">ACCEPT CHALLENGE</button>
+                    </div>
+                    
+                    <!-- Board Game Setup -->
+                    <div class="w-[760px] flex flex-col gap-4">
+                        <div class="text-[40px] font-black text-white uppercase font-overpass leading-none tracking-widest">BOARD GAME SETUP</div>
+                        <div id="stat-set-v2" class="font-light text-white text-[30px] leading-relaxed uppercase font-overpass flex flex-col gap-1"></div>
+                        <div id="gambit-variation-img-v2" class="w-[372px] h-[300px] bg-slate-900 border-4 border-white/20 rounded-[20px] bg-cover bg-center overflow-hidden mt-[30px]"></div>
+                    </div>
+                </div>
+
+                <!-- FIXED ABSOLUTE CARD SLOTS (Anchored 140px from the bottom of the plate to prevent vertical staggering and center vertically) -->
+                <!-- Local Card Slot (Positioned to have exactly 200px extra distance from grid) -->
+                <div class="absolute bottom-[140px] left-[1340px] w-[400px] h-[686px]">
+                    <div id="local-card-header-v2" class="absolute -top-[96px] left-0 right-0 h-[80px] flex items-end justify-center text-center pb-2 text-[40px] font-black text-white uppercase font-overpass tracking-widest leading-tight">LOCAL:</div>
+                    <div id="player-card-v2" class="v2-playing-card relative w-full h-full rounded-[18px] shrink-0 hover:scale-[1.75] hover:z-[200] z-[10] cursor-pointer overflow-visible"></div>
+                </div>
+
+                <!-- VS Divider Slot -->
+                <div class="absolute bottom-[140px] left-[1770px] w-[90px] h-[686px] flex items-center justify-center text-[90px] font-black text-white italic leading-none select-none">VS</div>
+
+                <!-- Visitor 1 Slot -->
+                <div id="v2-bot-1-column" class="absolute bottom-[140px] left-[1890px] w-[400px] h-[686px]">
+                    <div id="bot-1-header-v2" class="absolute -top-[96px] left-0 right-0 h-[80px] flex items-end justify-center text-center pb-2 text-[40px] font-black text-white uppercase font-overpass tracking-widest leading-tight">VISITOR 1:</div>
+                    <div id="bot-1-card-v2" class="v2-playing-card relative w-full h-full rounded-[18px] shrink-0 hover:scale-[1.75] hover:z-[200] z-[10] overflow-visible"></div>
+                </div>
+
+                <!-- Visitor 2 Slot -->
+                <div id="v2-bot-2-column" class="absolute bottom-[140px] left-[2320px] w-[400px] h-[686px]">
+                    <div id="bot-2-header-v2" class="absolute -top-[96px] left-0 right-0 h-[80px] flex items-end justify-center text-center pb-2 text-[40px] font-black text-white uppercase font-overpass tracking-widest leading-tight">VISITOR 2:</div>
+                    <div id="bot-2-card-v2" class="v2-playing-card relative w-full h-full rounded-[18px] shrink-0 hover:scale-[1.75] hover:z-[200] z-[10] overflow-visible"></div>
+                </div>
+
+                <!-- Visitor 3 Slot -->
+                <div id="v2-bot-3-column" class="absolute bottom-[140px] left-[2750px] w-[400px] h-[686px]">
+                    <div id="bot-3-header-v2" class="absolute -top-[96px] left-0 right-0 h-[80px] flex items-end justify-center text-center pb-2 text-[40px] font-black text-white uppercase font-overpass tracking-widest leading-tight">VISITOR 3:</div>
+                    <div id="bot-3-card-v2" class="v2-playing-card relative w-full h-full rounded-[18px] shrink-0 hover:scale-[1.75] hover:z-[200] z-[10] overflow-visible"></div>
+                </div>
+
+            </div>
+        </div>
+      </div>
+
+      <!-- COGWHEEL TRIGGER (Lower Right) -->
+      <div class="absolute bottom-[48px] right-[167px] z-[650] text-white hover:text-[#F3C80D] transition-transform hover:rotate-90 hover:scale-110 drop-shadow-lg cursor-pointer pointer-events-auto" onclick="app.toggleSettings()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd"
+            d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+            clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAMBIT OBJECTIVE PAGE / MODAL -->
+  <div id="gambit-objective-modal" class="hidden fixed inset-0 z-[2500] bg-transparent flex flex-col items-center justify-center p-6 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto select-none">
+    <div id="gambit-objective-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-14 flex flex-col items-center relative w-[1400px] max-w-[95vw] overflow-visible shrink-0 shadow-2xl origin-center">
+      <!-- Header -->
+      <h2 id="gambit-obj-header" class="text-[60px] font-black text-white uppercase font-overpass tracking-widest text-center leading-tight drop-shadow-md mb-2">
+        GAMBIT OBJECTIVES
+      </h2>
+
+      <!-- Persistent Unwinnable Banner (Shown when an objective becomes impossible) -->
+      <div id="gambit-obj-unwinnable-banner" class="hidden w-full bg-red-950/70 border border-red-500/50 rounded-2xl p-4 px-8 flex flex-col items-center text-center my-3 shadow-xl animate-pop-in">
+        <span class="text-red-400 font-black text-[28px] uppercase tracking-widest font-overpass">GAMBIT CAN NO LONGER BE COMPLETED</span>
+        <span id="gambit-obj-unwinnable-reason" class="text-white/90 font-light text-[22px] font-overpass mt-1">A mandatory objective is no longer achievable.</span>
+      </div>
+      
+      <!-- Overall Gambit Description -->
+      <div id="gambit-obj-description" class="text-[40px] font-light text-white font-overpass text-center leading-relaxed max-w-[1250px] mb-8 drop-shadow-sm">
+        Complete all objectives and win the game.
+      </div>
+
+      <!-- Objective Sections Container -->
+      <div id="gambit-obj-sections" class="w-full flex flex-col gap-5 mb-6">
+        <!-- Dynamic Reusable Sections Rendered Here -->
+      </div>
+
+      <!-- CONTINUE Button -->
+      <button id="gambit-obj-continue-btn" onclick="app.closeGambitObjectivesModal()" class="text-[60px] font-black text-white font-overpass hover:text-[#F3C80D] transition-colors cursor-pointer bg-transparent border-none uppercase tracking-widest drop-shadow-md mt-2">
+        CONTINUE
+      </button>
+    </div>
+  </div>
+
+  <!-- OBJECTIVE IMPOSSIBLE POPUP MODAL -->
+  <div id="objective-impossible-modal" class="hidden fixed inset-0 z-[4000] bg-transparent flex flex-col items-center justify-center p-6 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto select-none">
+    <div id="objective-impossible-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1300px] max-w-[95vw] shrink-0 shadow-2xl origin-center text-center">
+      
+      <!-- Title -->
+      <h2 class="text-[52px] font-black text-white uppercase font-overpass tracking-widest leading-tight drop-shadow-md mb-8">
+        OBJECTIVE CAN NO LONGER BE COMPLETED
+      </h2>
+      
+      <!-- Scenario-Specific Explanation -->
+      <div id="objective-impossible-reason" class="text-[36px] font-normal text-[#F3C80D] font-overpass leading-relaxed max-w-[1150px] mb-6 drop-shadow-sm">
+        The objective can no longer be completed.
+      </div>
+      
+      <!-- Warning Subtitle -->
+      <p class="text-[32px] font-light text-white/80 font-overpass leading-relaxed max-w-[1100px] mb-12">
+        You can continue playing, but this Gambit can no longer be won.
+      </p>
+
+      <!-- Buttons -->
+      <div class="flex items-center justify-center gap-16 w-full">
+        <button onclick="app.closeObjectiveImpossibleModal()" class="text-[48px] font-black text-white font-overpass hover:text-[#F3C80D] transition-colors cursor-pointer bg-transparent border-none uppercase tracking-widest drop-shadow-md">
+          CONTINUE PLAYING
+        </button>
+        <button onclick="app.quitFromImpossibleObjective()" class="text-[48px] font-black text-red-400 font-overpass hover:text-red-300 transition-colors cursor-pointer bg-transparent border-none uppercase tracking-widest drop-shadow-md">
+          QUIT GAMBIT
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALS -->
+  <!-- Removed full-screen cheat sheet overlay -->
+
+  <!-- EXIT INTENT PROMO MODAL -->
+  <div id="promo-modal" class="hidden fixed inset-0 z-[2000] bg-transparent flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div id="promo-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1200px] shrink-0 shadow-2xl origin-center">
+      <h2 id="promo-title" class="text-[60px] font-black text-white uppercase tracking-widest drop-shadow-md text-center leading-tight mb-8 font-overpass"></h2>
+      
+      <div id="promo-body" class="text-[40px] font-light text-white font-overpass leading-relaxed text-center max-w-[1000px] mb-12 drop-shadow-sm"></div>
+      
+      <div class="flex flex-row justify-center items-center gap-10 w-[900px] mb-12">
+        <!-- Kickstarter Logo -->
+        <a id="promo-ks-link" href="#" target="_blank" class="promo-logo flex-1 h-[180px] bg-white rounded-[24px] shadow-xl flex items-center justify-center p-6 transition-all hover:scale-105 border-4 border-transparent hover:border-[#DA795A] hover:shadow-[0_0_30px_rgba(218,121,90,0.8)] cursor-pointer">
+          <img id="promo-ks-img" src="" alt="Kickstarter" class="w-full h-full object-contain">
+        </a>
+        
+        <!-- Steam Logo -->
+        <a id="promo-steam-link" href="#" target="_blank" class="promo-logo flex-1 h-[180px] bg-white rounded-[24px] shadow-xl flex items-center justify-center p-6 transition-all hover:scale-105 border-4 border-transparent hover:border-[#DA795A] hover:shadow-[0_0_30px_rgba(218,121,90,0.8)] cursor-pointer">
+          <img id="promo-steam-img" src="" alt="Steam" class="w-full h-full object-contain">
+        </a>
+      </div>
+      
+      <div class="flex flex-col w-[900px] items-center mt-auto">
+        <button id="promo-btn-confirm" class="btn-v2-glossy w-full h-[150px] text-[48px] font-black uppercase pointer-events-auto leading-none pt-2 shadow-2xl hover:scale-105 transition-transform cursor-pointer !bg-white !text-slate-900 hover:!bg-white/90">
+          CONTINUE
+        </button>
+        <button id="promo-btn-cancel" onclick="app.closePromoModal()" class="text-[50px] font-black text-white/50 hover:text-white uppercase tracking-widest font-overpass hover:scale-105 transition-all cursor-pointer bg-transparent border-none mt-8">
+          CANCEL
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WEB PARTY EDITION: SUPPORT US POPUP. Opened only by the SUPPORT US button on the party menu, never automatically.
+       Content comes from js/support_links.js. Closes with the X, the CLOSE button, the Escape key or a click outside. -->
+  <div id="support-modal" class="web-only hidden fixed inset-0 z-[2000] bg-transparent flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto" onclick="if (event.target === this) app.closeSupportModal()" role="dialog" aria-modal="true" aria-labelledby="support-title">
+    <div id="support-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[2000px] shrink-0 shadow-2xl origin-center overflow-hidden">
+      <!-- Banner photo across the top, edge to edge. The picture is set from js/main.js when the popup is first opened (or when the
+           Support button is hovered/touched), so nothing is downloaded before then. The reserved height avoids a jump while it loads. -->
+      <img id="support-banner" alt="The Boca Raton board game: box, board, rulebooks and cards" decoding="async" class="block -mt-16 mb-14 w-[2000px] max-w-none shrink-0 aspect-[2560/900] bg-[#f4f4f4] object-cover">
+      <button onclick="app.closeSupportModal()" aria-label="Close" class="absolute top-10 right-10 z-10 w-[110px] h-[110px] rounded-full bg-[#26385C]/90 border-2 border-white/60 text-white shadow-lg hover:bg-[#26385C] hover:border-white transition-colors cursor-pointer flex items-center justify-center">
+        <svg class="w-14 h-14 pointer-events-none" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+      <h2 id="support-title" class="text-[72px] font-black text-white uppercase tracking-[0.12em] drop-shadow-md text-center leading-tight mb-14 font-overpass"></h2>
+      <div id="support-offers" class="flex flex-row justify-center items-stretch gap-14 w-full"></div>
+      <button onclick="app.closeSupportModal()" class="text-[50px] font-black text-white/60 hover:text-white uppercase tracking-widest font-overpass hover:scale-105 transition-all cursor-pointer bg-transparent border-none mt-14">
+        CLOSE
+      </button>
+    </div>
+  </div>
+
+  <!-- START PROMO MODAL -->
+  <div id="start-promo-modal" class="hidden fixed inset-0 z-[2000] bg-transparent flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div id="start-promo-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1200px] shrink-0 shadow-2xl origin-center">
+      <h2 class="text-[60px] font-black text-white uppercase font-overpass mb-10 tracking-widest text-center drop-shadow-md">PREMIUM FEATURE</h2>
+      
+      <div id="start-promo-body" class="text-[60px] font-light text-white font-overpass leading-snug max-w-[1000px] mb-16 text-center"></div>
+      
+      <div class="flex flex-row justify-center items-center w-full mb-16">
+        <!-- Steam Logo -->
+        <a id="start-promo-steam-link" href="#" target="_blank" class="w-[350px] h-[120px] bg-white/10 border border-white/20 rounded-2xl flex items-center justify-center p-4 transition-all hover:scale-105 hover:border-[#F3C80D] hover:shadow-[0_0_20px_rgba(243,200,13,0.5)]">
+          <img id="start-promo-steam-img" src="" alt="Steam" class="w-full h-full object-contain filter invert brightness-200 opacity-80 hover:opacity-100 transition-opacity">
+        </a>
+      </div>
+      
+      <div class="flex flex-col w-full items-center mt-auto">
+        <button onclick="document.getElementById('start-promo-modal').classList.add('hidden')" class="text-[60px] font-black text-white font-overpass hover:text-[#F3C80D] transition-colors cursor-pointer bg-transparent border-none">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DICE OVERLAY -->
+  <div id="dice-overlay"
+    class="fixed inset-0 z-[2000] hidden flex flex-col items-center justify-center pointer-events-auto"
+    style="background-color: transparent !important;">
+    <div class="scene pointer-events-none">
+      <div id="dice-cube" class="cube">
+        <div class="cube__face cube__face--1">
+          <div class="dot"></div>
+        </div>
+        <div class="cube__face cube__face--2">
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="cube__face cube__face--3">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="cube__face cube__face--4">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="cube__face cube__face--5">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+        <div class="cube__face cube__face--6">
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+          <div class="dot"></div>
+        </div>
+      </div>
+    </div>
+    <div id="dice-message"
+      class="mt-12 text-white text-5xl font-black dice-result-text opacity-0 duration-300 pointer-events-none drop-shadow-2xl">
+      Rolling...</div>
+    <div id="reroll-controls"
+      class="hidden mt-8 flex flex-col items-center gap-4 bg-black/80 p-6 rounded-2xl border-2 border-yellow-400 backdrop-blur-md">
+      <p class="text-yellow-400 font-black text-xl animate-pulse uppercase tracking-widest">REROLL AVAILABLE</p>
+      <div class="flex gap-4">
+        <button onclick="app.reroll()"
+          class="bg-green-500 hover:bg-green-400 text-black font-black py-4 px-10 rounded text-xl shadow-lg transform hover:scale-105 transition-transform uppercase">REROLL!</button>
+        <button onclick="app.cancelReroll()"
+          class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-8 rounded text-lg uppercase">Accept
+          Fate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TUTORIAL LAYER -->
+  <div id="tutorial-layer"></div>
+
+  <!-- GAMBIT LEVEL INFORMATION / ONBOARDING MODAL -->
+  <div id="gambit-level-modal" class="hidden fixed inset-0 z-[3000] bg-transparent backdrop-blur-md flex items-center justify-center cursor-pointer pointer-events-none [&:not(.hidden)]:pointer-events-auto p-4" onclick="app.closeGambitLevelPlate(event)">
+    <div id="gambit-level-plate-inner" class="bg-[#26385C]/50 backdrop-blur-md w-[1900px] h-[1900px] rounded-3xl flex flex-col justify-between p-14 px-16 cursor-default border border-white/10 shadow-2xl origin-center shrink-0 overflow-hidden" onclick="event.stopPropagation()">
+      <!-- Dynamically populated by app.showGambitLevelPlate(level) -->
+    </div>
+  </div>
+
+  <!-- UNIFIED SETTINGS MODAL -->
+  <div id="unified-settings-modal" class="hidden fixed inset-0 z-[3000] bg-transparent backdrop-blur-md flex items-center justify-center cursor-pointer pointer-events-none [&:not(.hidden)]:pointer-events-auto p-4" onclick="app.toggleSettings()">
+    <div id="unified-settings-inner" class="bg-[#26385C]/50 backdrop-blur-md w-[1400px] h-[1900px] rounded-3xl flex flex-col justify-between pt-16 pb-12 px-20 cursor-default border border-white/10 shadow-2xl origin-center shrink-0" onclick="event.stopPropagation()">
+      
+      <!-- Top Header Row: CLOSE Button -->
+      <div class="flex items-center justify-between w-full">
+        <button class="flex items-center gap-6 text-white hover:text-[#F3C80D] transition-colors cursor-pointer group" onclick="app.toggleSettings()">
+          <svg class="w-[56px] h-[56px] transition-transform group-hover:-translate-x-2" fill="none" stroke="currentColor" stroke-width="3.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+          <span class="font-overpass font-black text-[56px] leading-none uppercase tracking-widest">CLOSE</span>
+        </button>
+      </div>
+
+      <!-- AUDIO SECTION (Music & SFX) -->
+      <div class="flex flex-col items-start w-full border-t border-white/10 pt-8">
+        <label class="font-overpass font-black text-[52px] text-white leading-none mb-8 uppercase tracking-widest drop-shadow-md">AUDIO</label>
+        
+        <!-- Music Volume & Mute -->
+        <div class="grid grid-cols-1 gap-6 w-full mb-6">
+          <div class="flex items-center justify-between w-full group">
+            <label class="font-overpass font-black text-[40px] text-white group-hover:text-[#F3C80D] transition-colors leading-none uppercase cursor-pointer" onclick="document.getElementById('unified-music-vol').focus()">Music Volume</label>
+            <div class="flex items-center gap-6 cursor-pointer" onclick="document.getElementById('unified-music-mute').click()">
+              <span class="font-overpass font-black text-[32px] text-white/70 hover:text-[#F3C80D] transition-colors leading-none uppercase">Mute</span>
+              <label class="v2-switch pointer-events-none scale-[1.3] origin-right">
+                <input type="checkbox" id="unified-music-mute" onchange="app.updateAudioConfig(this.checked, state.settings.isSfxMuted)">
+                <span class="v2-slider"></span>
+              </label>
+            </div>
+          </div>
+          <input type="range" id="unified-music-vol" min="0" max="100" class="w-full h-6 bg-white/30 rounded-xl appearance-none cursor-pointer accent-[#F3C80D]" oninput="app.setMusicVolume(this.value)">
+        </div>
+
+        <!-- SFX Volume & Mute -->
+        <div class="grid grid-cols-1 gap-6 w-full">
+          <div class="flex items-center justify-between w-full group">
+            <label class="font-overpass font-black text-[40px] text-white group-hover:text-[#F3C80D] transition-colors leading-none uppercase cursor-pointer" onclick="document.getElementById('unified-sfx-vol').focus()">SFX Volume</label>
+            <div class="flex items-center gap-6 cursor-pointer" onclick="document.getElementById('unified-sfx-mute').click()">
+              <span class="font-overpass font-black text-[32px] text-white/70 hover:text-[#F3C80D] transition-colors leading-none uppercase">Mute</span>
+              <label class="v2-switch pointer-events-none scale-[1.3] origin-right">
+                <input type="checkbox" id="unified-sfx-mute" onchange="app.updateAudioConfig(state.settings.isMuted, this.checked)">
+                <span class="v2-slider"></span>
+              </label>
+            </div>
+          </div>
+          <input type="range" id="unified-sfx-vol" min="0" max="100" class="w-full h-6 bg-white/30 rounded-xl appearance-none cursor-pointer accent-[#F3C80D]" oninput="app.setSfxVolume(this.value)">
+        </div>
+      </div>
+
+      <!-- GAME PACING SECTION -->
+      <div class="flex flex-col items-start w-full border-t border-white/10 pt-8">
+        <label class="font-overpass font-black text-[52px] text-white leading-none mb-8 uppercase tracking-widest drop-shadow-md">GAME PACING</label>
+        
+        <!-- 1. Animation Speed -->
+        <div class="flex flex-col items-start w-full mb-8">
+          <div class="text-[34px] font-overpass font-black text-white/90 mb-3 uppercase tracking-wider">ANIMATION SPEED</div>
+          <div class="flex items-center justify-between w-full text-white/60 text-[20px] font-overpass font-bold mb-3 px-1">
+            <span class="w-1/4 text-left">1. INSTANT</span>
+            <span class="w-1/4 text-center">2. VERY FAST</span>
+            <span class="w-1/4 text-center text-[#F3C80D] font-black">3. SNAPPY</span>
+            <span class="w-1/4 text-right">4. RELAXED</span>
+          </div>
+          <input type="range" id="setting-anim-speed" min="1" max="4" step="1" value="3" class="w-full h-6 bg-white/30 rounded-xl appearance-none cursor-pointer accent-[#F3C80D]" oninput="app.setAnimationSpeed(this.value)">
+        </div>
+
+        <!-- 2. Bot Turn Speed -->
+        <div class="flex flex-col items-start w-full mb-8">
+          <div class="text-[34px] font-overpass font-black text-white/90 mb-3 uppercase tracking-wider">BOT TURN SPEED</div>
+          <div class="flex items-center justify-between w-full text-white/60 text-[20px] font-overpass font-bold mb-3 px-1">
+            <span class="w-1/4 text-left">1. INSTANT</span>
+            <span class="w-1/4 text-center">2. VERY FAST</span>
+            <span class="w-1/4 text-center text-[#F3C80D] font-black">3. SNAPPY</span>
+            <span class="w-1/4 text-right">4. RELAXED</span>
+          </div>
+          <input type="range" id="setting-bot-speed" min="1" max="4" step="1" value="3" class="w-full h-6 bg-white/30 rounded-xl appearance-none cursor-pointer accent-[#F3C80D]" oninput="app.setBotTurnSpeed(this.value)">
+        </div>
+
+        <!-- 3. Dice Speed -->
+        <div class="flex flex-col items-start w-full">
+          <div class="text-[34px] font-overpass font-black text-white/90 mb-3 uppercase tracking-wider">DICE SPEED</div>
+          <div class="flex items-center justify-between w-full text-white/60 text-[20px] font-overpass font-bold mb-3 px-1">
+            <span class="w-1/4 text-left">1. INSTANT</span>
+            <span class="w-1/4 text-center">2. VERY FAST</span>
+            <span class="w-1/4 text-center text-[#F3C80D] font-black">3. SNAPPY</span>
+            <span class="w-1/4 text-right">4. RELAXED</span>
+          </div>
+          <input type="range" id="setting-dice-speed" min="1" max="4" step="1" value="3" class="w-full h-6 bg-white/30 rounded-xl appearance-none cursor-pointer accent-[#F3C80D]" oninput="app.setDiceSpeed(this.value)">
+        </div>
+      </div>
+
+      <!-- LANDMARK INFO SECTION -->
+      <div class="flex flex-col items-start w-full border-t border-white/10 pt-8">
+        <label class="font-overpass font-black text-[52px] text-white leading-none mb-6 uppercase tracking-widest drop-shadow-md">LANDMARK INFO</label>
+        
+        <!-- Close Landmark Card Manually Toggle -->
+        <div class="flex items-center justify-between w-full mb-6 cursor-pointer group" onclick="document.getElementById('setting-landmark-manual-close').click()">
+          <span class="font-overpass font-black text-[34px] text-white/80 group-hover:text-[#F3C80D] transition-colors leading-none uppercase">Close Landmark Card Manually</span>
+          <label class="v2-switch pointer-events-none scale-[1.3] origin-right ml-auto">
+            <input type="checkbox" id="setting-landmark-manual-close" onchange="app.setLandmarkManualClose(this.checked)">
+            <span class="v2-slider"></span>
+          </label>
+        </div>
+
+        <!-- Landmark Display Time -->
+        <div id="setting-landmark-duration-container" class="flex flex-col items-start w-full transition-opacity duration-200">
+          <span class="font-overpass font-bold text-[24px] text-white/60 mb-3 uppercase tracking-wider">Display Time</span>
+          <div class="grid grid-cols-3 gap-6 w-full">
+            <button id="landmark-duration-btn-1" class="py-4 px-6 rounded-2xl border border-white/20 font-overpass text-[24px] transition-all cursor-pointer flex flex-col items-center justify-center bg-white/10 text-white hover:border-white/50" onclick="app.setLandmarkDisplayDuration(1)">
+              <span class="font-black text-[24px] uppercase tracking-wider">Short</span>
+              <span class="text-[18px] opacity-80 mt-1 font-bold">0.7 SEC</span>
+            </button>
+            <button id="landmark-duration-btn-2" class="py-4 px-6 rounded-2xl border border-white/20 font-overpass text-[24px] transition-all cursor-pointer flex flex-col items-center justify-center bg-[#F3C80D] text-[#26385C] font-black hover:border-white/50" onclick="app.setLandmarkDisplayDuration(2)">
+              <span class="font-black text-[24px] uppercase tracking-wider">Medium</span>
+              <span class="text-[18px] opacity-80 mt-1 font-bold">1.4 SEC</span>
+            </button>
+            <button id="landmark-duration-btn-3" class="py-4 px-6 rounded-2xl border border-white/20 font-overpass text-[24px] transition-all cursor-pointer flex flex-col items-center justify-center bg-white/10 text-white hover:border-white/50" onclick="app.setLandmarkDisplayDuration(3)">
+              <span class="font-black text-[24px] uppercase tracking-wider">Long</span>
+              <span class="text-[18px] opacity-80 mt-1 font-bold">3 SEC</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FULL SCREEN & BOTTOM OPTIONS -->
+      <div class="flex flex-col items-start w-full border-t border-white/10 pt-8">
+        <!-- Full Screen -->
+        <div class="flex items-center justify-between w-full mb-8 cursor-pointer group" onclick="document.getElementById('unified-fullscreen').click()">
+          <span class="font-overpass font-black text-[42px] text-white group-hover:text-[#F3C80D] transition-colors leading-none uppercase">Full Screen</span>
+          <label class="v2-switch pointer-events-none scale-[1.4] origin-right ml-auto">
+            <input type="checkbox" id="unified-fullscreen" onchange="app.toggleFullScreen()">
+            <span class="v2-slider"></span>
+          </label>
+        </div>
+
+        <!-- Buttons Grid -->
+        <div class="grid grid-cols-3 gap-6 w-full mb-4">
+          <!-- Change Local Name -->
+          <button class="font-overpass font-black text-[32px] text-white hover:text-[#F3C80D] transition-colors leading-none uppercase text-center py-4 px-4 rounded-2xl bg-white/10 border border-white/20 hover:border-[#F3C80D]/50 cursor-pointer steam-only" onclick="app.toggleSettings(); app.showLocalNamePopup()">
+            Change Local Name
+          </button>
+
+          <!-- Report Bug -->
+          <button class="font-overpass font-black text-[32px] text-white hover:text-[#F3C80D] transition-colors leading-none uppercase text-center py-4 px-4 rounded-2xl bg-white/10 border border-white/20 hover:border-[#F3C80D]/50 cursor-pointer steam-only" onclick="app.openBugReport(); app.toggleSettings()">
+            Report Bug
+          </button>
+
+          <!-- Context Sensitive Exit Button -->
+          <button id="settings-quit-btn" class="font-overpass font-black text-[32px] text-white hover:text-[#F3C80D] transition-colors leading-none uppercase text-center py-4 px-4 rounded-2xl bg-white/10 border border-white/20 hover:border-[#F3C80D]/50 cursor-pointer" onclick="app.handleSettingsExit()">
+            QUIT TO DESKTOP
+          </button>
+        </div>
+      </div>
+
+      <div class="text-white/40 font-mono text-[20px] w-full text-center select-none" id="settings-version-info">
+        Loading version...
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LOCAL NAME ENTRY POPUP -->
+  <div id="local-name-popup" class="hidden fixed inset-0 z-[4000] bg-transparent backdrop-blur-md flex items-center justify-center cursor-pointer pointer-events-none [&:not(.hidden)]:pointer-events-auto" onclick="app.closeLocalNamePopup(event)">
+      <div id="local-name-popup-inner" class="bg-[#26385C]/90 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center justify-center relative w-[1000px] shrink-0 shadow-2xl origin-center cursor-default pointer-events-auto">
+          
+          <h2 class="font-overpass font-black text-[60px] text-white tracking-widest uppercase mb-10 text-center drop-shadow-md">LOCAL NAME</h2>
+          
+          <div class="text-white text-[36px] font-overpass font-light text-center max-w-[800px] mb-10 leading-normal">
+              WRITE YOUR NAME AS A LOCAL IN THE GAMBITS.
+          </div>
+          
+          <input type="text" id="input-local-name" class="w-[800px] h-[100px] px-6 text-[40px] font-overpass font-bold text-center text-white bg-black/40 border-4 border-white/20 rounded-2xl focus:outline-none focus:border-[#F3C80D] transition-colors mb-12 uppercase" placeholder="LOCAL" maxlength="15" />
+          
+          <div class="flex gap-8">
+              <button onclick="app.submitLocalName()" class="btn-v2-glossy w-[400px] h-[100px] text-[36px] font-overpass font-black uppercase flex items-center justify-center leading-none">SUBMIT</button>
+          </div>
+      </div>
+  </div>
+
+
+
+
+
+  <!-- ABILITY MODAL -->
+  <div id="ability-modal"
+    class="fixed inset-0 z-[1200] bg-black/90 flex items-center justify-center hidden p-4 pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div
+      class="bg-slate-900 border-2 border-[#DA795A] p-8 rounded-xl max-w-lg w-full text-center shadow-[0_0_50px_rgba(218,121,90,0.3)]">
+      <h2 id="ability-title" class="text-3xl font-black text-white uppercase tracking-tighter mb-4 font-overpass">
+        CHARACTER NAME</h2>
+      <div class="h-1 w-20 bg-[#DA795A] mx-auto mb-6"></div>
+      <p id="ability-desc" class="text-slate-300 text-lg leading-relaxed mb-8 font-overpass">Ability description
+        goes here.</p>
+      <button onclick="app.closeAbility()"
+        class="bg-[#DA795A] hover:bg-[#C0684A] text-black font-black text-xl py-2 px-12 rounded shadow-lg uppercase tracking-widest font-overpass transition-transform active:scale-95">Got
+        it</button>
+    </div>
+  </div>
+
+  <!-- MESSAGE MODAL -->
+  <div id="message-modal" onclick="app.closeMessageModal()"
+    class="fixed inset-0 z-[1300] bg-transparent backdrop-blur-md flex items-center justify-center hidden p-4 pointer-events-none [&:not(.hidden)]:pointer-events-auto cursor-pointer">
+    <div id="message-inner"
+      class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1200px] shrink-0 shadow-2xl text-center origin-center">
+      <h2 id="msg-title" class="text-[60px] font-black text-white uppercase font-overpass mb-10 tracking-widest text-center drop-shadow-md">MESSAGE TITLE</h2>
+      <div id="msg-body" class="text-[40px] font-light text-white font-overpass leading-snug max-w-[1000px] mb-16 text-center">Message body text.</div>
+      <div id="msg-actions" class="flex gap-16 w-full justify-center"></div>
+    </div>
+  </div>
+
+  <div id="draft-overlay"
+    class="fixed inset-0 z-[1000] bg-black/85 flex items-center justify-center hidden overflow-hidden backdrop-blur-md">
+    <div id="draft-scale-wrapper" class="w-[3840px] h-[2160px] relative shrink-0 origin-center flex items-center justify-center pointer-events-none [&>*]:pointer-events-auto">
+      <div id="draft-plate" class="v2-panel relative w-[2840px] h-[1660px] flex flex-col items-center justify-center overflow-visible">
+        <h2 id="draft-header"
+          class="absolute top-[60px] left-1/2 -translate-x-1/2 text-[60px] font-black text-white uppercase tracking-widest drop-shadow-md font-overpass m-0 leading-none">Choose Your Character</h2>
+        <div id="draft-cards-container" class="flex flex-row gap-40 justify-center items-center perspective-1000 overflow-visible mt-[100px]"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULEBOOK MODAL -->
+  <div id="rulebook-modal" class="fixed inset-0 z-[1400] bg-black/95 flex items-center justify-center hidden p-4">
+    <div
+      class="bg-slate-900 p-8 rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative">
+      <button onclick="app.closeRulebook()"
+        class="absolute top-4 right-4 text-slate-500 hover:text-white text-3xl font-black">&times;</button>
+      <h2
+        class="text-4xl font-black text-[#DA795A] uppercase tracking-widest mb-8 border-b border-slate-700 pb-4 font-overpass">
+        Rulebook</h2>
+      <div class="space-y-8 text-slate-300 font-overpass">
+        <section>
+          <h3 class="text-white font-black text-xl mb-3 uppercase">Objective</h3>
+          <p>Collect the most Prestige Points (Stars) by the time the game ends. The game ends when either all Map Cards are flipped (including both Property Auctions) or all Luxury Cards are sold AND both Property Auctions are held.</p>
+        </section>
+        <section>
+          <h3 class="text-white font-black text-xl mb-3 uppercase">Gameplay</h3>
+          <p>Players take turns flipping Map Cards to earn Gold. Gold is then used to buy Luxury Cards
+            (Points) or bid on Properties (Big Points).</p>
+        </section>
+        <section>
+          <h3 class="text-white font-black text-xl mb-3 uppercase">Card Types</h3>
+          <ul class="list-disc list-inside space-y-2">
+            <li><span class="text-[#DA795A] font-bold">Block (3 Au):</span> Safe. Automatic success.</li>
+            <li><span class="text-[#DA795A] font-bold">Waterfront (4 Au):</span> Safe. Completing a column
+              starts an Auction.</li>
+            <li><span class="text-[#DA795A] font-bold">Atlantic (6 Au):</span> Medium Risk. Must roll 3-6 to
+              succeed.</li>
+            <li><span class="text-[#DA795A] font-bold">Lagoon (8 Au):</span> High Risk. Must roll 4-6 to
+              succeed.</li>
+          </ul>
+        </section>
+        <section class="border-t border-slate-700 pt-4 mt-4">
+          <h3 class="text-white font-black text-xl mb-3 uppercase flex items-center gap-2">
+            <span class="text-[#DA795A]">ℹ️</span> Quick Reference
+          </h3>
+          <p class="mb-4">
+            Look for the <span
+              class="text-[#DA795A] font-bold border border-[#DA795A] px-1 rounded text-xs uppercase">CHEAT
+              SHEET</span> button on the top-left of the game board to view card values anytime!
+          </p>
+          <div class="w-full bg-black rounded-lg border-2 border-slate-700 p-2 shadow-lg">
+            <img src="/assets/cheat_sheet@2x.webp" alt="Game Cheat Sheet"
+              class="w-full h-auto rounded  ">
+          </div>
+        </section>
+        <!-- PDF Manual Link Removed -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CURTAIN CALL -->
+  <div id="curtain-call" class="fixed inset-0 z-[1500] bg-black/90 flex flex-col items-center justify-center hidden">
+    <div class="text-center space-y-8 animate-pop-in">
+      <h1 class="text-7xl font-black text-white uppercase tracking-[0.3em] font-overpass">THE END</h1>
+      <p id="curtain-reason" class="text-[#DA795A] font-bold text-2xl uppercase tracking-widest font-overpass">
+        Game Over Reason</p>
+      <div class="h-1 w-48 bg-white mx-auto"></div>
+      <button onclick="app.revealWinner()"
+        class="bg-white hover:bg-[#DA795A] text-black font-black text-2xl py-4 px-16 rounded-full shadow-[0_0_30px_rgba(255,255,255,0.3)] transition-all hover:scale-105 uppercase tracking-widest font-overpass">Reveal
+        Winner</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER SCREEN -->
+  <div id="game-over-screen" class="hidden fixed inset-0 z-[400] go-screen-bg"></div>
+
+  <!-- WEB PARTY EDITION: small-window / portrait notice. Real viewport pixels (not part of the 4K canvas),
+       shown and hidden by app.updateWebSizeHint, dismissible. Hidden on Steam builds by .web-only. -->
+  <div id="web-size-hint" class="web-only fixed bottom-4 left-1/2 -translate-x-1/2 z-[3000] max-w-[min(92vw,620px)] items-center gap-3 rounded-xl border border-white/20 bg-[#26385C]/85 px-4 py-2 text-white backdrop-blur-md shadow-2xl font-overpass" style="display:none" role="status">
+    <span id="web-size-hint-text" class="text-[12px] font-bold uppercase tracking-wide leading-snug"></span>
+    <button onclick="app.dismissWebSizeHint()" class="shrink-0 cursor-pointer rounded-lg bg-white/15 px-3 py-1 text-[13px] font-black uppercase hover:bg-white/30">OK</button>
+  </div>
+
+  <!-- GOD MODE OVERLAY -->
+  <div id="god-mode-overlay"
+    class="fixed top-0 bottom-0 left-0 right-[430px] z-[500] bg-red-950/90 backdrop-blur-md flex flex-col items-center justify-center hidden p-8 border-[20px] border-red-600">
+    <h1 class="text-6xl font-black text-white mb-8 tracking-tighter uppercase font-overpass">GOD MODE CONSOLE</h1>
+    <div class="grid grid-cols-3 gap-6 max-w-5xl w-full">
+      <button onclick="app.godRevealMap()"
+        class="bg-white hover:bg-slate-200 text-black font-bold p-6 rounded-xl shadow-2xl transition-transform active:scale-95 uppercase">Reveal
+        All Map</button>
+      <button onclick="app.godForceAuction('A')"
+        class="bg-[#DA795A] hover:bg-[#C0684A] text-black font-bold p-6 rounded-xl shadow-2xl transition-transform active:scale-95 uppercase">Force
+        Spanish Auction</button>
+      <button onclick="app.godForceAuction('B')"
+        class="bg-[#DA795A] hover:bg-[#C0684A] text-black font-bold p-6 rounded-xl shadow-2xl transition-transform active:scale-95 uppercase">Force
+        Gulf Auction</button>
+      <button onclick="app.godSuperBoost()"
+        class="bg-green-600 hover:bg-green-500 text-white font-bold p-6 rounded-xl shadow-2xl transition-transform active:scale-95 uppercase">Super
+        Boost Current Player</button>
+      <button id="btn-map-edit" onclick="app.toggleMapEditMode()"
+        class="bg-slate-700 text-slate-300 font-bold p-6 rounded-xl shadow-2xl uppercase transition-colors">Edit
+        Map Mode: OFF</button>
+      <button onclick="app.toggleDebugPanel()"
+        class="bg-blue-600 hover:bg-blue-500 text-white font-bold p-6 rounded-xl shadow-2xl transition-transform active:scale-95 uppercase">Toggle
+        System Logs/AI</button>
+
+      <div class="bg-black/50 p-6 rounded-xl border border-red-500 flex flex-col gap-4">
+        <label class="text-white font-bold text-xs uppercase">Distribute Luxury (Amt)</label>
+        <div class="flex gap-2">
+          <input type="number" id="god-lux-amount" value="6"
+            class="bg-white text-black font-bold px-3 py-2 w-20 rounded">
+          <button onclick="app.godDistributeLuxury()"
+            class="bg-blue-600 hover:bg-blue-500 text-white font-bold flex-1 rounded uppercase text-[10px]">Grant</button>
+        </div>
+      </div>
+
+      <button onclick="app.godForceGameOver()"
+        class="bg-red-600 hover:bg-red-500 text-white font-black text-xl p-6 rounded-xl shadow-2xl transition-transform active:scale-95 uppercase border-2 border-white">
+        FORCE GAME OVER
+      </button>
+
+      <button onclick="app.closeGodMode()"
+        class="bg-white text-red-600 font-black text-2xl p-6 rounded-xl shadow-2xl hover:bg-red-600 hover:text-white transition-colors uppercase">Close
+        Console</button>
+    </div>
+  </div>
+
+  <!-- GAME UI -->
+  <div id="game-ui"
+    class="flex items-start justify-center h-full w-full opacity-0 pointer-events-none duration-1000 overflow-hidden relative">
+    
+    <!-- INFORMATION HUB REMOVED -->
+
+    <div id="board-wrapper"
+      class="flex relative shrink-0 origin-top transition-transform duration-200 ease-out mx-auto mt-0">
+
+      
+      
+      <!-- LEFT SIDEBAR: Players and UI -->
+
+      <div id="left-sidebar" class="left-sidebar-zone" style="background: transparent !important; min-height: 2160px;">
+        <div class="h-full flex flex-col z-20">
+          <div class="flex-1 p-4 flex items-start justify-center overflow-y-auto">
+            <div id="left-panel-cards" class="grid grid-cols-4 gap-[30px] w-full relative">
+              <!-- Turn Indicator Card -->
+              <div id="turn-indicator-card" class="absolute w-[250px] h-[250px] bg-[#1e293b] flex flex-col items-center justify-center text-center p-4 transition-all duration-500 z-50 pointer-events-none opacity-0">
+                <div id="turn-card-name" class="text-[40px] font-black text-white uppercase font-overpass leading-tight">LOCAL</div>
+                <div class="text-[30px] font-bold text-white uppercase font-overpass tracking-widest mt-2">TURN</div>
+              </div>
+          </div>
+        </div>
+      </div>
+        <!-- SIDE ABILITY POPUP -->
+        <div id="side-ability-popup" class="hidden absolute top-[920px] left-[25px] w-[1100px] bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl shadow-2xl p-10 z-[500] flex flex-col font-overpass text-white">
+          <h2 id="side-popup-title" class="text-[60px] font-black text-yellow-400 uppercase tracking-widest drop-shadow-md text-center mb-6">ABILITY TITLE</h2>
+          <p id="side-popup-desc" class="text-[36px] font-light text-slate-200 text-center leading-normal mb-8 font-overpass">Instructions go here.</p>
+          <div id="side-popup-content" class="flex flex-col gap-4 w-full mb-8"></div>
+          <button id="side-popup-cancel" class="w-full py-5 bg-slate-700/50 hover:bg-slate-600/50 text-white font-black text-[32px] uppercase tracking-widest rounded-2xl border border-white/10 shadow-lg cursor-pointer hover:scale-[1.02] active:scale-[0.98] transition-all">Cancel</button>
+        </div>
+      </div>
+
+      <!-- CENTER ZONE: Game Board -->
+      <div class="center-grid-zone" style="display: flex !important; flex-direction: column !important; justify-content: start !important; align-items: center !important; background: transparent !important; min-height: 2160px; position: relative;">
+        
+        <!-- NEW LOGO POSITION (Absolute to prevent pushing board down) -->
+        <img src="assets/game_logo.webp" alt="Boca Raton Logo" 
+          class="absolute top-0 left-1/2 -translate-x-1/2 h-[120px] w-auto object-contain z-10">
+
+        <!-- Board Header (Dice + Column Labels) starts at 160px -->
+        <div class="w-[2250px] flex items-center justify-between relative" style="margin-top: 160px !important; height: 130px !important;">
+        </div>
+
+
+        
+        <div id="game-board" class="relative overflow-visible transition-all duration-300">
+
+          <!-- TUTORIAL ARROW -->
+          <div id="tutorial-arrow" class="absolute z-50 pointer-events-none hidden flex flex-col items-center justify-center animate-bounce-arrow" style="width: 100px; height: 100px; margin-top: -120px; left: 0; top: 0; transition: all 0.5s ease-in-out;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="gold" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-24 h-24 drop-shadow-[0_0_10px_gold]">
+              <path d="M12 5v14M19 12l-7 7-7-7"/>
+            </svg>
+          </div>
+
+          <!-- TUTORIAL TOAST WRAPPER -->
+          <div class="absolute top-[200px] left-0 w-full flex justify-center pointer-events-none z-[200]">
+            <div id="tutorial-toast" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-10 shadow-2xl flex flex-col items-center text-center w-[1200px] transition-opacity duration-300 hidden pointer-events-auto origin-center">
+              <h2 id="toast-title" class="text-[60px] font-black text-white uppercase font-overpass mb-4 tracking-widest drop-shadow-md"></h2>
+              <h3 id="toast-subtitle" class="text-[40px] font-bold text-[#88C9CC] uppercase font-overpass mb-4 tracking-wider drop-shadow-md hidden"></h3>
+              <p id="toast-body" class="text-[40px] font-light text-white font-overpass leading-snug drop-shadow-md mb-2"></p>
+              <button id="toast-dismiss-btn" class="mt-8 px-16 py-4 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-black text-[60px] rounded-3xl uppercase tracking-widest shadow-lg transition-all hover:scale-105 active:scale-95 hidden cursor-pointer font-overpass" onclick="document.getElementById('tutorial-toast').classList.add('hidden'); document.querySelectorAll('.tutorial-highlight').forEach(el => el.classList.remove('tutorial-highlight'));">GOT IT</button>
+            </div>
+          </div>
+
+          <!-- Cheat Sheet removed and moved to right sidebar -->
+          <!-- In-Game Cheat Sheet (Small Card) -->
+          <div id="in-game-cheat-sheet"
+            class="absolute -top-[50px] -left-[300px] w-[250px] h-[250px] z-50 hidden shadow-2xl border-4 border-white rounded-lg bg-black">
+            <img src="assets/cheat_sheet.webp"
+              srcset="assets/cheat_sheet.webp 1x, assets/cheat_sheet@2x.webp 2x"
+              class="w-full h-full object-fill">
+          </div>
+
+          <div id="grid-container" class="relative gap-0"></div>
+
+          <!-- Auctions -->
+          <div id="auction-A"
+            class="hidden absolute w-[1000px] h-[500px] bg-slate-800 rounded z-10"
+            style="top: 250px; left: 750px;">
+            <div id="auction-overlay-A"
+              class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+          </div>
+          <div id="auction-B"
+            class="hidden absolute w-[1000px] h-[500px] bg-slate-800 rounded z-10"
+            style="top: 1250px; left: 750px;">
+            <div id="auction-overlay-B"
+              class="absolute inset-0 flex items-center justify-center pointer-events-none"></div>
+          </div>
+        </div>
+
+        <!-- CENTRAL AUCTION UI -->
+        <div id="central-auction-ui"
+          class="hidden absolute inset-0 z-50 pointer-events-none bg-black/80 backdrop-blur-sm transition-all duration-300">
+
+          <!-- 2. Center: Active Bidder Card -->
+          <div id="auction-active-bidder"
+            class="absolute left-1/2 -translate-x-1/2 top-[100px] flex flex-col items-center">
+            <!-- Populated dynamically by JS -->
+          </div>
+
+          <!-- 3. Right: Action Buttons (Moved further right to fit massive 500px card) -->
+          <div id="auction-controls"
+            class="absolute left-[calc(50%+400px)] top-[100px] pointer-events-auto">
+
+            <div
+              class="w-[450px] bg-[#26385C]/90 backdrop-blur-md rounded-xl shadow-2xl p-6 flex flex-col gap-4 items-center justify-center border-4 border-slate-600">
+              <button id="btn-raise-1" onclick="app.handleAuctionAction('raise', undefined, 1)"
+                class="w-full h-[100px] bg-green-600 hover:bg-green-500 disabled:bg-slate-600 text-white font-black text-[32px] font-overpass uppercase shadow-xl border-2 border-white transition-transform active:scale-95 disabled:scale-100 disabled:cursor-not-allowed">
+                RAISE +1
+              </button>
+              <button id="btn-raise-3" onclick="app.handleAuctionAction('raise', undefined, 3)"
+                class="w-full h-[100px] bg-green-600 hover:bg-green-500 disabled:bg-slate-600 text-white font-black text-[32px] font-overpass uppercase shadow-xl border-2 border-white transition-transform active:scale-95 disabled:scale-100 disabled:cursor-not-allowed">
+                RAISE +3
+              </button>
+              <button id="btn-raise-5" onclick="app.handleAuctionAction('raise', undefined, 5)"
+                class="w-full h-[100px] bg-green-600 hover:bg-green-500 disabled:bg-slate-600 text-white font-black text-[32px] font-overpass uppercase shadow-xl border-2 border-white transition-transform active:scale-95 disabled:scale-100 disabled:cursor-not-allowed">
+                RAISE +5
+              </button>
+              <button id="btn-fold-main" onclick="app.handleAuctionAction('pass')"
+                class="w-full h-[100px] bg-red-600 hover:bg-red-500 text-white font-black text-[32px] font-overpass uppercase shadow-xl border-2 border-white transition-transform active:scale-95 mt-2">
+                FOLD
+              </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+      <!-- RIGHT SIDEBAR: Luxury Decks and Info -->
+
+      <div id="right-sidebar" class="right-sidebar-zone" style="display: block !important; background: transparent !important; min-height: 2160px; width: 430px !important; position: relative; z-index: 20;">
+        <button id="compendium-btn" onclick="app.showCompendium()" class="absolute top-[50px] left-[50px] font-overpass font-black text-[40px] text-white hover:text-[#DA795A] transition-colors bg-transparent border-none p-0 m-0 cursor-pointer z-50 pointer-events-auto">? COMPENDIUM</button>
+        <button id="objective-btn" onclick="app.showGambitBrief()" class="absolute top-[120px] left-[50px] font-overpass font-black text-[40px] text-white hover:text-[#DA795A] transition-colors bg-transparent border-none p-0 m-0 cursor-pointer z-50 pointer-events-auto animate-objective-pulse">★ OBJECTIVE</button>
+        <button id="resign-btn" onclick="app.showResignModal()" class="absolute bottom-[200px] left-1/2 -translate-x-1/2 font-overpass font-normal text-[40px] text-white hover:text-red-500 transition-colors bg-transparent border-none p-0 m-0 cursor-pointer z-50 pointer-events-auto">RESIGN</button>
+        
+        <!-- Sidebar Title (Now at 300px) -->
+
+        <div class="absolute top-[300px] left-1/2 -translate-x-1/2 w-full text-center">
+          <h2 class="text-[30px] font-black font-overpass text-white uppercase tracking-[0.2em] drop-shadow-lg">Luxury Cards</h2>
+        </div>
+
+        <!-- Deck 2 (15 Au) - Start at 410px -->
+        <div onclick="app.buyLuxury(2)" id="deck-container-2"
+          class="absolute top-[410px] left-1/2 -translate-x-1/2 w-[250px] cursor-pointer group z-20 flex flex-col items-center">
+          <!-- Labels ABOVE -->
+          <div class="w-[450px] text-center mb-1">
+            <span class="text-[40px] font-black font-overpass text-white uppercase tracking-wider">PAY 15 Au</span>
+          </div>
+          <div id="deck-slot-2" class="relative w-[250px] h-[250px]">
+            <div id="deck-2" class="relative w-[250px] h-[250px] bg-no-repeat bg-cover shadow-lg group-hover:scale-105 transition-transform" style="background-size: 100% 100% !important;">
+              <div class="absolute top-2 left-2 bg-white text-slate-900 font-bold w-12 h-12 rounded-full flex items-center justify-center shadow-md text-xl z-30"
+                id="deck-count-2">5</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Deck 1 (10 Au) - 500px under 1st card (910px) -->
+        <div onclick="app.buyLuxury(1)" id="deck-container-1"
+          class="absolute top-[810px] left-1/2 -translate-x-1/2 w-[250px] cursor-pointer group z-20 flex flex-col items-center">
+          <!-- Labels ABOVE -->
+          <div class="w-[450px] text-center mb-1">
+            <span class="text-[40px] font-black font-overpass text-white uppercase tracking-wider">PAY 10 Au</span>
+          </div>
+          <div id="deck-slot-1" class="relative w-[250px] h-[250px]">
+            <div id="deck-1" class="relative w-[250px] h-[250px] bg-no-repeat bg-cover shadow-lg group-hover:scale-105 transition-transform" style="background-size: 100% 100% !important;">
+              <div class="absolute top-2 left-2 bg-white text-slate-900 font-bold w-12 h-12 rounded-full flex items-center justify-center shadow-md text-xl z-30"
+                id="deck-count-1">6</div>
+            </div>
+          </div>
+          <!-- Dice BELOW -->
+          <img src="assets/dices_3_6.webp" class="w-[250px] mt-2 drop-shadow-lg">
+        </div>
+
+        <!-- Deck 0 (5 Au) - 500px under 2nd card (1410px) -->
+        <div onclick="app.buyLuxury(0)" id="deck-container-0"
+          class="absolute top-[1310px] left-1/2 -translate-x-1/2 w-[250px] cursor-pointer group z-20 flex flex-col items-center">
+          <!-- Labels ABOVE -->
+          <div class="w-[450px] text-center mb-1">
+            <span class="text-[40px] font-black font-overpass text-white uppercase tracking-wider">PAY 5 Au</span>
+          </div>
+          <div id="deck-slot-0" class="relative w-[250px] h-[250px]">
+            <div id="deck-0" class="relative w-[250px] h-[250px] bg-no-repeat bg-cover shadow-lg group-hover:scale-105 transition-transform" style="background-size: 100% 100% !important;">
+              <div class="absolute top-2 left-2 bg-white text-slate-900 font-bold w-12 h-12 rounded-full flex items-center justify-center shadow-md text-xl z-30"
+                id="deck-count-0">6</div>
+            </div>
+          </div>
+          <!-- Dice BELOW -->
+          <img src="assets/dice_5_6.webp" class="w-[250px] mt-2 drop-shadow-lg">
+        </div>
+        
+        <!-- Settings Button (Cogwheel) -->
+        <button onclick="app.togglePause()"
+          class="absolute bottom-[48px] right-[167px] z-[60] text-white hover:text-[#F3C80D] transition-transform hover:rotate-90 hover:scale-110 drop-shadow-lg pointer-events-auto cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd"
+              d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z"
+              clip-rule="evenodd" />
+          </svg>
+        </button>
+
+          <!-- Tutorial Panel (Hidden by default) -->
+          <div id="tutorial-panel"
+            class="hidden absolute inset-0 z-50 bg-slate-900 flex flex-col p-4 overflow-y-auto border-l-4 border-[#DA795A]">
+            <h2
+              class="text-[#DA795A] font-black text-xl mb-4 uppercase tracking-widest border-b border-white/10 pb-2">
+              TUTORIAL</h2>
+            <div id="tutorial-text" class="text-white text-sm leading-relaxed font-overpass mb-6"></div>
+            <div class="mt-auto flex flex-col gap-3">
+              <button id="tutorial-next-btn" onclick="app.nextTutorialStep()"
+                class="w-full bg-[#DA795A] hover:bg-[#C0684A] text-white font-black py-3 rounded uppercase tracking-wider shadow-lg transition-transform active:scale-95">NEXT</button>
+              <button id="tutorial-finish-btn" type="button"
+                class="hidden w-full bg-green-600 hover:bg-green-500 text-white font-black py-3 rounded uppercase tracking-wider shadow-lg transition-transform active:scale-95">START
+                GAME</button>
+            </div>
+          </div>
+
+            <div id="right-panel-cards" class="grid grid-cols-1 gap-4 w-full"></div>
+          </div>
+
+      <!-- Cinematic Winner Overlay -->
+      <div id="cinematic-winner-overlay" class="hidden absolute inset-0 z-[1200] flex flex-col items-center justify-center pointer-events-none">
+        <!-- Victory Title -->
+        <div id="cinematic-victory-title" class="font-overpass font-black text-[120px] text-white tracking-[0.2em] uppercase mb-6 text-center select-none pointer-events-none">
+          VICTORY
+        </div>
+        
+        <!-- Winner Presentation Card / Container -->
+        <div id="cinematic-winner-card-container" class="relative w-[500px] h-[857px] shadow-[0_30px_60px_rgba(0,0,0,0.8)] rounded-[22px] border-4 border-[#F3C80D] overflow-hidden flex flex-col justify-end p-8 bg-cover bg-center select-none pointer-events-auto">
+          <!-- Portrait background image -->
+          <div id="cinematic-winner-portrait" class="absolute inset-0 bg-no-repeat bg-cover bg-center z-0"></div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="mt-12 pointer-events-auto">
+          <button id="cinematic-see-results-btn" onclick="app.handleSeeResults()" class="emerald-glow-btn emerald-pulse-btn font-overpass font-black text-[40px] text-white uppercase tracking-wider px-12 py-6 rounded-2xl cursor-pointer shadow-[0_10px_20px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 transition-all duration-300 pointer-events-auto border-2 border-emerald-400">
+            SEE THE RESULTS
+          </button>
+        </div>
+      </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script>
+    // Immediate handler for Start Game button responsiveness
+    window.app = {
+      enterGame: function() {
+        console.log("Immediate enterGame handler fired");
+        const splash = document.getElementById('splash-screen');
+        if (splash) {
+          splash.classList.add('opacity-0');
+          splash.classList.add('pointer-events-none');
+        }
+        document.body.classList.remove('bg-black');
+        // The full module will take over and finish init once loaded
+      }
+    };
+  </script>
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="/index.tsx"></script>
+
+
+  <!-- GAMBIT RESULTS OVERLAY -->
+  <div id="gambit-results-overlay" class="fixed inset-0 z-[2000] bg-black/95 flex flex-col items-center justify-center hidden backdrop-blur-md">
+      <div class="v2-panel p-16 flex flex-col items-center text-center animate-logo-expand border-4 border-white/20">
+          <h1 id="gambit-result-status" class="text-[120px] font-black italic uppercase leading-none mb-4 font-overpass">MISSION SUCCESS</h1>
+          <h2 id="gambit-result-title" class="text-[40px] text-white opacity-60 mb-12 uppercase font-overpass">THE AWAKENING</h2>
+          
+          <div id="gambit-unlocks" class="flex flex-col items-center gap-6 mb-16">
+              </div>
+
+          <div class="flex flex-col items-center gap-8 w-full mt-4">
+              <button onclick="app.showGambitStats()" class="btn-v2-glossy w-[500px] h-[100px] v2-text-variation opacity-70 hover:opacity-100">CONTINUE TO STATS</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- Resolution Curtain (Web Protection) -->
+  <div id="resolution-curtain" class="fixed inset-0 z-[9999] bg-[#111] hidden">
+    <div class="flex flex-col items-center justify-center h-full text-center px-8">
+      <h1 class="text-white text-4xl font-black uppercase mb-4 font-overpass">Window Too Narrow</h1>
+      <p class="text-slate-400 text-xl font-overpass">Please widen your browser to at least 1280px.</p>
+    </div>
+  </div>
+
+  <!-- DEV HUD -->
+  <div id="dev-hud" class="hidden fixed top-2 right-[450px] z-[9999] flex gap-2 bg-black/60 p-2 rounded-lg border border-white/20 backdrop-blur-sm">
+      <button onclick="app.godForceWin()" class="px-3 py-1 bg-green-600 hover:bg-green-500 text-white text-[10px] font-bold rounded uppercase">WIN</button>
+      <button onclick="app.godForceLose()" class="px-3 py-1 bg-red-600 hover:bg-red-500 text-white text-[10px] font-bold rounded uppercase">LOSE</button>
+      <button onclick="app.hardWipeSaveData()" class="px-3 py-1 bg-yellow-600 hover:bg-yellow-500 text-white text-[10px] font-bold rounded uppercase">REST</button>
+      <button onclick="app.openGodMode()" class="px-3 py-1 bg-purple-600 hover:bg-purple-500 text-white text-[10px] font-bold rounded uppercase">GOD</button>
+      <button onclick="document.getElementById('dev-hud').classList.add('hidden')" class="px-3 py-1 bg-slate-600 hover:bg-slate-500 text-white text-[10px] font-bold rounded uppercase">X</button>
+  </div>
+
+
+
+
+  <!-- RESIGN MODAL -->
+  <div id="resign-modal" class="hidden fixed inset-0 z-[2000] bg-transparent flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div id="resign-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1200px] shrink-0 shadow-2xl origin-center">
+      <h2 class="text-[60px] font-black text-white uppercase font-overpass mb-16 tracking-widest text-center drop-shadow-md">Are you sure you want to resign?</h2>
+      <div class="flex gap-16 w-full justify-center">
+        <button onclick="app.closeResignModal()" class="text-[60px] font-black text-white font-overpass hover:text-[#F3C80D] transition-colors cursor-pointer bg-transparent border-none">CANCEL</button>
+        <button onclick="app.confirmResign()" class="text-[60px] font-black text-white font-overpass hover:text-red-500 transition-colors cursor-pointer bg-transparent border-none">YES, RESIGN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT MODAL -->
+  <div id="about-modal" class="hidden fixed inset-0 z-[2000] bg-black/80 flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div id="about-inner" class="v2-panel p-16 flex flex-col items-center relative w-[1000px] shrink-0 border-4 border-white/20 origin-center">
+      <h2 class="text-[64px] font-black text-white uppercase font-overpass mb-8 tracking-widest text-center">ABOUT</h2>
+      <div class="w-full space-y-6 text-white text-[24px] font-overpass text-center">
+        <p>Boca Raton: Chairman's Final Auction</p>
+        <p id="about-version-info">Version 2.0 - The V2 UI Overhaul</p>
+        <p class="opacity-50">Designed and Developed by Backhans Games</p>
+      </div>
+      <button onclick="app.closeAbout()" class="mt-12 btn-v2-glossy w-[400px] v2-text-variation">CLOSE</button>
+    </div>
+  </div>
+
+  <!-- ABORT MATCH CONFIRMATION MODAL -->
+  <div id="abort-match-modal" class="hidden fixed inset-0 z-[4500] bg-black/60 flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div id="abort-match-inner" class="bg-[#26385C]/90 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1300px] shrink-0 shadow-2xl origin-center text-center animate-pop-in">
+      <h2 class="text-[60px] font-black text-white uppercase font-overpass mb-6 tracking-widest drop-shadow-md">ABORT MATCH?</h2>
+      <p class="text-[36px] font-light text-white/90 font-overpass mb-14 leading-relaxed max-w-[1100px]">Are you sure you want to leave this match? All current progress will be lost.</p>
+      <div class="flex gap-12 w-full justify-center">
+        <button onclick="app.closeAbortMatchModal()" class="w-[450px] h-[110px] flex justify-center items-center font-overpass text-[40px] font-black uppercase text-white bg-transparent border-4 border-white/30 hover:border-white rounded-full cursor-pointer hover:bg-white/10 hover:scale-105 transition-all tracking-widest drop-shadow-md">
+          CANCEL
+        </button>
+        <button onclick="app.confirmAbortMatch()" class="w-[450px] h-[110px] flex justify-center items-center btn-v2-glossy font-overpass text-[40px] font-black uppercase text-red-600 bg-white rounded-full cursor-pointer hover:scale-105 transition-all tracking-widest shadow-2xl pt-1">
+          YES, I'M SURE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TUTORIAL RECOMMENDED MODAL -->
+  <div id="tutorial-recommended-modal" class="hidden fixed inset-0 z-[4500] bg-black/60 flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div id="tutorial-recommended-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1400px] shrink-0 shadow-2xl origin-center text-center animate-pop-in">
+      <h2 class="text-[60px] font-black text-white uppercase font-overpass mb-6 tracking-widest drop-shadow-md">TUTORIAL RECOMMENDED</h2>
+      <p class="text-[40px] font-light text-white/90 font-overpass mb-10 leading-relaxed max-w-[1200px]">
+        We highly recommend playing the first four Gambits before setting up a custom match. They act as an interactive tutorial to teach you the rules, strategies, and card mechanics!
+      </p>
+
+      <label class="flex items-center gap-4 mb-12 cursor-pointer select-none group">
+        <input type="checkbox" id="dont-show-tutorial-cb" class="w-8 h-8 rounded border-2 border-white/40 accent-[#F3C80D] cursor-pointer" />
+        <span class="text-[32px] font-medium text-white/80 font-overpass group-hover:text-white transition-colors">Don't show this again</span>
+      </label>
+
+      <div class="flex gap-10 w-full justify-center">
+        <button onclick="app.closeTutorialRecommendedModal()" class="w-[520px] h-[110px] flex justify-center items-center font-overpass text-[36px] font-black uppercase text-white bg-transparent border-4 border-white/30 hover:border-white rounded-full cursor-pointer hover:bg-white/10 hover:scale-105 transition-all tracking-widest drop-shadow-md">
+          BACK TO MAIN MENU
+        </button>
+        <button onclick="app.confirmTutorialRecommended()" class="w-[520px] h-[110px] flex justify-center items-center font-overpass text-[36px] font-black uppercase text-black bg-[#F3C80D] border-4 border-white/30 hover:border-white rounded-full cursor-pointer hover:scale-105 transition-all tracking-widest shadow-[0_0_30px_rgba(243,200,13,0.4)]">
+          CONTINUE ANYWAY
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEVEL UNLOCKED MODAL -->
+  <div id="level-unlocked-modal" class="hidden fixed inset-0 z-[4500] bg-black/60 flex flex-col items-center justify-center p-4 backdrop-blur-md pointer-events-none [&:not(.hidden)]:pointer-events-auto">
+    <div id="level-unlocked-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[1400px] shrink-0 shadow-2xl origin-center text-center">
+      <h2 id="level-unlocked-title" class="text-[60px] font-black text-white uppercase font-overpass mb-6 tracking-widest drop-shadow-md">LEVEL 2 UNLOCKED</h2>
+      <p id="level-unlocked-desc" class="text-[40px] font-light text-white/90 font-overpass mb-12 leading-relaxed max-w-[1200px]">
+        You completed 4 of 5 Gambits in Level 1.
+      </p>
+
+      <div class="flex justify-center w-full">
+        <button onclick="app.closeLevelUnlockedPopup()" class="w-[520px] h-[110px] flex justify-center items-center font-overpass text-[36px] font-black uppercase text-black bg-[#F3C80D] border-4 border-white/30 hover:border-white rounded-full cursor-pointer hover:scale-105 transition-all tracking-widest shadow-[0_0_30px_rgba(243,200,13,0.4)]">
+          CONTINUE
+        </button>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+
+</html>

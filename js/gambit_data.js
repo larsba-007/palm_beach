@@ -1,0 +1,836 @@
+export const GAMBIT_CAMPAIGN = [
+  {
+    id: 1,
+    level: 1,
+    name: "The Hook",
+    playAs: "BRIGHTSHELL",
+    opponents: [],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 12 }, uiText: "Welcome to Boca Raton. This lesson introduces Prestige Points and Luxury Cards. Your goal is to spend your starting Gold to buy Luxury Cards and reach 12 Prestige Points." },
+    dossier: { funnyText: "Welcome to Boca Raton. Money is worthless unless you spend it on things you don't need. Here is 200 Au. Go buy some prestige." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Reach 12 Prestige Points", warning: null, unlockReward: "Level 2" }
+  },
+  {
+    id: 2,
+    level: 1,
+    name: "Getting Money",
+    playAs: "BRIGHTSHELL",
+    opponents: [],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { tutorialComplete: true }, uiText: "Complete the 14-step tutorial to learn about Map Cards, Bonus Cards, Landmark Cards, and Row/Column Bonuses." },
+    dossier: { funnyText: "I am trying to preserve the delicate ecological balance of this coastline, and this child is literally wearing a cape made of synthetic polymers. It’s an environmental hazard and a sartorial tragedy." },
+    brief: { boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Complete the 14-step tutorial", warning: null, unlockReward: "Superboy" }
+  },
+  {
+    id: 3,
+    level: 1,
+    name: "Property Auctions",
+    playAs: "BRIGHTSHELL",
+    opponents: [1],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { requireGulfStream: true }, uiText: "Outbid your opponent and win the Gulf Stream Golf Club property card." },
+    dossier: { funnyText: "Welcome to the high-stakes world of Property Auctions. Learn how to trigger auctions and outbid your rival to secure the Gulf Stream property." },
+    brief: { boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Win the Gulf Stream Golf Club", warning: null, unlockReward: "Level 2" }
+  },
+  {
+    id: 4,
+    level: 1,
+    name: "Special Abilities",
+    playAs: "LEJA",
+    opponents: [],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { tutorialComplete: true }, uiText: "Complete the Special Abilities tutorial to learn how to access your special abilities." },
+    dossier: { funnyText: "Every Local and Visitor has unique advantages. When it is your turn, your character card will glow and display COMMANDS READY. Click your portrait to open your Command Menu." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Complete the Special Abilities tutorial", warning: null, unlockReward: "Goober" }
+  },
+  {
+    id: 5,
+    level: 1,
+    name: "The Exam",
+    playAs: "BRIGHTSHELL",
+    opponents: [1], // 1v1 vs Superboy
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 10 }, uiText: "Be the first player to reach 10 prestige points. (The match ends immediately when a player hits 10)." },
+    dossier: { funnyText: "Superboy has discovered the concept of a 'mortgage' and is now a direct threat to the local economy. Time to put everything together and crush his dreams." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "First to 10 Prestige", warning: null, unlockReward: "SPANISH" }
+  },
+  {
+    id: 6,
+    level: 2,
+    name: "LEJA's Empire",
+    playAs: "LEJA",
+    opponents: [2],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Designer Handbag", "Diamond Rings"] }, uiText: "Score the most prestige points and acquire either the Designer Handbag or Diamond Rings Luxury Card." },
+    dossier: { funnyText: "I’m Leja, Delray's premier pop artist, and I refuse to lose a bidding war to a farm animal. I need that Tiger luxury card for my next installation." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Acquire Handbag or Rings & Win", warning: null, unlockReward: "LEJA" }
+  },
+  {
+    id: 7,
+    level: 2,
+    name: "LEJA's Current",
+    playAs: "LEJA",
+    opponents: [1, 2],
+    botMoneyVisible: true,
+    winCondition: {
+      evaluateAt: "MID_GAME",
+      params: { minPrestige: 10 },
+      uiText: "Be the first player to reach 10 prestige points."
+    },
+    dossier: { funnyText: "Superboy is trying to 'save' the art market while the horse eats the complimentary crudités. I am going to bankrupt them both just so I can paint in peace." },
+    brief: { boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open", draft: "Pre-Selected", condition: "First to 10 Prestige", warning: null, unlockReward: "Level 3" }
+  },
+  {
+    id: 8,
+    level: 2,
+    name: "BRIGHTSHELL's Ledger",
+    playAs: "BRIGHTSHELL",
+    opponents: [2, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 6 }, uiText: "Be the first player to collect 6 Luxury Cards." },
+    dossier: { funnyText: "A man who calls everyone 'bro' has pitched a tent on the Atlantic grid. I must reclaim the shoreline before the property values sink faster than his surfboard." },
+    brief: { boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Collect 6 Luxury Cards", warning: null, unlockReward: "Surfer Dude" }
+  },
+  {
+    id: 9,
+    level: 2,
+    name: "LEJA's Horizon",
+    playAs: "LEJA",
+    opponents: [1, 2, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, requireLuxuryFromEachPile: true }, uiText: "Score the most prestige points and acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au)." },
+    dossier: { funnyText: "This is a disaster. The surfer is tracking sand into the gallery, the horse is neighing at the canvas, and the cape kid is hovering. I am buying everything just to legally evict them." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "1 Luxury from Each Pile & Win", warning: null, unlockReward: "Level 3" }
+  },
+  {
+    id: 10,
+    level: 2,
+    name: "PICK 2's Engine",
+    playAs: "PICK 2",
+    opponents: [1, 2, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Tiger Experience", "Football Team"], minLagoon: 4 }, uiText: "Score the most prestige points, successfully flip at least 4 Lagoon Map Cards, and acquire either the Tiger Experience or Football Team Luxury Card." },
+    dossier: { funnyText: "It takes two of us to handle this level of sheer municipal incompetence. We are cornering the mid-tier luxury market until these interlopers are priced out of the zip code." },
+    brief: { boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open", draft: "Pick 2", condition: "Tiger/Team, 4 Lagoon & Win", warning: "Bot banking data is currently encrypted.", unlockReward: "PICK 2" }
+  },
+  {
+    id: 11,
+    level: 3,
+    name: "Trial at Vault",
+    playAs: "KINGSTONE",
+    opponents: [2],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minProperties: 2 }, uiText: "Win both property auctions. (The match ends immediately when you win your second property)." },
+    dossier: { funnyText: "This horse keeps wandering onto the clay courts and eating the net. I am going to buy both properties on the Spanish waterfront just to build a multi-tiered security fence." },
+    brief: { boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open", draft: "Pre-Selected", condition: "Win Both Property Auctions", warning: null, unlockReward: "KINGSTONE" }
+  },
+  {
+    id: 12,
+    level: 3,
+    name: "Echoes from Harbor",
+    playAs: "KINGSTONE",
+    opponents: [2, 3],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 6 }, uiText: "Be the first player to collect 6 Luxury Cards." },
+    dossier: { funnyText: "The country club has completely gone to seed. There is a horse grazing on the 18th green and a vagrant sleeping under a surfboard by the pro shop. If I don't secure the top prestige score today, the board of directors is going to let them register for the club championship." },
+    brief: { boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Collect 6 Luxury Cards", warning: "Bot banking data is currently encrypted.", unlockReward: "NO MONEY" }
+  },
+  {
+    id: 13,
+    level: 3,
+    name: "Shadow over Reef",
+    playAs: "LEJA",
+    opponents: [4, 2],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Designer Shoes", "Luxury Watch"] }, uiText: "Score the most prestige points and acquire either the Designer Shoes or Luxury Watch Luxury Card." },
+    dossier: { funnyText: "An actual pirate has docked his brigantine at the marina and is trying to pay for real estate with 'pieces of eight' and doubloons. The horse is backing him up. I will focus entirely on pure luxury art; let those primitives have the auctions." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Shoes/Watch & Win", warning: null, unlockReward: "Boss Cat" }
+  },
+  {
+    id: 14,
+    level: 3,
+    name: "The Palace",
+    playAs: "KINGSTONE",
+    opponents: [4, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 10 }, uiText: "Be the first player to reach 10 prestige points. (The match ends immediately when a player hits 10)." },
+    dossier: { funnyText: "The pirate is threatening to make the yacht club commodore walk the plank, and the surfer is just filming it for social media. I am personally financing a legal offensive to ensure this maritime criminal finishes dead last in the property rankings." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "First to 10 Prestige", warning: "Bot banking data is currently encrypted.", unlockReward: "Level 4" }
+  },
+  {
+    id: 15,
+    level: 3,
+    name: "A Circuit",
+    playAs: "PICK 2",
+    opponents: [4, 2, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, requireLuxuryFromEachPile: true, minLagoon: 2, minAtlantic: 3 }, uiText: "Score the most prestige points, successfully flip 2 Lagoon and 3 Atlantic Map Cards, and acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au)." },
+    dossier: { funnyText: "The twins are officially unified in disgust. A pirate, an equine, and a beach bum are competing for Red Reef. We are cornering every single piece of luxury inventory until these walking caricatures are forced back to international waters." },
+    brief: { boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open", draft: "Pick 2", condition: "Each Pile, 2 Lagoon, 3 Atlantic & Win", warning: "Bot banking data is currently encrypted.", unlockReward: "Level 4" }
+  },
+  {
+    id: 16,
+    level: 4,
+    name: "Legacy of Empire",
+    playAs: "SILVIANO",
+    opponents: [4, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 10 }, uiText: "Be the first player to reach 10 prestige points. (The match ends immediately when a player hits 10)." },
+    dossier: { funnyText: "I am wearing a custom linen suit that costs more than a pirate's entire ship, and yet I am forced to sit next to them at the auction block. I am going to speed-run this match to ten points before the smell of saltwater and cheap rum ruins my upholstery." },
+    brief: { boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "First to 10 Prestige", warning: null, unlockReward: "SILVIANO" }
+  },
+  {
+    id: 17,
+    level: 4,
+    name: "Master of Current",
+    playAs: "SILVIANO",
+    opponents: [4, 5],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Sailing Yacht", "Sports Car"] }, uiText: "Score the most prestige points and acquire either the Sailing Yacht or Sports Car Luxury Card." },
+    dossier: { funnyText: "A magician has arrived and is trying to turn my silk pocket squares into doves. Between him and the pirate, my patience is wearing as thin as gauze. I'll buy out the entire exposed luxury market before they can pull any more stunts." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "Yacht/Car & Win", warning: "Bot banking data is currently encrypted.", unlockReward: "Level 5" }
+  },
+  {
+    id: 18,
+    level: 4,
+    name: "Trial at Ledger",
+    playAs: "BRIGHTSHELL",
+    opponents: [4, 5, 1],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 5 }, uiText: "Be the first player to collect 5 Luxury Cards." },
+    dossier: { funnyText: "The magician is doing card tricks with endangered mangrove leaves, the pirate is dump-steaming coal, and Superboy is cheering them on. I am tailoring my entire strategy to ensure that illusionist's credit line vanishes completely." },
+    brief: { boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open", draft: "Pre-Selected", condition: "Collect 5 Luxury Cards", warning: null, unlockReward: "Robot" }
+  },
+  {
+    id: 19,
+    level: 4,
+    name: "Echoes from Horizon",
+    playAs: "SILVIANO",
+    opponents: [4, 5, 2],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, minWaterfrontLagoon: 4 }, uiText: "Score the most prestige points and successfully flip at least 4 Waterfront Lagoon Map Cards." },
+    dossier: { funnyText: "The horse is trying to eat the magician's top hat, and the pirate is planning a mutiny against the HOA. I am forced to strategically manipulate the bids so the illusionist wins the estate—mostly because his velvet cape is marginally more acceptable than the pirate's rags." },
+    brief: { boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed", draft: "Pre-Selected", condition: "4 Waterfront Lagoon & Win", warning: null, unlockReward: "Level 5" }
+  },
+  {
+    id: 20,
+    level: 4,
+    name: "Shadow over Engine",
+    playAs: "OPEN DRAFT",
+    opponents: [4, 5, 3],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 5, requireLuxuryFromEachPile: true, minLagoon: 4 }, uiText: "Collect 5 Luxury Cards, acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au), and successfully flip at least 4 Lagoon Map Cards before any bot collects 5 Luxury Cards." },
+    dossier: { funnyText: "This town has devolved into a low-rent talent show. We have to place in the top two just to restore a shred of architectural and fiscal dignity to the Spanish district. Interlopers, prepare to be evicted." },
+    brief: { boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open", draft: "Open Draft", condition: "5 Luxury, Each Pile, 4 Lagoon", warning: "Bot banking data is currently encrypted.", unlockReward: "Level 5" }
+  },
+  {
+    id: 21,
+    level: 5,
+    name: "The Vault",
+    playAs: "MS. POST",
+    opponents: [4, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 6 }, uiText: "Be the first player to collect 6 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "Collect 6 Luxury Cards",
+      warning: null,
+      unlockReward: "MS POST"
+    }
+  },
+  {
+    id: 22,
+    level: 5,
+    name: "A Harbor",
+    playAs: "MS. POST",
+    opponents: [4, 5],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Luxury Hotel", "Luxury Yacht"] }, uiText: "Score the most prestige points and acquire either the Luxury Hotel or Luxury Yacht Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "Hotel/Yacht & Win",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "MIZNER"
+    }
+  },
+  {
+    id: 23,
+    level: 5,
+    name: "Legacy of Reef",
+    playAs: "KINGSTONE",
+    opponents: [5, 6],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, maxProperties: 0 }, uiText: "Score the most prestige points to win the match without acquiring any Property Cards. You will fail immediately if you win a property auction." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "Win with No Properties",
+      warning: null,
+      unlockReward: "Pirate"
+    }
+  },
+  {
+    id: 24,
+    level: 5,
+    name: "Master of Palace",
+    playAs: "MS. POST",
+    opponents: [1, 3, 6],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 12 }, uiText: "Be the first player to reach 12 prestige points." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "First to 12 Prestige",
+      warning: null,
+      unlockReward: "Level 6"
+    }
+  },
+  {
+    id: 25,
+    level: 5,
+    name: "Trial at Circuit",
+    playAs: "OPEN DRAFT",
+    opponents: [4, 5, 6],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 10, requireLuxuryFromEachPile: true, minAtlantic: 4 }, uiText: "Reach 10 prestige points before any bot while acquiring at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au) and successfully flipping at least 4 Atlantic Map Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open",
+      draft: "Open Draft",
+      condition: "10 Prestige, Each Pile, 4 Atlantic",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 6"
+    }
+  },
+  {
+    id: 26,
+    level: 6,
+    name: "Spanish Empire 26",
+    playAs: "ADDISON",
+    opponents: [6],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Submarine", "Personal Drone"] }, uiText: "Score the most prestige points and acquire either the Submarine or Personal Drone Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "Sub/Drone & Win",
+      warning: null,
+      unlockReward: "ADDISON"
+    }
+  },
+  {
+    id: 27,
+    level: 6,
+    name: "Boca Current 27",
+    playAs: "ADDISON",
+    opponents: [5, 6],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 6 }, uiText: "Be the first player to collect 6 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "Collect 6 Luxury Cards",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 7"
+    }
+  },
+  {
+    id: 28,
+    level: 6,
+    name: "Spanish Ledger 28",
+    playAs: "LEJA",
+    opponents: [7, 5, 4],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 9 }, uiText: "Be the first player to reach 9 prestige points." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "First to 9 Prestige",
+      warning: null,
+      unlockReward: "Flamingo Queen"
+    }
+  },
+  {
+    id: 29,
+    level: 6,
+    name: "Reef Horizon 29",
+    playAs: "ADDISON",
+    opponents: [7, 5, 6],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 5, requireLuxuryFromEachPile: true }, uiText: "Collect 5 Luxury Cards and acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au) before any bot collects 5 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "5 Luxury & Each Pile",
+      warning: null,
+      unlockReward: "Level 7"
+    }
+  },
+  {
+    id: 30,
+    level: 6,
+    name: "Mizner Engine 30",
+    playAs: "OPEN DRAFT",
+    opponents: [7, 5, 6],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Private Jet", "Art Gallery"], minBlock: 8 }, uiText: "Score the most prestige points, successfully flip at least 8 Block Map Cards, and acquire either the Private Jet or Art Gallery Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open",
+      draft: "Open Draft",
+      condition: "Jet/Gallery, 8 Block & Win",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 7"
+    }
+  },
+  {
+    id: 31,
+    level: 7,
+    name: "Reef Vault 31",
+    playAs: "ROXANA",
+    opponents: [7],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 10 }, uiText: "Be the first player to reach 10 prestige points." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "First to 10 Prestige",
+      warning: null,
+      unlockReward: "ROXANA"
+    }
+  },
+  {
+    id: 32,
+    level: 7,
+    name: "Mizner Harbor 32",
+    playAs: "ROXANA",
+    opponents: [7, 5],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 6 }, uiText: "Be the first player to collect 6 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "Collect 6 Luxury Cards",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 8"
+    }
+  },
+  {
+    id: 33,
+    level: 7,
+    name: "Reef Reef 33",
+    playAs: "LEJA",
+    opponents: [2, 8, 3],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Horse", "Rocket Ship"] }, uiText: "Score the most prestige points and acquire either the Horse or Rocket Ship Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "Horse/Rocket & Win",
+      warning: null,
+      unlockReward: "Magician"
+    }
+  },
+  {
+    id: 34,
+    level: 7,
+    name: "Boca Palace 34",
+    playAs: "ROXANA",
+    opponents: [7, 8, 6],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, minLagoon: 2, minWaterfrontAtlantic: 4 }, uiText: "Score the most prestige points, successfully flip 2 Lagoon Map Cards, and successfully flip 4 Waterfront Atlantic Map Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "2 Lagoon, 4 WF Atlantic & Win",
+      warning: null,
+      unlockReward: "Level 8"
+    }
+  },
+  {
+    id: 35,
+    level: 7,
+    name: "Mizner Circuit 35",
+    playAs: "OPEN DRAFT",
+    opponents: [7, 8, 6],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 5, requireLuxuryFromEachPile: true, minLagoon: 4 }, uiText: "Collect 5 Luxury Cards, acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au), and successfully flip at least 4 Lagoon Map Cards before any bot collects 5 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open",
+      draft: "Open Draft",
+      condition: "5 Luxury, Each Pile, 4 Lagoon",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 8"
+    }
+  },
+  {
+    id: 36,
+    level: 8,
+    name: "Reef Empire 36",
+    playAs: "MR. FLAGLER",
+    opponents: [7, 8],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Designer Handbag", "Luxury Hotel"] }, uiText: "Score the most prestige points and acquire either the Designer Handbag or Luxury Hotel Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "Handbag/Hotel & Win",
+      warning: null,
+      unlockReward: "MR FLAGLER"
+    }
+  },
+  {
+    id: 37,
+    level: 8,
+    name: "Boca Current 37",
+    playAs: "MR. FLAGLER",
+    opponents: [7, 8, 3],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 9 }, uiText: "Be the first player to reach 9 prestige points." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "First to 9 Prestige",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 9"
+    }
+  },
+  {
+    id: 38,
+    level: 8,
+    name: "Spanish Ledger 38",
+    playAs: "ROXANA",
+    opponents: [7, 5, 9],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 5, minWaterfrontLagoon: 4 }, uiText: "Collect 5 Luxury Cards and successfully flip at least 4 Waterfront Lagoon Map Cards before any bot collects 5 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "5 Luxury & 4 WF Lagoon",
+      warning: null,
+      unlockReward: "The Twins"
+    }
+  },
+  {
+    id: 39,
+    level: 8,
+    name: "Reef Horizon 39",
+    playAs: "MR. FLAGLER",
+    opponents: [7, 8, 9],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, requireLuxuryFromEachPile: true }, uiText: "Score the most prestige points and acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au)." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "1 Luxury from Each Pile & Win",
+      warning: null,
+      unlockReward: "Level 9"
+    }
+  },
+  {
+    id: 40,
+    level: 8,
+    name: "Reef Engine 40",
+    playAs: "OPEN DRAFT",
+    opponents: [7, 8, 9],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Luxury Watch", "Football Team"], minLagoon: 2, minAtlantic: 3 }, uiText: "Score the most prestige points, successfully flip 2 Lagoon and 3 Atlantic Map Cards, and acquire either the Luxury Watch or Football Team Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Open Draft",
+      condition: "Watch/Team, 2 Lag, 3 Atl & Win",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 9"
+    }
+  },
+  {
+    id: 41,
+    level: 9,
+    name: "Boca Vault 41",
+    playAs: "CARINA",
+    opponents: [8, 9],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 6, minAtlantic: 4 }, uiText: "Collect 6 Luxury Cards and successfully flip at least 4 Atlantic Map Cards before any bot collects 6 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "6 Luxury & 4 Atlantic",
+      warning: null,
+      unlockReward: "CARINA"
+    }
+  },
+  {
+    id: 42,
+    level: 9,
+    name: "Boca Harbor 42",
+    playAs: "CARINA",
+    opponents: [7, 8, 9],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 10 }, uiText: "Be the first player to reach 10 prestige points." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Boca Raton",
+      luxuryCards: "Closed",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "First to 10 Prestige",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 10"
+    }
+  },
+  {
+    id: 43,
+    level: 9,
+    name: "Spanish Reef 43",
+    playAs: "KINGSTONE",
+    opponents: [10, 8, 6],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Designer Shoes", "Sports Car"] }, uiText: "Score the most prestige points and acquire either the Designer Shoes or Sports Car Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "Shoes/Car & Win",
+      warning: null,
+      unlockReward: "Gran Gran"
+    }
+  },
+  {
+    id: 44,
+    level: 9,
+    name: "Reef Palace 44",
+    playAs: "CARINA",
+    opponents: [10, 8, 9],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, requireLuxuryFromEachPile: true }, uiText: "Score the most prestige points and acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au)." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "1 Luxury from Each Pile & Win",
+      warning: null,
+      unlockReward: "Level 10"
+    }
+  },
+  {
+    id: 45,
+    level: 9,
+    name: "Mizner Circuit 45",
+    playAs: "OPEN DRAFT",
+    opponents: [10, 8, 9],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 10, requireLuxuryFromEachPile: true, minBlock: 8 }, uiText: "Reach 10 prestige points before any bot while acquiring at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au) and successfully flipping at least 8 Block Map Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open",
+      draft: "Open Draft",
+      condition: "10 Prestige, Each Pile, 8 Block",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 10"
+    }
+  },
+  {
+    id: 46,
+    level: 10,
+    name: "Spanish Empire 46",
+    playAs: "ERIC",
+    opponents: [10, 8, 9],
+    botMoneyVisible: true,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Sailing Yacht", "Submarine"] }, uiText: "Score the most prestige points and acquire either the Sailing Yacht or Submarine Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "Yacht/Sub & Win",
+      warning: null,
+      unlockReward: "ERIC"
+    }
+  },
+  {
+    id: 47,
+    level: 10,
+    name: "Reef Current 47",
+    playAs: "ERIC",
+    opponents: [10, 8, 9],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minLuxuryCards: 5, minBlock: 8 }, uiText: "Collect 5 Luxury Cards and successfully flip at least 8 Block Map Cards before any bot collects 5 Luxury Cards." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Pre-Selected",
+      condition: "5 Luxury & 8 Block",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 11"
+    }
+  },
+  {
+    id: 48,
+    level: 10,
+    name: "Mizner Ledger 48",
+    playAs: "ERIC",
+    opponents: [10, 8, 9],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "MID_GAME", params: { minPrestige: 12 }, uiText: "Be the first player to reach 12 prestige points." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Mizner Variation",
+      luxuryCards: "Open",
+      auctionCards: "Open",
+      draft: "Pre-Selected",
+      condition: "First to 12 Prestige",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 11"
+    }
+  },
+  {
+    id: 49,
+    level: 10,
+    name: "Spanish Horizon 49",
+    playAs: "OPEN DRAFT",
+    opponents: [10, 9, 8],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, requireLuxuryFromEachPile: true, minLagoon: 2, minWaterfrontAtlantic: 4 }, uiText: "Score the most prestige points, successfully flip 2 Lagoon and 4 Waterfront Atlantic Map Cards, and acquire at least one Luxury Card from each pile (15 Au, 10 Au, and 5 Au)." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Spanish Variation",
+      luxuryCards: "Closed",
+      auctionCards: "Open",
+      draft: "Open Draft",
+      condition: "Each Pile, 2 Lag, 4 WF Atl & Win",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 11"
+    }
+  },
+  {
+    id: 50,
+    level: 10,
+    name: "Reef Engine 50",
+    playAs: "OPEN DRAFT",
+    opponents: [10, 9, 8],
+    botMoneyVisible: false,
+    winCondition: { evaluateAt: "END_GAME", params: { minRank: 1, luxuryCardOptions: ["Football Team", "Rocket Ship"], minWaterfrontLagoon: 4 }, uiText: "Score the most prestige points, successfully flip at least 4 Waterfront Lagoon Map Cards, and acquire either the Football Team or Rocket Ship Luxury Card." },
+    dossier: { funnyText: "Funny text will be here...." },
+    brief: {
+      boardSetup: "Red Reef Variation",
+      luxuryCards: "Open",
+      auctionCards: "Closed",
+      draft: "Open Draft",
+      condition: "Team/Rocket, 4 WF Lag & Win",
+      warning: "Bot banking data is currently encrypted.",
+      unlockReward: "Level 11"
+    }
+  }
+];

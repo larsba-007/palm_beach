@@ -1,0 +1,28 @@
+{
+  "appId": "com.bocaraton.game.demo",
+  "productName": "Gold Coast Gambits Demo",
+  "directories": {
+    "output": "dist/demo-game"
+  },
+  "files": [
+    "dist/**/*",
+    "electron-main.js",
+    "package.json"
+  ],
+  "mac": {
+    "icon": "public/assets/icon.png",
+    "category": "public.app-category.board-games",
+    "target": [
+      {
+        "target": "dir",
+        "arch": [
+          "arm64"
+        ]
+      }
+    ],
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.inherit.plist"
+  }
+}

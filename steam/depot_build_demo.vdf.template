@@ -1,0 +1,16 @@
+"DepotBuild"
+{
+  "DepotID" "__STEAM_DEPOT_ID__"
+  "ContentRoot" "__CONTENT_ROOT__"
+  "FileMapping"
+  {
+    "LocalPath" "*"
+    "DepotPath" "."
+    "Recursive" "1"
+  }
+  "FileExcludes"
+  {
+    "*.pdb"
+    "*.DS_Store"
+  }
+}

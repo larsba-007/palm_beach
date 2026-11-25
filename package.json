@@ -1,0 +1,69 @@
+{
+  "name": "2026-01-03-v06-boca-raton",
+  "productName": "Boca Raton Board Game",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Boca Raton Board Game - Demo Version",
+  "author": "Backhans Games",
+  "type": "module",
+  "main": "electron-main.js",
+  "scripts": {
+    "dev": "vite",
+    "dev:full": "vite --mode full",
+    "dev:web": "vite --mode web",
+    "build": "vite build",
+    "build:web": "vite build --mode web --outDir dist-web",
+    "preview": "vite preview",
+    "preview:web": "vite preview --outDir dist-web",
+    "build:demo:win": "vite build && electron-builder --win --x64 -c.directories.output=dist/demo-game",
+    "build:demo:mac": "vite build && electron-builder --mac --config electron-builder.demo.json",
+    "build:full:win": "vite build --mode full && electron-builder --win --x64 -c.directories.output=dist/full-game",
+    "build:full:mac": "vite build --mode full && electron-builder --mac --config electron-builder.full.json",
+    "electron:dev": "vite build && electron .",
+    "electron:dev:full": "vite build --mode full && electron .",
+    "play:full": "vite build --mode full && electron .",
+    "play:demo": "vite build && electron .",
+    "play:web": "vite --mode web --open",
+    "play:web:build": "vite build --mode web --outDir dist-web && vite preview --outDir dist-web --open",
+    "check": "node scripts/check-all.mjs",
+    "build:win": "electron-builder --win --x64",
+    "dist": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.bocaraton.game",
+    "productName": "Boca Raton Board Game",
+    "win": {
+      "icon": "public/assets/icon.png",
+      "target": [
+        "dir"
+      ]
+    },
+    "mac": {
+      "icon": "public/assets/icon.png",
+      "target": [
+        "dir"
+      ]
+    },
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "dist/**/*",
+      "electron-main.js",
+      "package.json"
+    ]
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "@tailwindcss/vite": "^4.1.18",
+    "steamworks.js": "^0.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "electron": "^39.2.7",
+    "electron-builder": "^25.1.8",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "vite-plugin-glsl": "^1.6.0"
+  }
+}
