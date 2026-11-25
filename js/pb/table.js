@@ -122,7 +122,14 @@ export function renderPalmBeachTable(game, doc = document) {
     paintAuctionMapCard(auctionMap, game.auctionMapCard);
     board.appendChild(auctionMap);
 
-    PROPERTY_TABLE_ORDER.forEach((propertyId, index) => {
+    // Before the Property Auction all 3 Property Cards lie on the Auction Map Card. When the card has been
+    // flipped, the other two go back to the box; the auctioned one stays until it is won (or nobody bids).
+    const owned = game.players.some(p => p.property);
+    const onTable = !game.property
+        ? PROPERTY_TABLE_ORDER
+        : ((owned || game.propertyUnsold) ? [] : [game.property.id]);
+    onTable.forEach((propertyId, index) => {
+        if (game.property) index = 1;          // the one card left lies in the middle
         const property = game.propertyCards.find(p => p.id === propertyId);
         const el = doc.createElement('div');
         el.id = `pb-property-${propertyId}`;

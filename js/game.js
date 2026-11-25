@@ -6,6 +6,7 @@ import { audioMgr } from './audio.js';
 import { state } from './state.js';
 import { createPalmBeachGame, renderPalmBeachTable, clearPalmBeachTable } from './pb/table.js';
 import { renderPalmBeachPanels, clearPalmBeachPanels } from './pb/panels.js';
+import { runPalmBeachMatch } from './pb/match.js';
 import { setupBoard, initPlayerCards, updateUI, updateCardVisuals, animateCellFlip, flyTextAnimation, flyCardAnimation, rollDiceVisual, getCharacterCardStyle, loadHighScores, setupAuctionVisuals, showAuctionBonusPopup, animateAuctionWin, triggerWaveAnimation, animateJaegaSetup, animateRoxanaSetup, showVariationSplash, centerBoardView, highlightTargetCell, clearTargetHighlight, showTurnBanner, hideDiceOverlay } from './ui.js';
 import * as Debug from './debug.js';
 import { TutorialManager } from './tutorial.js';
@@ -430,8 +431,8 @@ export function initGame() {
     initPlayerCards();
     updateUI();
 
-    // PALM BEACH (step 1.2): a normal match shows the Palm Beach table instead of the Boca board.
-    // The Boca turn cycle is not started: nothing is clickable until steps 1.4 and 1.5 connect the rules engine.
+    // PALM BEACH: a normal match shows the Palm Beach table instead of the Boca board, and the Palm Beach
+    // rules engine runs the game (js/pb/match.js). The Boca turn cycle is not started.
     state.pb = null;
     if (state.mode !== 'TUTORIAL' && !state.activeGambitId) {
         state.pb = createPalmBeachGame(state.players);
@@ -442,6 +443,9 @@ export function initGame() {
             renderPalmBeachPanels(state.pb.game);
         };
         state.pb.refresh();
+        // Starts the match: the rules engine now runs the 8 rounds, and the players answer with clicks.
+        const thisMatch = state.pb;
+        runPalmBeachMatch(thisMatch, { isCurrent: () => state.pb === thisMatch }).catch(() => {});
         document.getElementById('game-ui').classList.remove('opacity-0', 'pointer-events-none');
         centerBoardView();
         return;

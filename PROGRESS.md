@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.3 done** (characters and player panels). Next: step 1.4, after Lars has tried 1.3.
+- **Current step: 1.4 done** (the flipping phase can be played). Next: step 1.5, after Lars has tried 1.4.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -117,8 +117,32 @@ The party menu deals Palm Beach characters and the player panels show the Palm B
 4. One Boca test was set aside (`_to_delete/boca_tests/`): it tested Eric's Boca power, which Palm Beach does not have.
 5. The Compendium and the Boca campaign screens were not gone through; they still hold Boca texts in places (step 1.6).
 
+## Step 1.4 (25 Nov 2026): done
+The card flipping phase of all 8 rounds can be played, hot seat. The rules engine runs the game; the screen only asks and shows.
+
+- **Start of a round:** a message names the round, the start player and the initiative number. The start player has a star, and the row being played has a gold frame.
+- **Turns:** the player whose turn it is has a gold name bar, and the top line says "PLAYER 2: CHOOSE A CARD IN ROW 3". Only face-down cards in the current row can be clicked. Turns go clockwise.
+- **Lagoon and Atlantic:** the die rolls on screen. On a miss the card stays face down with a message. Skip flips Atlantic cards with no die.
+- **Re-roll:** after a miss, a player with a yellow counter is asked "Spend a re-roll and roll again?" with RE-ROLL and NO THANKS.
+- **Rewards:** the card turns over, and "+8 Au" or a Diamond flies to the player's panel. Bonus circles are included. Landmark cards show the landmark's story beside the board (the Boca pop-up).
+- **Diamond trade:** the popup "You have 4 diamonds. Trade in for a Luxury Card." with OK (3 for Mr. Flagler). Then the new Luxury Card appears large in the middle of the table and flies to the player's panel.
+- **End of the row:** "ROW 3 IS COMPLETE", then the next round.
+- **After round 8:** the Auction Map Card is flipped, the other two Property Cards are removed, characters collect their gold, and a simple box lists the points.
+- New code: `js/pb/match.js` (connects engine and screen), `js/pb/effects.js` (dice, flips, flying rewards, popups), `js/pb/messages.js` (the words on screen). 8 new checks in `tests/pb_match_messages.test.js`. `npm run check`: ALL 21 CHECKS PASSED.
+- Checked in the browser: a whole 3-player game played to the end by an automatic clicker with no errors (all 64 cards flipped, Diamond trades happened), and the re-roll and Diamond trade popups looked at by hand.
+
+### Not in step 1.4 (on purpose)
+- **No auctions yet.** Until step 1.5 nobody bids, so every Luxury Card and the Property Card go unsold, with the message "the auction comes in step 1.5". Points can only come from Diamond trades.
+- **No final scoring screen** (step 1.6): only a simple box with the points.
+- **A match is not saved.** Reloading the page or leaving the match ends it.
+
+### For Lars to look at after step 1.4
+1. The speed: messages stay about 1.5 seconds, the landmark pop-up closes by itself or on a click.
+2. The landmark pop-up covers the Luxury Cards on the right while it is open.
+3. The "new Luxury Card" moment: is it enough, or should it be bigger?
+
 ## Next
-Step 1.4 in `PLAN.md` (the flipping phase: clicks, dice, rewards, Diamond trade), after Lars has tried step 1.3 and said OK.
+Step 1.5 in `PLAN.md` (Luxury Auctions and the Property Auction), after Lars has tried step 1.4 and said OK.
 
 ## Open questions for Lars
 - **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.
