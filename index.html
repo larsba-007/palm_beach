@@ -317,21 +317,10 @@
                                     The <strong class="font-bold">BLOCK</strong> cards have hidden bonus cards. Flipping a bonus card gives you <span class="text-[#F3C80D] font-bold">+5 Au</span>, for a total of <span class="text-[#F3C80D] font-bold">8 Au</span>.
                                 </p>
                                 <div class="border-t border-white/10 my-6"></div>
-                                <h3 class="text-[32px] font-black text-white uppercase mb-4">BONUS CARD COUNTS</h3>
-                                <ul class="space-y-4 text-[26px] font-[200]">
-                                    <li class="flex items-center gap-3">
-                                        <span class="w-3 h-3 rounded-full bg-[#F3C80D]"></span>
-                                        <span><strong>Column 3:</strong> 2 bonus cards (always)</span>
-                                    </li>
-                                    <li class="flex items-center gap-3">
-                                        <span class="w-3 h-3 rounded-full bg-[#F3C80D]"></span>
-                                        <span><strong>Columns 4-6:</strong> 0-5 bonus cards (shuffled)</span>
-                                    </li>
-                                    <li class="flex items-center gap-3">
-                                        <span class="w-3 h-3 rounded-full bg-[#F3C80D]"></span>
-                                        <span><strong>Column 7:</strong> 0-2 bonus cards (shuffled)</span>
-                                    </li>
-                                </ul>
+                                <h3 class="text-[32px] font-black text-white uppercase mb-4">WHERE THEY LIE</h3>
+                                <p class="text-[26px] font-[200] leading-relaxed">
+                                    There are <strong>9 Block Bonus Cards</strong> among the 32 Block cards. All Block cards are shuffled together, so a bonus card can lie in any Block place on the board. Each one shows a yellow <strong>+5</strong> circle when it is flipped.
+                                </p>
                             </div>
 
                             <!-- Col 3 (Gameboard Col 3) -->
@@ -569,7 +558,7 @@
             <div class="web-only absolute top-[250px] left-[520px] w-[960px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">HOW MANY PLAYERS? TAP 2, 3 OR 4 AND TYPE THE NAMES<br>IN THE ORDER YOU SIT, CLOCKWISE</div>
             <div class="web-only absolute top-[250px] left-[1720px] w-[600px] font-overpass font-black text-[30px] text-white/75 text-center uppercase leading-tight tracking-wider">CHARACTER DRAFT</div>
             <div class="web-only absolute top-[880px] left-[1720px] w-[600px] font-overpass font-light text-[28px] text-white/70 uppercase leading-snug">RANDOM: EVERYONE GETS A RANDOM CHARACTER.<br><br>PICK 2: EACH PLAYER GETS TWO CHARACTERS AND KEEPS ONE.<br><br>OPEN DRAFT: TAKE TURNS CHOOSING ANY FREE CHARACTER.</div>
-            <div id="v3-support-btn" onclick="app.showSupportModal()" onmouseenter="app.preloadSupportBanner()" ontouchstart="app.preloadSupportBanner()" class="web-only absolute top-[1280px] left-[310px] w-[700px] h-[150px] rounded-full bg-white/15 border-4 border-white/60 font-overpass font-black text-[48px] text-white flex items-center justify-center cursor-pointer hover:scale-105 hover:border-[#F3C80D] transition-transform uppercase">SUPPORT US<svg class="w-[56px] h-[56px] ml-5 shrink-0" viewBox="0 0 24 24" fill="#ff4d6d" aria-hidden="true"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg></div>
+            <div id="v3-support-btn" onclick="app.showSupportModal()" onmouseenter="app.preloadSupportBanner()" ontouchstart="app.preloadSupportBanner()" class="web-only absolute top-[1280px] left-[690px] w-[700px] h-[150px] rounded-full bg-white/15 border-4 border-white/60 font-overpass font-black text-[48px] text-white flex items-center justify-center cursor-pointer hover:scale-105 hover:border-[#F3C80D] transition-transform uppercase">THE BOARD GAME</div>
             <div id="v3-tutorial-btn" onclick="app.startWebTutorial()" class="web-only absolute top-[1280px] left-[1830px] w-[700px] h-[150px] rounded-full bg-white/15 border-4 border-white/60 font-overpass font-black text-[48px] text-white flex items-center justify-center cursor-pointer hover:scale-105 hover:border-[#F3C80D] transition-transform uppercase">TUTORIAL</div>
             <div class="web-only absolute top-[1450px] left-[1830px] w-[700px] font-overpass font-light text-[28px] text-white/60 text-center uppercase leading-tight">PLAY THE GUIDED FIRST LEVEL TO LEARN THE RULES</div>
           </div>
@@ -760,7 +749,7 @@
     <div id="support-inner" class="bg-[#26385C]/50 backdrop-blur-md border border-white/10 rounded-3xl p-16 flex flex-col items-center relative w-[2000px] shrink-0 shadow-2xl origin-center overflow-hidden">
       <!-- Banner photo across the top, edge to edge. The picture is set from js/main.js when the popup is first opened (or when the
            Support button is hovered/touched), so nothing is downloaded before then. The reserved height avoids a jump while it loads. -->
-      <img id="support-banner" alt="The Boca Raton board game: box, board, rulebooks and cards" decoding="async" class="block -mt-16 mb-14 w-[2000px] max-w-none shrink-0 aspect-[2560/900] bg-[#f4f4f4] object-cover">
+      <img id="support-banner" alt="The board game: box, board, rulebooks and cards" decoding="async" class="block -mt-16 mb-14 w-[2000px] max-w-none shrink-0 aspect-[2560/900] bg-[#f4f4f4] object-cover">
       <button onclick="app.closeSupportModal()" aria-label="Close" class="absolute top-10 right-10 z-10 w-[110px] h-[110px] rounded-full bg-[#26385C]/90 border-2 border-white/60 text-white shadow-lg hover:bg-[#26385C] hover:border-white transition-colors cursor-pointer flex items-center justify-center">
         <svg class="w-14 h-14 pointer-events-none" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
       </button>

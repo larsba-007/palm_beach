@@ -1,7 +1,7 @@
 // Palm Beach table: the words shown on screen during a match.
 // Plain functions with no screen code, so the tests can read them and Lars's texts live in one place.
 
-import { ROUNDS } from '../rules/data.js';
+import { ROUNDS, CARD_RULES, DIAMOND_TRADE_COST, MIN_BID, getCharacter } from '../rules/data.js';
 import { initiativeOf } from '../rules/initiative.js';
 
 const TYPE_NAMES = { LAGOON: 'Lagoon', ATLANTIC: 'Atlantic', WATERFRONT: 'Waterfront', BLOCK: 'Block' };
@@ -114,4 +114,61 @@ export function gameOverText(result) {
     const how = { POINTS: 'most Prestige Points', PROPERTY: 'tie, won by the Property Card', GOLD: 'tie, won by most gold left', SHARED: 'shared victory' }[result.decidedBy];
     const scores = result.scores.map(s => `${s.name}: ${s.prestige} Prestige Points, ${s.gold} Au`).join('  ·  ');
     return { title: `${names.join(' & ').toUpperCase()} WIN${names.length === 1 ? 'S' : ''}`, text: `${scores}. (${how}.)` };
+}
+
+// ---- Final scoring screen and cheat sheet (step 1.6) --------------------------------------------------
+
+const TIEBREAK_TEXT = {
+    POINTS: 'Most Prestige Points.',
+    PROPERTY: 'Tied on Prestige Points: the tied player holding the Property Card wins.',
+    GOLD: 'Tied on Prestige Points, and no tied player holds the Property Card: most gold left wins.',
+    SHARED: 'Tied on Prestige Points and on gold: the victory is shared.'
+};
+
+/**
+ * The final scoring table: winners first, then by Prestige Points, Property Card and gold.
+ * @returns {{title: string, how: string, rows: object[]}}
+ */
+export function finalScoreTable(result) {
+    const winners = new Set(result.winners);
+    const ordered = result.scores.slice().sort((a, b) =>
+        (winners.has(b.playerId) - winners.has(a.playerId))
+        || (b.prestige - a.prestige)
+        || (b.hasProperty - a.hasProperty)
+        || (b.gold - a.gold)
+        || (a.playerId - b.playerId));
+    const rows = ordered.map((s, index) => ({
+        ...s,
+        isWinner: winners.has(s.playerId),
+        place: winners.has(s.playerId) ? 1 : index + 1
+    }));
+    const names = rows.filter(r => r.isWinner).map(r => r.name.toUpperCase());
+    return {
+        title: `${names.join(' & ')} ${names.length === 1 ? 'WINS' : 'SHARE THE VICTORY'}`,
+        how: TIEBREAK_TEXT[result.decidedBy],
+        rows
+    };
+}
+
+
+/** The cheat sheet: the Palm Beach reward table and the short rules, with the numbers taken from the rules engine. */
+export function cheatSheet() {
+    const roll = (type) => (CARD_RULES[type].minRoll ? `Roll ${CARD_RULES[type].minRoll}–6` : 'No roll');
+    const reward = (type) => (CARD_RULES[type].diamonds ? `${CARD_RULES[type].diamonds} Diamond` : `${CARD_RULES[type].gold} Au`);
+    return {
+        title: 'REWARDS AND RULES',
+        table: [
+            ['LAGOON', roll('LAGOON'), reward('LAGOON')],
+            ['ATLANTIC', roll('ATLANTIC'), reward('ATLANTIC')],
+            ['WATERFRONT', roll('WATERFRONT'), reward('WATERFRONT')],
+            ['BLOCK', roll('BLOCK'), reward('BLOCK')]
+        ],
+        lines: [
+            'Yellow circle on a card: +5, +2 or +1 Au extra, paid when the card is flipped.',
+            'Failed roll: the card stays face down. Spend a yellow re-roll counter to roll again.',
+            `${DIAMOND_TRADE_COST} Diamonds (Mr. Flagler ${getCharacter('FLAGLER').diamondTradeCost}): trade them at once for a Luxury Card.`,
+            `Auction after every row: lowest bid ${MIN_BID} Au, raise by at least 1 Au, never bid more than you have. Pass and you are out.`,
+            'After round 8: the Property Auction. Most Prestige Points wins; a tie goes to the Property Card, then to the most gold.'
+        ]
+    };
 }

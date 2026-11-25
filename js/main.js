@@ -1490,7 +1490,8 @@ function configureGameWindow() {
 // Web Party Edition: one card of the Support Us popup (heading, text, optional badge, link button)
 function buildSupportOfferCard(offer) {
     const card = document.createElement('div');
-    card.className = 'flex-1 flex flex-col items-center text-center rounded-3xl border-4 bg-white/5 p-12';
+    // The main offer (Kickstarter) is the larger card; the other one is smaller.
+    card.className = `${offer.main ? 'flex-[3]' : 'flex-[2]'} flex flex-col items-center text-center rounded-3xl border-4 bg-white/5 p-12`;
     card.style.borderColor = offer.accent;
 
     const heading = document.createElement('h3');
@@ -1520,9 +1521,27 @@ function buildSupportOfferCard(offer) {
     link.target = '_blank';
     link.rel = 'noopener noreferrer';
     link.className = 'mt-auto w-full h-[120px] flex items-center justify-center rounded-full text-[42px] font-black uppercase text-black font-overpass hover:scale-105 transition-transform cursor-pointer no-underline';
-    link.style.backgroundColor = offer.accent;
+    if (offer.main) {
+        // The only solid button in the popup
+        link.style.backgroundColor = offer.accent;
+    } else {
+        link.style.backgroundColor = 'transparent';
+        link.style.border = `4px solid ${offer.accent}`;
+        link.style.color = '#ffffff';
+    }
     link.textContent = offer.buttonLabel;
     card.appendChild(link);
+
+    if (offer.extraLink && offer.extraHref) {
+        // A plain text link under the button (not a button)
+        const extra = document.createElement('a');
+        extra.href = offer.extraHref;
+        extra.target = '_blank';
+        extra.rel = 'noopener noreferrer';
+        extra.className = 'mt-8 text-[36px] font-light text-white/85 hover:text-white underline font-overpass cursor-pointer';
+        extra.textContent = offer.extraLink.label;
+        card.appendChild(extra);
+    }
 
     return card;
 }

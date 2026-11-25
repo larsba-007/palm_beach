@@ -9,9 +9,10 @@
 import { playGame } from '../rules/engine.js';
 import {
     nameOf, diamondTradeMessage, rerollMessage, roundStartMessage, statusText,
-    auctionWonText, auctionUnsoldText, forcedPassText, gameOverText
+    auctionWonText, auctionUnsoldText, forcedPassText
 } from './messages.js';
 import { openAuction, updateAuction, askBid, closeAuction } from './auction_view.js';
+import { showFinalScreen, closeFinalScreen, closeCheatSheet, ensureCheatSheetButton } from './end_screen.js';
 import { renderPalmBeachTable, paintMapCard } from './table.js';
 import { renderPalmBeachPanels } from './panels.js';
 import {
@@ -26,8 +27,9 @@ import {
  * @param {{game: object, rng: object}} pb  the Palm Beach game made in js/pb/table.js
  * @param {{isCurrent?: () => boolean}} [options]  isCurrent says whether this match is still the one on the table
  */
-export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
+export async function runPalmBeachMatch(pb, { isCurrent = () => true, onFinished = () => {}, boardGameLink = '' } = {}) {
     const { game, rng } = pb;
+    ensureCheatSheetButton();
     const cardEl = (cardId) => document.getElementById(`pb-card-${cardId}`);
     // If the players left this match (RESIGN, new match), it simply stops where it is.
     const stopped = () => new Promise(() => {});
@@ -78,6 +80,7 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
         if (!isCurrent()) return stopped();
         switch (e.type) {
             case 'ROUND_START':
+                playSound('the_gong');
                 renderPalmBeachTable(game);
                 refreshPanels();
                 frameRow(e.round);
@@ -85,6 +88,7 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
                 await showToast(roundStartMessage(game, e.round), 1800);
                 break;
             case 'TURN_START':
+                playSound('turn_switch');
                 refreshPanels();
                 refreshStatus();
                 break;
@@ -175,8 +179,9 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
                 refreshPanels();
                 refreshStatus();
                 playSound('winner_song');
-                const m = gameOverText(e.result);       // the full scoring screen is step 1.6
-                await showDialog({ title: m.title, text: m.text, buttons: [{ label: 'OK', value: true, primary: true }] });
+                // The final scoring screen. PLAY AGAIN or PARTY MENU: the caller decides what happens next.
+                const choice = await showFinalScreen(game, { boardGameLink });
+                if (isCurrent()) onFinished(choice);
                 break;
             }
             default:
@@ -190,4 +195,17 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
         console.error('[Palm Beach] The match stopped on an error:', error);
         throw error;
     }
+}
+
+/** Takes everything a Palm Beach match put on the screen away again (when the players leave the match). */
+export function leavePalmBeachMatch() {
+    hideDice();
+    closeAuction();
+    closeFinalScreen();
+    closeCheatSheet();
+    frameRow(null);
+    setStatus('', '');
+    for (const id of ['pb-dialog-layer', 'pb-toast', 'pb-rules-btn']) document.getElementById(id)?.remove();
+    document.querySelectorAll('.pb-flyer, .pb-luxury-reveal, .flip-container').forEach(el => el.remove());
+    if (typeof window !== 'undefined' && window.app?.dismissLandmarkDossier) window.app.dismissLandmarkDossier();
 }

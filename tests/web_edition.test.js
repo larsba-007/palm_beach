@@ -681,26 +681,41 @@ console.log('Running Web Edition regression tests...\n');
     console.log('✓ Test 34 Passed: party menu background is a 2560x1440 WebP, Web-only cover rule, preloaded, Steam untouched.');
 }
 
-// Test 35: Support Us data file: texts, links, tracking, and no dead or unsafe buttons
+// Test 35: Board game popup data file (design: SUPPORT_POPUP.md): texts, links, tracking, and no dead or unsafe buttons
 {
+    assert.equal(SUPPORT_US.buttonLabel, 'THE BOARD GAME');
+    assert.equal(SUPPORT_US.title, 'PLAY IT ON YOUR TABLE');
+    assert.equal(SUPPORT_US.gameOverLink, "Liked it? It's a real board game \u2192");
     assert.equal(SUPPORT_US.offers.length, 2);
-    const [steam, board] = SUPPORT_US.offers;
-    assert.equal(steam.heading, 'GET THE FULL STEAM GAME');
-    assert.equal(steam.text, 'at backhansgames.com');
-    assert.equal(steam.badge, 'EXCLUSIVE WEB OFFER — 50% OFF');
-    assert.equal(steam.buttonLabel, 'GET MY STEAM KEY →');
-    assert.equal(steam.url, 'https://www.backhansgames.com', 'placeholder link until the webshop page exists');
-    assert.equal(board.heading, 'FOLLOW OUR BOARD GAME');
+    const [board, steam] = SUPPORT_US.offers;
+    // 1. Kickstarter is the main action and comes first
+    assert.equal(board.main, true);
+    assert.ok(!steam.main, 'only one main offer');
+    assert.equal(board.heading, 'COMING TO KICKSTARTER');
+    assert.match(board.text, /^Palm Beach is one of two games in the box: Palm Beach \(bidding\) and Boca Raton \(push your luck\)\. 1\u20135 players, solo mode, 45\u201360 min\.$/);
+    assert.equal(board.buttonLabel, 'NOTIFY ME ON LAUNCH \u2192');
     assert.match(board.url, /^https:\/\/www\.kickstarter\.com\/projects\/backhansgames\/boca-raton-and-palm-beach$/);
+    // 2. The VIP link is a plain text link under the main button
+    assert.equal(board.extraLink.label, 'Join the VIP list for the 15% Early Bird \u2192');
+    assert.equal(board.extraLink.url, 'https://backhansgames.com/go');
+    // 3. Steam is the smaller second card, and it is about Boca Raton: Palm Beach is not on Steam
+    assert.equal(steam.heading, 'PLAY BOCA RATON ON STEAM');
+    assert.equal(steam.text, 'The other game in the box, as Gold Coast Gambits.');
+    assert.equal(steam.buttonLabel, 'VIEW ON STEAM \u2192');
+    assert.equal(steam.url, 'https://store.steampowered.com/app/4307400/');
+    // 4. Copy rules: no 50 % badge, no "full Steam game", no "Notify me for 10 % off"
+    const allText = JSON.stringify(SUPPORT_US);
+    assert.ok(SUPPORT_US.offers.every(o => !o.badge), 'no badge until the real shop page exists');
+    assert.ok(!/50\s?%|10\s?%|FULL STEAM GAME|full Steam game/i.test(allText));
     assert.notEqual(steam.accent, board.accent, 'the two offers have different accent colors');
 
     // Tracking tags are added to every link
-    const steamHref = new URL(buildSupportUrl(steam.url, steam.id));
-    assert.equal(steamHref.hostname, 'www.backhansgames.com');
-    assert.equal(steamHref.searchParams.get('utm_source'), 'web_party');
-    assert.equal(steamHref.searchParams.get('utm_medium'), 'support_popup');
-    assert.equal(steamHref.searchParams.get('utm_campaign'), 'steam-key');
-    assert.equal(new URL(buildSupportUrl(board.url, board.id)).searchParams.get('utm_campaign'), 'board-game');
+    const boardHref = new URL(buildSupportUrl(board.url, board.id));
+    assert.equal(boardHref.hostname, 'www.kickstarter.com');
+    assert.equal(boardHref.searchParams.get('utm_source'), 'web_palm_beach');
+    assert.equal(boardHref.searchParams.get('utm_medium'), 'support_popup');
+    assert.equal(boardHref.searchParams.get('utm_campaign'), 'board-game');
+    assert.equal(new URL(buildSupportUrl(steam.url, steam.id)).searchParams.get('utm_campaign'), 'steam');
     // Tags already in a link are kept; tracking can be switched off
     assert.equal(new URL(buildSupportUrl('https://shop.example/key?utm_source=mine', 'x')).searchParams.get('utm_source'), 'mine');
     assert.equal(buildSupportUrl('https://shop.example/key', 'x', {}), 'https://shop.example/key');
@@ -712,11 +727,16 @@ console.log('Running Web Edition regression tests...\n');
     }
     const visible = getVisibleSupportOffers({ offers: [{ id: 'a', url: 'https://ok.example' }, { id: 'b', url: '' }, { id: 'c', url: 'javascript:1' }], tracking: {} });
     assert.deepEqual(visible.map(o => o.id), ['a']);
-    assert.equal(getVisibleSupportOffers().length, 2, 'both real offers are shown');
-    console.log('✓ Test 35 Passed: Support Us texts and links, tracking tags, and dead/unsafe offers are never shown.');
+    const shown = getVisibleSupportOffers();
+    assert.equal(shown.length, 2, 'both real offers are shown');
+    const vip = new URL(shown[0].extraHref);
+    assert.equal(vip.hostname, 'backhansgames.com');
+    assert.equal(vip.searchParams.get('utm_campaign'), 'board-game-vip');
+    assert.equal(shown[1].extraHref, '', 'the Steam card has no extra link');
+    console.log('\u2713 Test 35 Passed: board game popup texts and links (Kickstarter first), tracking tags, and dead/unsafe offers are never shown.');
 }
 
-// Test 36: Party menu: three equal buttons in a centered row, Start stays the prominent one
+// Test 36: Party menu: two equal buttons in a centered row (no tutorial in version 1), Start stays the prominent one
 {
     const html = read('index.html');
     const css = read('index.css');
@@ -728,35 +748,30 @@ console.log('Running Web Edition regression tests...\n');
     const px = (cls, prefix) => Number((cls.match(new RegExp(`${prefix}-\\[(\\d+)px\\]`)) || [])[1]);
 
     const support = btnClass('v3-support-btn');
-    const tutorial = btnClass('v3-tutorial-btn');
     const start = css.match(/\.edition-web #v3-start-match\s*\{([^}]*)\}/)[1];
     const cssPx = (prop) => Number((start.match(new RegExp(`${prop}:\\s*(\\d+)px`)) || [])[1]);
 
-    // Same size
+    // Same size, same row, a 60px gap, centered on the 2840px plate: THE BOARD GAME | START MATCH
     assert.deepEqual([px(support, 'w'), px(support, 'h')], [700, 150]);
-    assert.deepEqual([px(tutorial, 'w'), px(tutorial, 'h')], [700, 150]);
     assert.deepEqual([cssPx('width'), cssPx('height')], [700, 150]);
-    // Same row, equal 60px gaps, centered on the 2840px plate: SUPPORT | START | TUTORIAL
-    const lefts = [px(support, 'left'), cssPx('left'), px(tutorial, 'left')];
-    assert.deepEqual(lefts, [310, 1070, 1830]);
-    assert.deepEqual([px(support, 'top'), cssPx('top'), px(tutorial, 'top')], [1280, 1280, 1280]);
+    const lefts = [px(support, 'left'), cssPx('left')];
+    assert.deepEqual(lefts, [690, 1450]);
+    assert.deepEqual([px(support, 'top'), cssPx('top')], [1280, 1280]);
     assert.equal(lefts[1] - (lefts[0] + 700), 60);
-    assert.equal(lefts[2] - (lefts[1] + 700), 60);
-    assert.equal(lefts[0], 2840 - (lefts[2] + 700), 'row is centered on the plate');
-    // Support is a twin of Tutorial: identical style apart from position
-    const style = (cls) => cls.replace(/left-\[\d+px\]/, '');
-    assert.equal(style(support), style(tutorial));
+    assert.equal(lefts[0], 2840 - (lefts[1] + 700), 'row is centered on the plate');
     // Start remains the only solid yellow button
     const startMarkup = html.match(/<div id="v3-start-match"[^>]*class="([^"]*)"/)[1];
     assert.ok(startMarkup.includes('bg-[#F3C80D]'));
-    assert.ok(!support.includes('bg-[#F3C80D]') && !tutorial.includes('bg-[#F3C80D]'));
-    // Label and heart, caption moved with Tutorial
-    assert.match(html, /<div id="v3-support-btn"[^>]*>SUPPORT US<svg[^>]*fill="#ff4d6d"/, 'SUPPORT US plus a drawn heart');
-    assert.match(html, /left-\[1830px\] w-\[700px\][^>]*>PLAY THE GUIDED FIRST LEVEL/, 'caption under Tutorial');
+    assert.ok(!support.includes('bg-[#F3C80D]'));
+    // The button is named for what the player gets, and says the same as the data file
+    assert.match(html, /<div id="v3-support-btn"[^>]*>THE BOARD GAME<\/div>/);
+    assert.equal(SUPPORT_US.buttonLabel, 'THE BOARD GAME');
+    // The Boca tutorial button is still in the markup (it returns in version 2) but hidden
+    assert.match(css, /#v3-tutorial-btn,\s*#v3-tutorial-btn \+ div\s*\{\s*display:\s*none\s*!important/);
     // The heading no longer collides with the column labels (subtitle ends well above them)
     assert.match(html, /top-\[80px\][^>]*>READY TO PLAY\?/);
     assert.match(html, /top-\[180px\][^>]*text-\[40px\][^>]*>Grab your friends/);
-    console.log('✓ Test 36 Passed: SUPPORT US | START MATCH | TUTORIAL, equal size, centered row; Start is the only solid button.');
+    console.log('\u2713 Test 36 Passed: THE BOARD GAME | START MATCH, equal size, centered row; Start is the only solid button.');
 }
 
 // Test 37: The popup: Web only, never automatic, easy to close, links open in a new tab

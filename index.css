@@ -3206,6 +3206,105 @@ input[type=range]::-webkit-slider-runnable-track {
 .pb-bid-btn-label { font-weight: 900; font-size: 42px; line-height: 60px; letter-spacing: 0.04em; pointer-events: none; }
 .pb-bid-btn-hint { font-weight: 400; font-size: 28px; line-height: 36px; pointer-events: none; }
 
+/* ---- Palm Beach final scoring screen and cheat sheet (js/pb/end_screen.js) ---------------------- */
+#pb-final-layer,
+#pb-cheat-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 3830px;
+    height: 2160px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1400;
+}
+#pb-final,
+#pb-cheat {
+    background-color: rgba(38, 56, 92, 0.96);
+    font-family: 'Overpass', sans-serif;
+    color: #ffffff;
+}
+.pb-final-title {
+    font-weight: 900;
+    font-size: 96px;
+    line-height: 120px;
+    letter-spacing: 0.08em;
+    text-align: center;
+    color: #F3C80D;
+}
+.pb-final-how {
+    font-weight: 300;
+    font-size: 42px;
+    line-height: 60px;
+    text-align: center;
+}
+.pb-final-head {
+    font-weight: 900;
+    font-size: 30px;
+    line-height: 50px;
+    letter-spacing: 0.12em;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+}
+.pb-final-row {
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.07);
+    border: 3px solid transparent;
+}
+.pb-final-row.pb-final-winner {
+    background: rgba(243, 200, 13, 0.16);
+    border-color: #F3C80D;
+}
+.pb-final-place { font-weight: 900; font-size: 80px; line-height: 154px; text-align: center; }
+.pb-final-card { background-repeat: no-repeat; border-radius: 6px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4); }
+.pb-final-name { font-weight: 900; font-size: 54px; line-height: 154px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pb-final-num { font-weight: 700; font-size: 60px; line-height: 154px; text-align: center; }
+.pb-final-prestige { font-weight: 900; font-size: 96px; }
+.pb-final-gold { color: #F3C80D; }
+.pb-final-btn { position: absolute; }
+.pb-final-link {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.75);
+    font-family: 'Overpass', sans-serif;
+    font-weight: 400;
+    font-size: 40px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.pb-final-link:hover { color: #ffffff; }
+
+.pb-cheat-row { border-radius: 16px; background: rgba(255, 255, 255, 0.07); }
+.pb-cheat-type { font-weight: 900; font-size: 52px; line-height: 96px; letter-spacing: 0.06em; }
+.pb-cheat-roll { font-weight: 400; font-size: 48px; line-height: 96px; }
+.pb-cheat-reward { font-weight: 900; font-size: 56px; line-height: 96px; text-align: right; color: #F3C80D; }
+.pb-cheat-line { font-weight: 300; font-size: 42px; line-height: 54px; }
+
+/* "? REWARDS" under COMPENDIUM in the top-right corner. */
+#pb-rules-btn {
+    position: absolute;
+    top: 104px;
+    left: 50px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #ffffff;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 900;
+    font-size: 40px;
+    line-height: 48px;
+    cursor: pointer;
+    z-index: 50;
+}
+#pb-rules-btn:hover { color: #DA795A; }
+
+/* Compendium: tabs that only make sense in Boca Raton are hidden in Palm Beach version 1:
+   Visitors (Boca's AI opponents), Member Profile (Boca campaign statistics) and Lore (an empty page). */
+#comp-tab-BOTS,
+#comp-tab-PROFILE,
+#comp-tab-LORE {
+    display: none !important;
+}
+
 /* The number 2 on the top card of a stack of two Luxury Cards (rows 4 and 6). */
 .pb-stack-count {
     position: absolute;
@@ -3246,7 +3345,7 @@ html:not(.edition-web) .web-only {
 .edition-web #v3-setup-random { top: 360px; left: 1720px; width: 600px; }
 .edition-web #v3-setup-pair { top: 530px; left: 1720px; width: 600px; }
 .edition-web #v3-setup-open { top: 700px; left: 1720px; width: 600px; }
-.edition-web #v3-start-match { top: 1280px; left: 1070px; width: 700px; height: 150px; }
+.edition-web #v3-start-match { top: 1280px; left: 1450px; width: 700px; height: 150px; }
 
 /* ---- Web Party Edition: tap-to-preview in Open Draft (touch screens have no hover) ----
    The previewed card gets the same enlargement as the hover state. */

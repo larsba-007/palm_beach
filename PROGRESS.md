@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.5 done** (a complete game can be played). Next: step 1.6, after Lars has tried 1.5.
+- **Current step: 1.6 done** (end of game and polish). Next: step 1.7, the release check, after Lars has tried 1.6.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -160,8 +160,31 @@ A complete game can be played from start to finish: 8 rounds of flipping, 10 Lux
 2. After the end box, the table stays as it is. RESIGN (bottom left) goes back to the menu. A proper end screen with PLAY AGAIN is step 1.6.
 3. Not tried by hand: games with 2, 4 and 5 players through the auctions (the tests cover them; the browser run was 3 players).
 
+## Step 1.6 (25 Nov 2026): done
+End of game and polish.
+
+- **Final scoring screen:** the winner in the title, how the game was decided in words (most points, Property Card, most gold, or shared), and a table with every player's Luxury points, Property points, Prestige Points and gold left. Buttons **PLAY AGAIN** (same names, new draft) and **PARTY MENU**.
+- **RESIGN** now ends the match and goes straight back to the party menu, with nothing left on screen. (It used to open Boca's game-over screen.)
+- **Cheat sheet:** a "? REWARDS" button under COMPENDIUM opens the Palm Beach reward table and the short rules. The numbers come from the rules engine.
+- **Round and phase indicator and whose turn** were already in place from steps 1.4–1.5 ("ROUND 3 OF 8 · LUXURY AUCTION").
+- **Sounds:** gong at round start, a click when the turn changes, dice, card flip, gold, auction alert, bid, pass, win, and the winner song at the end.
+- **Board game popup, new design** (`SUPPORT_POPUP.md`): the party-menu button says THE BOARD GAME, the popup heading is PLAY IT ON YOUR TABLE, Kickstarter is the larger first card with the only solid button, the VIP list is a plain text link under it, Steam is the smaller second card about Boca Raton. No 50 % badge. Tracking tag `utm_source=web_palm_beach`. A quiet link on the final scoring screen opens the same popup (web edition only); it never opens by itself.
+- **Party menu:** two buttons, centred: THE BOARD GAME and START MATCH.
+- **Compendium:** the RULES tab now holds the Palm Beach rules (`js/pb/rules_text.js`). The Boca-only tabs are hidden: Visitors (Boca's AI), Member Profile (Boca campaign statistics), Lore (an empty page). The Block Bonus text no longer talks about Boca's columns.
+- **Small-window notice:** inherited from the Boca web edition, unchanged.
+- New code: `js/pb/end_screen.js`, `js/pb/rules_text.js`. 8 new checks in `tests/pb_end_and_polish.test.js`; the popup and menu tests in `tests/web_edition.test.js` were rewritten for the new design. `npm run check`: ALL 23 CHECKS PASSED.
+- Checked in the browser: the final screen (with a tie decided by the Property Card), the cheat sheet, the popup, the party menu, the Compendium rules, RESIGN back to the menu and starting a new match after it.
+
+### For Lars to approve or supply after step 1.6
+1. **Board game popup texts:** built with the proposals in `SUPPORT_POPUP.md`. Lars approves them; changes are made in `js/support_links.js` only.
+2. **Character stories** in `js/characters.js` (drafts).
+3. **Compendium rules text** in `js/pb/rules_text.js` (a summary of the rulebook, written by Claude).
+4. **Photos still showing Boca Raton:** the splash picture (title in the picture), the party-menu background (`board_game.webp`, 2560 × 1440) and the popup banner (`board_game_support_us.webp`, 2560 × 900, under 500 KB).
+5. **Compendium "Board game" page:** still the Boca text and photos, with one sentence changed to name Palm Beach.
+6. Not done by hand: the PLAY AGAIN button at the end of a full game (the same code was run directly and worked).
+
 ## Next
-Step 1.6 in `PLAN.md` (final scoring screen, round and phase indicator, sounds, cheat sheet, small-window notice, support popup, tidy the party menu and the Compendium), after Lars has tried step 1.5 and said OK.
+Step 1.7 in `PLAN.md` (release check: play-through with 2, 3 and 4 players, the checklist in `docs/WEB_EDITION.md` section 8, build `dist-web`), after Lars has tried step 1.6 and said OK.
 
 ## Open questions for Lars
 - **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.

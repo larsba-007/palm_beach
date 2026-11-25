@@ -63,7 +63,7 @@ await check('The screen plays the game through the rules engine: one place asks 
     assert.match(match, /request\.options\.map\(cardEl\)/);
     // A match that was left (RESIGN, new match) stops instead of going on in the background.
     assert.match(match, /if \(!isCurrent\(\)\) return stopped\(\);/);
-    assert.match(fs.readFileSync('js/game.js', 'utf8'), /runPalmBeachMatch\(thisMatch, \{ isCurrent: \(\) => state\.pb === thisMatch \}\)/);
+    assert.match(fs.readFileSync('js/game.js', 'utf8'), /runPalmBeachMatch\(thisMatch, \{\s*isCurrent: \(\) => state\.pb === thisMatch,/);
 });
 
 await check('Landmark cards are the 12 cards with a +2 or +1 circle', async () => {

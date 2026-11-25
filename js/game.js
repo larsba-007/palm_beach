@@ -6,7 +6,8 @@ import { audioMgr } from './audio.js';
 import { state } from './state.js';
 import { createPalmBeachGame, renderPalmBeachTable, clearPalmBeachTable } from './pb/table.js';
 import { renderPalmBeachPanels, clearPalmBeachPanels } from './pb/panels.js';
-import { runPalmBeachMatch } from './pb/match.js';
+import { runPalmBeachMatch, leavePalmBeachMatch } from './pb/match.js';
+import { SUPPORT_US } from './support_links.js';
 import { setupBoard, initPlayerCards, updateUI, updateCardVisuals, animateCellFlip, flyTextAnimation, flyCardAnimation, rollDiceVisual, getCharacterCardStyle, loadHighScores, setupAuctionVisuals, showAuctionBonusPopup, animateAuctionWin, triggerWaveAnimation, animateJaegaSetup, animateRoxanaSetup, showVariationSplash, centerBoardView, highlightTargetCell, clearTargetHighlight, showTurnBanner, hideDiceOverlay } from './ui.js';
 import * as Debug from './debug.js';
 import { TutorialManager } from './tutorial.js';
@@ -445,7 +446,13 @@ export function initGame() {
         state.pb.refresh();
         // Starts the match: the rules engine now runs the 8 rounds, and the players answer with clicks.
         const thisMatch = state.pb;
-        runPalmBeachMatch(thisMatch, { isCurrent: () => state.pb === thisMatch }).catch(() => {});
+        runPalmBeachMatch(thisMatch, {
+            isCurrent: () => state.pb === thisMatch,
+            // The final scoring screen: PLAY AGAIN (same players, new draft) or PARTY MENU.
+            onFinished: (choice) => leavePalmBeachTable(choice === 'AGAIN'),
+            // The quiet link to the board game popup exists in the web edition only.
+            boardGameLink: (window.GameConfig && window.GameConfig.isWeb) ? SUPPORT_US.gameOverLink : ''
+        }).catch(() => {});
         document.getElementById('game-ui').classList.remove('opacity-0', 'pointer-events-none');
         centerBoardView();
         return;
@@ -2872,7 +2879,24 @@ async function runBotTurn(bot) {
     }
 }
 
+/** PALM BEACH: ends the match on the table and goes back to the menu (or straight into a new match). */
+export function leavePalmBeachTable(playAgain = false) {
+    leavePalmBeachMatch();
+    state.pb = null;
+    if (typeof window !== 'undefined' && window.app) {
+        // Back to the setup screen (the party menu in the web edition), with no extra question.
+        window.app.handleCustomMatchExit('SETUP');
+        if (playAgain) setTimeout(() => window.app.startGame(), 600);
+    }
+}
+
 export function confirmResign() {
+    // PALM BEACH: RESIGN simply ends the match and returns to the menu. Nobody is given a win.
+    if (state.pb) {
+        if (window.app && window.app.closeResignModal) window.app.closeResignModal();
+        leavePalmBeachTable(false);
+        return;
+    }
     if (window.app && window.app.closeResignModal) {
         window.app.closeResignModal();
     }

@@ -6,6 +6,7 @@ import { usesTapToPreview } from './web_party.js';
 import { botRoster } from './bots.js';
 import { GAMBIT_CAMPAIGN } from './gambit_data.js';
 import { getProfileHtml } from './StatsUI.js';
+import { palmBeachRulesHtml } from './pb/rules_text.js';
 import { landmarkData } from './landmarks.js';
 import { propertyLore } from './auction.js';
 import { state } from './state.js';
@@ -3022,7 +3023,7 @@ export function setCompendiumTab(tabName) {
                     content = getProfileHtml();
                 }
                 else if (tabName === 'LORE') {
-                    titleEl.innerText = "THE WORLD OF BOCA RATON";
+                    titleEl.innerText = "THE WORLD OF PALM BEACH";
                     content = `<div class="v2-glass-plate max-w-[2000px] mx-auto min-h-[1000px] p-[80px] flex items-center justify-center">
                         <div class="text-white text-[64px] font-black uppercase font-overpass opacity-20">CONTENT COMING SOON</div>
                     </div>`;
@@ -3040,7 +3041,7 @@ export function setCompendiumTab(tabName) {
                             <div class="space-y-6">
                                 <h2 class="text-[60px] font-black uppercase tracking-wider text-white">BOCA RATON and PALM BEACH</h2>
                                 <p class="text-[40px] font-[200] leading-relaxed text-slate-100 mb-6">
-                                    The digital game is an adaptation of the board game BOCA RATON that is to be released on KICKSTARTER.
+                                    This digital game is an adaptation of PALM BEACH, one of the two board games in the box that is to be released on KICKSTARTER.
                                 </p>
                                 <p class="text-[40px] font-[200] leading-relaxed text-slate-100">
                                     Play as a local along Florida's east coast in a tabletop strategy board game of luck, risk, and bidding. Choose from 10 characters, each with different abilities that alter your strategy. Flip map cards to collect gold and invest in luxury cards.
@@ -3141,122 +3142,9 @@ export function setCompendiumTab(tabName) {
                     </div>`;
                 }
                 else if (tabName === 'RULES') {
-                    content = `
-                    <div class="max-w-[1800px] mx-auto text-left space-y-16 pb-20 text-[36px] leading-snug font-overpass">
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">OBJECTIVE</h3>
-                            <p class="opacity-95">Collect the most Prestige Points. The game ends when all Map Cards are flipped (including both Property Auctions) or when all Luxury Cards are sold AND both Property Auctions are held.</p>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">EARNING PRESTIGE POINTS</h3>
-                            <div class="space-y-8">
-                                <div class="v2-glass-plate p-10 border-l-8 border-[#F3C80D]">
-                                    <p><strong>LUXURY CARDS:</strong> Worth 1 to 3 Prestige Points. You acquire these by using your turn to purchase them.</p>
-                                </div>
-                                <div class="v2-glass-plate p-10 border-l-8 border-[#F3C80D]">
-                                    <p><strong>PROPERTY CARDS:</strong> Worth 2 to 4 Prestige Points. These can only be won during special Property Auctions.</p>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">HOW TO BUY A LUXURY CARD</h3>
-                            <p class="mb-8">Instead of flipping a map card, you can attempt to buy the top card from one of three piles:</p>
-                            <ul class="space-y-6 mb-8">
-                                <li><strong>15 Au PILE: SAFE.</strong> Pay 15 Au. Automatic success.</li>
-                                <li><strong>10 Au PILE: MEDIUM RISK.</strong> Pay 10 Au. Roll 3-6 to succeed.</li>
-                                <li><strong>5 Au PILE: HIGH RISK.</strong> Pay 5 Au. Roll 5-6 to succeed.</li>
-                            </ul>
-                            <p class="text-red-400 font-bold uppercase tracking-widest">! Warning: If you fail the roll, you lose the Gold and do not get the card !</p>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">PROPERTY AUCTIONS</h3>
-                            <div class="space-y-8">
-                                <p><strong>The Trigger:</strong> An auction begins immediately when a player flips the final Waterfront card in a designated row.</p>
-                                <p><strong>The Bidding:</strong> The player who flipped the final card opens the bidding. On your turn, you must either raise by at least 1 Au, or pass.</p>
-                                <p><strong>The Winner:</strong> Once you pass, you are out. The last remaining bidder pays their bid and claims the Property Card.</p>
-                            </div>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">MAP CARD TYPES</h3>
-                            <ul class="space-y-4 list-none">
-                                <li><strong>BLOCK (3 Au):</strong> Safe & Steady. Automatic success.</li>
-                                <li><strong>WATERFRONT (4 Au):</strong> Auction Trigger. Automatic success.</li>
-                                <li><strong>ATLANTIC (6 Au):</strong> Medium Risk. Roll 3-6 to succeed.</li>
-                                <li><strong>LAGOON (8 Au):</strong> High Risk. Roll 4-6 to succeed.</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">BLOCK BONUS CARDS</h3>
-                            <p class="mb-6 opacity-95">Certain BLOCK cards have hidden bonuses. Flipping a bonus card awards an extra <strong class="text-[#F3C80D]">+5 Au</strong> (for a total of <strong class="text-[#F3C80D]">8 Au</strong>).</p>
-                            <p class="mb-4 opacity-95">The number of bonus cards distributed across the board columns is as follows:</p>
-                            <ul class="space-y-4 list-disc pl-8 opacity-95 mb-6">
-                                <li><strong>Column 3:</strong> 2 bonus cards (always)</li>
-                                <li><strong>Columns 4-6:</strong> 0 to 5 bonus cards (shuffled)</li>
-                                <li><strong>Column 7:</strong> 0 to 2 bonus cards (shuffled)</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">LANDMARK CARDS</h3>
-                            <p class="mb-6 opacity-95">Landmarks are special locations spread across the board. Flipping a Landmark card grants a special bonus:</p>
-                            <ul class="space-y-4 list-disc pl-8 opacity-95 mb-6">
-                                <li><strong>+2 Au:</strong> Granted by landmarks in columns 1-7 & 9.</li>
-                                <li><strong>+1 Au:</strong> Granted by landmarks in column 8.</li>
-                            </ul>
-                            <p class="mb-4 opacity-95">The number of Landmark cards distributed across the board columns is as follows:</p>
-                            <ul class="space-y-4 list-disc pl-8 opacity-95">
-                                <li><strong>Columns 1-3 & 9:</strong> 1 landmark card (always)</li>
-                                <li><strong>Columns 4-7:</strong> 0 to 1 landmark card (shuffled)</li>
-                                <li><strong>Column 8:</strong> 4 landmark cards (always)</li>
-                            </ul>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">CHARACTER ABILITIES</h3>
-                            <div class="flex flex-col lg:flex-row gap-12 items-start justify-between">
-                                <div class="space-y-6 flex-1 opacity-95">
-                                    <p>Every character in the game possesses unique traits and capabilities (with the exception of low-intelligence/basic Visitor AIs):</p>
-                                    <ul class="space-y-6 list-none pl-0">
-                                        <li class="v2-glass-plate p-8 border-l-8 border-[#F3C80D]">
-                                            <p class="mb-2"><strong>🔴 RE-ROLLS (LOCALS):</strong></p>
-                                            <p>All Local characters can perform re-rolls. The number of available re-rolls is represented by **red dots** at the top of their character card. Re-rolls are offered automatically whenever a die roll is missed during gameplay.</p>
-                                        </li>
-                                        <li class="v2-glass-plate p-8 border-l-8 border-[#F3C80D]">
-                                            <p class="mb-2"><strong>🟠 EXTRA TURNS (LOCALS):</strong></p>
-                                            <p>Locals have the ability to take extra turn(s), indicated by **orange dots** on their character card.</p>
-                                        </li>
-                                        <li class="v2-glass-plate p-8 border-l-8 border-[#F3C80D]">
-                                            <p class="mb-2"><strong>⚡ SPECIAL POWERS (LOCALS & VISITORS):</strong></p>
-                                            <p>Characters feature unique active or passive powers. Active powers can be manually triggered during your turn to alter the state of play or grant bonuses.</p>
-                                        </li>
-                                    </ul>
-                                    <div class="bg-yellow-400/10 border border-[#F3C80D]/30 p-8 rounded-2xl mt-6">
-                                        <p class="text-[#F3C80D] font-bold">💡 HOW TO ACTIVATE & VIEW ABILITIES:</p>
-                                        <p class="text-[30px] mt-2">Simply **click on the character portrait** of any Local or Visitor on the screen to view their ability details, check power status, or trigger active abilities.</p>
-                                    </div>
-                                </div>
-                                <div class="flex flex-col items-center gap-4 shrink-0">
-                                    <img src="assets/rulebook01.webp" class="w-[650px] rounded-[24px] border-4 border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-all hover:scale-[1.02] duration-300" alt="Character Abilities Guide">
-                                    <span class="text-[24px] text-white/55 font-mono italic text-center">Character Card showing dots and power indicator</span>
-                                </div>
-                            </div>
-                        </section>
-
-                        <section>
-                            <h3 class="text-[60px] text-[#F3C80D] font-black mb-6">WINNING & TIEBREAKERS</h3>
-                            <p class="mb-6">The highest total Prestige score wins!</p>
-                            <ul class="space-y-4 opacity-90 list-none">
-                                <li>1. Player holding the Mar-a-Lago Property Card.</li>
-                                <li>2. Player with the most remaining Gold (Au).</li>
-                                <li>3. Victory is shared.</li>
-                            </ul>
-                        </section>
-                    </div>`;
+                    // PALM BEACH: the short rules (js/pb/rules_text.js). The Boca Raton rules text is in the first git commit.
+                    if (titleEl) titleEl.innerText = 'PALM BEACH RULES';
+                    content = palmBeachRulesHtml();
                 }
                 
                 if (bodyEl) bodyEl.innerHTML = `<div class="w-full">${content}</div>`;

@@ -50,12 +50,14 @@ The web edition is chosen by the file `.env.web`, which holds only `VITE_GAME_ED
 
 ## 4. What the web edition has today (inherited from Boca)
 
-- One party menu after the splash screen: names, 2–4 players, draft mode, START MATCH, SUPPORT US, TUTORIAL.
+- One party menu after the splash screen: names, 2–4 players, draft mode, THE BOARD GAME, START MATCH.
 - No Quit button, no Steam overlay, no Steam promos, developer hotkeys off.
 - Its own save key: `palmBeachWebSave`.
 - The board centred in the window, a notice for very small windows, tap-to-preview in Open Draft on touch screens.
 
-Still Boca and to be changed: the Support Us popup texts and banner (step 1.6), the party-menu background photo (Lars), and playing the game after START MATCH (steps 1.4–1.6). The TUTORIAL button is hidden until version 2.
+Still Boca and to be changed: the popup banner photo, the party-menu background photo and the splash picture (all three from Lars). The TUTORIAL button is hidden until version 2.
+
+The board game popup (design in `SUPPORT_POPUP.md`) is opened by THE BOARD GAME on the party menu and by a quiet link on the final scoring screen. All its texts and links are in `js/support_links.js`.
 
 CSS marker classes: `.steam-only` and `.hide-on-web` hide an element on the web; `.web-only` shows it only on the web.
 

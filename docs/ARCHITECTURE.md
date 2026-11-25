@@ -35,6 +35,7 @@ Palm Beach is round-based: 8 rounds, initiative, a flipping phase and an auction
 - **The Palm Beach screen code is in `js/pb/`.** `layout.js` holds every position on the table as plain numbers (tested without a browser). `table.js` draws the table and `panels.js` the player panels from the engine's game object (steps 1.2 and 1.3). `initGame()` in `js/game.js` calls it for a normal match and does not start the Boca turn cycle.
 - **`js/pb/match.js` connects the engine to the screen** (step 1.4): it answers the engine's questions with the players' clicks and turns the engine's events into animations (`js/pb/effects.js`). The words on screen are in `js/pb/messages.js`. No rule is decided on the screen side.
 - **`js/pb/auction_view.js`** is the auction window (step 1.5): it shows the engine's auction and asks the bidder through buttons (raise by 1, 3 or 5 Au, or pass).
+- **`js/pb/end_screen.js`** is the final scoring screen and the cheat sheet (step 1.6); **`js/pb/rules_text.js`** is the short rules shown in the Compendium. `leavePalmBeachTable()` in `js/game.js` ends a match and returns to the menu.
 - **The screen code** (`js/ui.js`, `js/main.js`) is reused where it fits: the scaling canvas, card and dice animations, the bidding window, landmark pop-ups, audio, the party menu.
 - **The rules are shared code**, so the Steam editions get them without a rewrite. Web-only behaviour stays behind `GameConfig.isWeb`.
 
