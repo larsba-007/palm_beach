@@ -291,3 +291,12 @@ Not checked: a human playing it at reading speed (is 2.4 seconds enough for the 
 Open for Lars:
 - The start screen still shows the Boca picture ("Gold Coast Gambits"). Art needed: `public/assets/splash.webp`, 3840 x 2160, .webp.
 - Next: step 2.4, release check and upload (as 1.7).
+
+## After Lars's first try of the tutorial (25 Nov 2026)
+
+Lars reported: (1) the first message was gone before he could read it, (2) the game froze at the re-roll popup.
+
+- **The freeze was a real bug, and it was in version 1 too.** The die's see-through layer covers the whole window and lay over the re-roll popup, so the mouse could not reach RE-ROLL or NO THANKS. Fixed in `js/pb/effects.js` (the die layer never catches clicks). Any player with a re-roll counter who missed a roll would have been stuck, in a normal match as well.
+- **Why Claude's checks missed it:** the automatic clicker pressed buttons directly, which works even when something lies on top. The check now clicks only what is really on top at that spot, like a mouse, and RE-ROLL was also clicked with a real mouse click.
+- **No tutorial text goes away by itself any more.** Roxana's two bubbles (1.5 and 1.12) now wait for NEXT. The game's own short messages ("ROUND 1: BRIGHT SHELL STARTS (30)") stay twice as long during the tutorial.
+- `tests/pb_tutorial.test.js`: 14 checks. `npm run check`: ALL 24 CHECKS PASSED.

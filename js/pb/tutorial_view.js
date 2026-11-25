@@ -7,6 +7,7 @@ import { createLessonGuide, playLessonParts } from './tutorial_engine.js';
 import { runPalmBeachMatch } from './match.js';
 import { renderPalmBeachTable } from './table.js';
 import { renderPalmBeachPanels } from './panels.js';
+import { setToastPace } from './effects.js';
 
 const BUBBLE_WIDTH = 900;
 // While a lesson runs, clicks on the game's own cards, popups and auction buttons are locked,
@@ -63,6 +64,7 @@ export function createTutorialScreen(lesson, doc = document) {
     bubble.style.width = `${BUBBLE_WIDTH}px`;
     const hide = () => { bubble.style.display = 'none'; ring.style.display = 'none'; };
     hide();
+    setToastPace(2);            // the game's own short messages stay twice as long during the tutorial
     wrapper.appendChild(ring);
     wrapper.appendChild(bubble);
 
@@ -191,6 +193,7 @@ export function createTutorialScreen(lesson, doc = document) {
         clear() { allowed = null; hide(); },
         close() {
             closed = true;
+            setToastPace(1);
             doc.removeEventListener('click', lock, true);
             bubble.remove();
             ring.remove();

@@ -4,7 +4,7 @@
 // How to read a step:
 //   who: 'SAY'       a bubble with a NEXT button.
 //   who: 'YOU'       the learner must click the thing in "do". Nothing else can be clicked.
-//   who: 'OPPONENT'  Roxana does the thing in "do" by herself. With a text, the bubble is shown while she plays.
+//   who: 'OPPONENT'  Roxana does the thing in "do" by herself. With a text, a bubble with NEXT comes first.
 //   who: 'END'       the last bubble of the tutorial, with the buttons in "buttons".
 //   on:  'EVENT'     (SAY only) show this bubble right after the game has shown this event, not at the next click.
 //   do:  { card: 2 }      flip the card at this place in the row (0 = Lagoon, 1 = Waterfront, 2-6 = Block, 7 = Waterfront, 8 = Atlantic)

@@ -275,6 +275,25 @@ await check('The tutorial uses the game through the match\'s one "ask the player
     assert.ok(!/minRoll|START_GOLD|gold \+=|gold -=/.test(engine), 'and copies no rule');
 });
 
+await check('Nothing can freeze or vanish unread: the die never catches clicks, and no tutorial text goes away by itself', async () => {
+    // Lars's play-test, 25 Nov 2026: the re-roll popup could not be clicked (the die layer lay over it),
+    // and a message was gone before he could read it.
+    const effects = fs.readFileSync('js/pb/effects.js', 'utf8');
+    assert.match(effects, /overlay\.style\.pointerEvents = 'none';\s*overlay\.classList\.remove\('hidden'\);/);
+    assert.match(effects, /ms = Math\.round\(ms \* toastPace\);/);
+    const view = fs.readFileSync('js/pb/tutorial_view.js', 'utf8');
+    assert.match(view, /setToastPace\(2\)/);
+    assert.match(view, /closed = true;\s*setToastPace\(1\);/);
+    // Every step with a text is shown with a button or with the thing to click: never on a timer.
+    for (const lesson of TUTORIAL_LESSONS) {
+        const { screen } = await run(lesson.id);
+        const shown = screen.log.filter(l => ['SAY', 'PROMPT', 'CHOOSE'].includes(l[0])).map(l => l[1]);
+        const withText = lesson.steps.filter(s => s.text || s.note).map(s => s.id);
+        assert.deepEqual(shown.filter(id => withText.includes(id)), withText, lesson.id);
+        assert.ok(!screen.log.some(l => l[0] === 'SHOW'));
+    }
+});
+
 await check('The way in and the way out: two choices on the start screen, TUTORIAL on the party menu, a choice at the end', () => {
     const html = fs.readFileSync('index.html', 'utf8');
     // Lars, 25 Nov 2026 (option A): the start screen offers LEARN TO PLAY and PLAY.

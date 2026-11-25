@@ -31,6 +31,9 @@ export async function rollDice(result) {
     const msg = document.getElementById('dice-message');
     if (!overlay || !cube) return;
     cube.style.transform = '';
+    // The die layer covers the whole window. It must never catch clicks: after a miss the die stays in view
+    // while the re-roll popup is open, and the popup's buttons lie under this layer.
+    overlay.style.pointerEvents = 'none';
     overlay.classList.remove('hidden');
     cube.classList.add('spinning');
     if (msg) { msg.style.opacity = '0'; msg.innerText = ''; }
@@ -240,8 +243,13 @@ export function showDialog({ title, text, buttons }) {
     });
 }
 
+// How long the short messages stay: 1 = normal. The tutorial makes them stay longer (a new player reads slower).
+let toastPace = 1;
+export function setToastPace(pace = 1) { toastPace = pace; }
+
 /** A short message over the board that goes away by itself. */
 export async function showToast(text, ms = 1500) {
+    ms = Math.round(ms * toastPace);
     const wrapper = document.getElementById('board-wrapper');
     if (!wrapper) return;
     document.getElementById('pb-toast')?.remove();

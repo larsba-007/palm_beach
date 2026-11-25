@@ -15,6 +15,7 @@ Lars: change any text directly in this file, or tell Claude what to change.
 - A text bubble points at one thing. Only that thing can be clicked. The game then moves on.
 - The cards and the dice are fixed, so every learner sees exactly what is written here.
 - Roxana's turns play by themselves. She is a script, not an AI.
+- No text goes away by itself: every bubble waits for a click. The game's own short messages ("ROUND 1: BRIGHT SHELL STARTS") stay twice as long as in a normal match.
 - Each chapter starts from its own fixed table. Chapters 3 and 4 jump ahead in the game ("A few rounds later").
 - All numbers below follow the rules file (`docs/palm_beach/rules-palm-beach.md`): Block 3 Au, Atlantic 3–6 gives 6 Au, Lagoon 4–6 gives 8 Au, Waterfront 1 Diamond, 4 Diamonds = 1 Luxury Card, everyone starts with 5 Au.
 
@@ -32,14 +33,14 @@ In the tables: **You** = the learner (Bright Shell). "Click" is what the learner
 | 1.2 | Each round is played on one row. First you flip its cards for gold, then you bid on a Luxury Card. | Row 1 and the Luxury Card beside it | Click NEXT | |
 | 1.3 | The lowest initiative number starts the round. You have 30 and Roxana has 70: you start. | The R1 numbers on both character cards | Click NEXT | |
 | 1.4 | Block cards are safe. Flip one and take 3 Au. | A Block card | Click the Block card | You 8 Au |
-| 1.5 | Roxana tries an Atlantic card. She needs 3 or higher on the die. | The Atlantic card | Roxana rolls 5: the card flips | Roxana 11 Au |
+| 1.5 | Roxana tries an Atlantic card. She needs 3 or higher on the die. | The Atlantic card | Click NEXT. Roxana rolls 5: the card flips | Roxana 11 Au |
 | 1.6 | An Atlantic card gives 6 Au. Roxana's power gives her 5 Au extra for rolling 5 or 6. | Roxana's character card | Click NEXT | Roxana 16 Au |
 | 1.7 | The Lagoon pays most: 8 Au. You need 4 or higher. | The Lagoon card | Click the Lagoon card. You roll 2 | |
 | 1.8 | A 2: missed! You have a yellow re-roll counter. Use it to roll again. | The RE-ROLL button | Click RE-ROLL. You roll 5: the card flips | You 16 Au, 0 re-rolls |
 | 1.9 | Without a re-roll the card stays face down, and anyone can try it later. | The flipped Lagoon card | Click NEXT | |
 | 1.10 | (no bubble) | | Roxana flips a Block card | Roxana 19 Au |
 | 1.11 | Some cards hide a yellow circle with extra gold. Try this one. | A Block card | Click the Block card: it shows +5 | You 24 Au (3 + 5) |
-| 1.12 | Waterfront cards give a Diamond instead of gold. | A Waterfront card | Roxana flips it | Roxana 1 Diamond |
+| 1.12 | Waterfront cards give a Diamond instead of gold. | A Waterfront card | Click NEXT. Roxana flips it | Roxana 1 Diamond |
 | 1.13 | Take the other Waterfront card. | The other Waterfront card | Click the Waterfront card | You 1 Diamond |
 | 1.14 | (no bubble) | | Roxana flips a Block card | Roxana 22 Au |
 | 1.15 | Flip the last card. When the whole row is face up, the auction begins. | The last Block card | Click the Block card | You 27 Au |

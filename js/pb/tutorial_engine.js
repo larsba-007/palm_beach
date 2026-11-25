@@ -175,7 +175,6 @@ export function answerOf(step, request, game) {
  * @param {object} screen  what the guide needs from the screen (js/pb/tutorial_view.js; the tests give a fake one):
  *   say(step, game)          shows a bubble with a NEXT button; resolves when the learner clicks it
  *   prompt(step, answer, game)  shows a bubble and lets the learner click only the thing the step is about
- *   show(step, game)         shows a bubble while the opponent plays (no click)
  *   pause(ms)                a short wait, so the learner can follow the opponent
  *   choose(step, game)       the last bubble, with the step's buttons; resolves with the chosen button's value
  *   clear()                  takes the bubble away
@@ -211,8 +210,10 @@ export function createLessonGuide(lesson, screen) {
                 await clicked;
                 screen.clear();
             } else {
-                if (step.text) screen.show(step, game);
-                await screen.pause(step.text ? 2400 : 900);
+                // A text about the opponent's move waits for NEXT (Lars, 25 Nov 2026: a bubble that goes away
+                // by itself is gone before it is read). Then the opponent plays.
+                if (step.text) await screen.say(step, game);
+                await screen.pause(700);
             }
             return answer;
         },
