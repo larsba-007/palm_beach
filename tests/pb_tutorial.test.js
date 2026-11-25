@@ -1,10 +1,11 @@
-// Palm Beach step 2.2: the tutorial engine.
-// Source: PLAN.md step 2.2; TUTORIAL_SCRIPT.md (the approved script); docs/palm_beach/rules-palm-beach.md.
+// Palm Beach steps 2.2 and 2.3: the tutorial engine and the four chapters.
+// Source: PLAN.md steps 2.2-2.3; TUTORIAL_SCRIPT.md (the approved script); docs/palm_beach/rules-palm-beach.md.
 import fs from 'node:fs';
 import { assert, R, check } from './pb_helpers.js';
 import { TUTORIAL_LESSONS, getLesson, nextLesson } from '../js/pb/tutorial_lessons.js';
 import { createLessonGame, createLessonGuide, playLesson, requestTypeOf } from '../js/pb/tutorial_engine.js';
-import { bidChoices } from '../js/pb/messages.js';
+import { bidChoices, diamondTradeMessage } from '../js/pb/messages.js';
+import { chapterLines, CHAPTER_LIST_TEXT } from '../js/pb/tutorial_menu.js';
 import { tutorBubblePosition, CANVAS } from '../js/pb/layout.js';
 
 console.log('Palm Beach: the tutorial engine\n');
@@ -17,7 +18,8 @@ function fakeScreen(log = []) {
         prompt: (step, answer) => { log.push(['PROMPT', step.id, answer]); },
         show: (step) => { log.push(['SHOW', step.id]); },
         pause: async () => {},
-        clear: () => {}
+        clear: () => {},
+        choose: async (step) => { log.push(['CHOOSE', step.id]); return step.buttons[0].value; }
     };
 }
 
@@ -30,7 +32,7 @@ async function run(lessonId, { change = (l) => l } = {}) {
     const asked = [];
     const guide = createLessonGuide(lesson, screen);
     const askOnScreen = async (request) => { asked.push(request); return true; };
-    await playLesson(pb, guide, askOnScreen, { emit: (e) => { events.push(e); } });
+    await playLesson(pb, guide, askOnScreen, { emit: (e) => { events.push(e); screen.log.push(['EVENT', e.type]); } });
     return { pb, game: pb.game, events, asked, screen, guide, lesson };
 }
 
@@ -117,6 +119,60 @@ await check('Chapter 2 starts where chapter 1 ends, and the learner wins the Spo
     assert.equal(game.players[0].luxuryCards[0].points, 2);
 });
 
+await check('Chapter 3: the fourth Diamond is traded for the Tiger, which gives 2 re-rolls', async () => {
+    const { game, events, guide, lesson } = await run('diamonds');
+    assert.equal(guide.stepsDone(), lesson.steps.length);
+    const trade = events.find(e => e.type === 'DIAMOND_TRADE');
+    assert.deepEqual([trade.playerId, trade.card.name, trade.cost, trade.rerollsGained], [0, 'Tiger', 4, 2]);
+    const you = game.players[0];
+    assert.deepEqual([you.diamonds, you.rerolls, you.gold, you.luxuryCards.map(c => c.name)], [0, 2, 12, ['Sports Car', 'Tiger']]);
+    assert.equal(you.luxuryCards.reduce((sum, c) => sum + c.points, 0), 3, '3 Prestige Points');
+    assert.equal(game.rows[4].filter(c => c.faceUp).length, 1, 'the chapter is one turn long');
+});
+
+await check('Chapter 4: the last round, the Property Auction and the final scoring end as the script says (5 against 4)', async () => {
+    const start = createLessonGame(getLesson('the-ending')).game;
+    const points = (p) => p.luxuryCards.reduce((sum, c) => sum + c.points, 0) + (p.property ? p.property.points : 0);
+    assert.deepEqual(start.players.map(points), [3, 3], 'both start the chapter with 3 Prestige Points');
+    assert.deepEqual(start.players.map(p => [p.gold, p.rerolls]), [[14, 2], [9, 0]]);
+
+    const { game, events, screen, pb } = await run('the-ending');
+    const rolls = events.filter(e => e.type === 'ROLL' || e.type === 'REROLL').map(e => [e.type, e.roll, e.success]);
+    assert.deepEqual(rolls, [['ROLL', 4, true], ['ROLL', 3, false], ['REROLL', 6, true]]);
+    const auction = events.filter(e => ['BID', 'PASS', 'AUCTION_WON', 'CHARACTER_GOLD', 'AUCTION_MAP_FLIPPED'].includes(e.type))
+        .map(e => [e.type, e.playerId ?? e.propertyId, e.amount ?? e.price ?? e.gold ?? (e.forced === undefined ? undefined : e.forced)]);
+    assert.deepEqual(auction, [
+        ['PASS', 0, false], ['BID', 1, 1], ['AUCTION_WON', 1, 1],                       // 4.9: the Shoes
+        ['AUCTION_MAP_FLIPPED', 'SPANISH_RIVER', undefined], ['CHARACTER_GOLD', 1, 10],  // 4.10-4.11
+        ['BID', 0, 5], ['BID', 1, 10], ['BID', 0, 15], ['BID', 1, 20], ['BID', 0, 21],
+        ['PASS', 1, true],                                                               // 4.14: Roxana cannot afford 22
+        ['AUCTION_WON', 0, 21]
+    ]);
+    assert.deepEqual(game.players.map(p => [points(p), p.gold]), [[5, 7], [4, 21]]);
+    assert.deepEqual(game.result.winners, [0]);
+    assert.equal(game.result.decidedBy, 'POINTS');
+    assert.equal(pb.choice, 'PLAY', 'the last bubble has buttons');
+    // Bubbles that belong to a moment come right after that moment, before the auction window opens.
+    const order = screen.log.map(l => l[1]);
+    assert.ok(order.indexOf('AUCTION_MAP_FLIPPED') < order.indexOf('4.10') && order.indexOf('4.10') < order.indexOf('CHARACTER_GOLD'));
+    assert.ok(order.indexOf('CHARACTER_GOLD') < order.indexOf('4.11') && order.indexOf('4.11') < order.lastIndexOf('AUCTION_START'));
+    assert.ok(order.indexOf('GAME_OVER') < order.indexOf('4.15'));
+    assert.deepEqual(screen.log.at(-1), ['CHOOSE', '4.17']);
+});
+
+await check('The four chapters follow each other, and what the learner holds never jumps backwards', () => {
+    assert.deepEqual(TUTORIAL_LESSONS.map(l => [l.chapter, l.id]), [[1, 'flip-cards'], [2, 'luxury-auction'], [3, 'diamonds'], [4, 'the-ending']]);
+    assert.equal(nextLesson('the-ending'), null);
+    const cards = (id) => createLessonGame(getLesson(id)).game.players.map(p => p.luxuryCards.map(c => c.name));
+    assert.deepEqual(cards('diamonds'), [['Sports Car'], ['Hotel']], 'chapter 3 starts with the Sports Car won in chapter 2');
+    assert.deepEqual(cards('the-ending'), [['Sports Car', 'Tiger'], ['Hotel']], 'chapter 4 starts with the Tiger from chapter 3');
+    // No landmark popup interrupts a lesson: the rows that are played have plain cards, except the one +5 circle.
+    for (const lesson of TUTORIAL_LESSONS) {
+        const game = createLessonGame(lesson).game;
+        assert.ok(game.rows[lesson.setup.round - 1].every(c => c.bonus === 0 || c.bonus === 5), lesson.id);
+    }
+});
+
 await check('The learner is only ever asked for one thing, and it is a thing the screen really offers', async () => {
     for (const lesson of TUTORIAL_LESSONS) {
         const { asked, screen, game } = await run(lesson.id);
@@ -165,6 +221,11 @@ await check('The bubble texts are the ones in TUTORIAL_SCRIPT.md, word for word'
             if (!rows.has(step.id)) { assert.ok(/b$/.test(step.id) && step.who === 'OPPONENT' && !step.text, `${step.id} is not in the script`); continue; }
             const written = rows.get(step.id);
             if (written === '(no bubble)') assert.equal(step.text, undefined, step.id);
+            else if (written.startsWith("(the game's own popup) ")) {
+                // The text is the game's own Diamond trade popup; the bubble only carries the board game rule.
+                assert.equal(step.text, undefined, step.id);
+                assert.equal(diamondTradeMessage({ cost: 4 }).text, written.replace("(the game's own popup) ", ''));
+            }
             else assert.equal(step.text, written, `step ${step.id}`);
             compared += 1;
         }
@@ -174,8 +235,8 @@ await check('The bubble texts are the ones in TUTORIAL_SCRIPT.md, word for word'
         const inScript = [...rows.keys()].filter(id => id.startsWith(`${lesson.chapter}.`));
         assert.deepEqual(lesson.steps.map(s => s.id).filter(id => rows.has(id)), inScript, `chapter ${lesson.chapter}: every step of the script, in order`);
     }
-    assert.equal(compared, 15 + 8, 'chapters 1 and 2');
-    assert.ok(TUTORIAL_LESSONS.every(l => l.steps.every(s => s.who === 'SAY' ? !s.do : !!requestTypeOf(s))));
+    assert.equal(compared, 15 + 8 + 5 + 17, 'all four chapters');
+    assert.ok(TUTORIAL_LESSONS.every(l => l.steps.every(s => (s.who === 'SAY' || s.who === 'END') ? !s.do : !!requestTypeOf(s))));
 });
 
 await check('The bubble stands beside the thing it points at, and never leaves the table', () => {
@@ -214,4 +275,29 @@ await check('The tutorial uses the game through the match\'s one "ask the player
     assert.ok(!/minRoll|START_GOLD|gold \+=|gold -=/.test(engine), 'and copies no rule');
 });
 
-console.log('\nAll tutorial engine checks passed.');
+await check('The way in and the way out: two choices on the start screen, TUTORIAL on the party menu, a choice at the end', () => {
+    const html = fs.readFileSync('index.html', 'utf8');
+    // Lars, 25 Nov 2026 (option A): the start screen offers LEARN TO PLAY and PLAY.
+    assert.match(html, /<button id="splash-learn-btn"[^>]*window\.app\.startPalmBeachTutorial\(\)">LEARN TO PLAY<span>5 minutes<\/span><\/button>/);
+    assert.match(html, /<button id="splash-play-btn"[^>]*window\.app\.enterGame\(\)">PLAY</);
+    assert.ok(!html.includes('START GAME\n    </button>'), 'the single START GAME button is replaced');
+    // The party menu keeps a way in: it opens the chapter list.
+    assert.match(html, /<div id="pb-tutorial-btn" onclick="app\.openPalmBeachChapters\(\)"[^>]*>TUTORIAL<\/div>/);
+    assert.deepEqual(chapterLines().map(l => `${l.number} ${l.title}`), ['1 FLIP CARDS', '2 THE LUXURY AUCTION', '3 DIAMONDS', '4 THE ENDING']);
+    assert.ok(CHAPTER_LIST_TEXT.intro.length > 20);
+    const main = fs.readFileSync('js/main.js', 'utf8');
+    assert.match(main, /startPalmBeachTutorial: \(lessonId\) => \{[\s\S]{0,400}enterPalmBeachTutorial\(lessonId\);/);
+    // The Boca tutorial (Boca rules, Boca board) stays hidden.
+    const css = fs.readFileSync('index.css', 'utf8');
+    assert.match(css, /#v3-tutorial-btn,\s*#v3-tutorial-btn \+ div\s*\{\s*display:\s*none\s*!important/);
+    // The end: PLAY A REAL GAME or CHAPTERS; leaving in the middle takes the bubble away.
+    const last = getLesson('the-ending').steps.at(-1);
+    assert.deepEqual(last.buttons.map(b => b.label), ['PLAY A REAL GAME', 'CHAPTERS']);
+    const game = fs.readFileSync('js/game.js', 'utf8');
+    assert.match(game, /if \(next\) \{ startPalmBeachLesson\(next\.id\); return; \}\s*leavePalmBeachTable\(false\);/);
+    assert.match(game, /if \(state\.pb && state\.pb\.closeTutorial\) state\.pb\.closeTutorial\(\);\s*leavePalmBeachMatch\(\);\s*state\.pb = null;/);
+    // In the tutorial the final scoring has no PLAY AGAIN button: the lesson's own bubble ends it.
+    assert.match(fs.readFileSync('js/pb/match.js', 'utf8'), /if \(guide\) \{ showFinalScreen\(game, \{ buttons: false \}\); break; \}/);
+});
+
+console.log('\nAll tutorial checks passed.');

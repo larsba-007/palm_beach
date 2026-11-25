@@ -37,12 +37,13 @@ const COLS = { place: 60, card: 180, name: 310, luxury: 1010, property: 1290, pr
  * Shows the final scoring. Returns a Promise with what the players chose: 'AGAIN' or 'MENU'.
  * @param {{boardGameLink?: string}} [options]  text of the quiet link to the board game popup (web edition only)
  */
-export function showFinalScreen(game, { boardGameLink = '' } = {}, doc = document) {
+export function showFinalScreen(game, { boardGameLink = '', buttons = true } = {}, doc = document) {
     const wrapper = doc.getElementById('board-wrapper');
     if (!wrapper) return Promise.resolve('MENU');
     doc.getElementById('pb-final-layer')?.remove();
     const table = finalScoreTable(game.result);
-    const height = 400 + table.rows.length * ROW + 330 + (boardGameLink ? 90 : 0);
+    // buttons: false = the scores only (the tutorial ends the game with its own bubble).
+    const height = 400 + table.rows.length * ROW + (buttons ? 330 : 80) + (boardGameLink ? 90 : 0);
 
     const layer = el(doc, '');
     layer.id = 'pb-final-layer';
@@ -77,6 +78,7 @@ export function showFinalScreen(game, { boardGameLink = '' } = {}, doc = documen
     layer.appendChild(box);
     wrapper.appendChild(layer);
 
+    if (!buttons) return new Promise(() => {});
     return new Promise(resolve => {
         const done = (value) => { layer.remove(); resolve(value); };
         const buttonsTop = 400 + table.rows.length * ROW + 40;

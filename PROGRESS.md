@@ -272,3 +272,22 @@ Good to know:
 Open for Lars:
 - Where the tutorial starts from: A (two choices on the start screen, Claude's recommendation), B (button on the party menu) or C.
 - Next: step 2.3 (chapters 3 and 4, the TUTORIAL button, PLAY A REAL GAME at the end, replay of single chapters).
+
+## Version 2, step 2.3: the four chapters and the way in (25 Nov 2026)
+
+Lars chose option A: two choices on the start screen.
+
+- **Chapters 3 (Diamonds) and 4 (The ending)** are in `js/pb/tutorial_lessons.js`. All 45 steps of `TUTORIAL_SCRIPT.md` are built.
+- **Start screen:** LEARN TO PLAY (5 minutes) and PLAY (2-4 players) replace the single START GAME button.
+- **Party menu:** a TUTORIAL button opens a chapter list (`js/pb/tutorial_menu.js`). The tutorial starts at the chosen chapter and plays on to the end. The three buttons (THE BOARD GAME, START MATCH, TUTORIAL) now stand side by side with START MATCH in the middle.
+- **The end:** the last bubble has two buttons, PLAY A REAL GAME (the party menu) and CHAPTERS (the party menu with the chapter list open). The script said "BACK TO MENU"; in the web edition that is the same place as PLAY A REAL GAME, so Claude made the second button CHAPTERS. `TUTORIAL_SCRIPT.md` is updated.
+- Bubbles 4.10 and 4.11 come right after the Auction Map Card is flipped and after Roxana collects her gold, before the auction window opens.
+- In the tutorial the final scoring screen has no PLAY AGAIN button.
+- `tests/pb_tutorial.test.js`: 13 checks (all four chapters end on the script's numbers; every text equals the script). `npm run check`: ALL 24 CHECKS PASSED. `dist-web` rebuilt by the check.
+- Browser: played from LEARN TO PLAY through all four chapters with an automatic clicker (no errors), CHAPTERS opens the list, starting at chapter 3 from the list works, and a normal match starts and plays after the tutorial.
+
+Not checked: a human playing it at reading speed (is 2.4 seconds enough for the bubbles shown while Roxana plays?), Safari/Firefox/iPad, sound during the tutorial.
+
+Open for Lars:
+- The start screen still shows the Boca picture ("Gold Coast Gambits"). Art needed: `public/assets/splash.webp`, 3840 x 2160, .webp.
+- Next: step 2.4, release check and upload (as 1.7).

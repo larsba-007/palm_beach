@@ -188,6 +188,8 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true, onFinished
                 refreshPanels();
                 refreshStatus();
                 playSound('winner_song');
+                // In the tutorial the final scoring is only shown: the lesson's own bubbles end it.
+                if (guide) { showFinalScreen(game, { buttons: false }); break; }
                 // The final scoring screen. PLAY AGAIN or PARTY MENU: the caller decides what happens next.
                 const choice = await showFinalScreen(game, { boardGameLink });
                 if (isCurrent()) onFinished(choice);
@@ -195,6 +197,8 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true, onFinished
             }
             default:
         }
+        // The tutorial may have a bubble that belongs right after this moment.
+        if (guide && guide.onEvent && isCurrent()) await guide.onEvent(e, game);
         return undefined;
     }
 

@@ -93,7 +93,7 @@ await check('Final screen and leaving: PLAY AGAIN and PARTY MENU, RESIGN returns
     assert.match(end, /'PARTY MENU'[\s\S]{0,120}done\('MENU'\)/);
     assert.ok(!/\.gold\s*[+\-]=|prestige\s*[+\-]=/.test(end), 'the screen only shows the scores');
     const match = fs.readFileSync('js/pb/match.js', 'utf8');
-    assert.match(match, /case 'GAME_OVER': \{[\s\S]{0,500}await showFinalScreen\(game, \{ boardGameLink \}\);\s*if \(isCurrent\(\)\) onFinished\(choice\);/);
+    assert.match(match, /case 'GAME_OVER': \{[\s\S]{0,800}await showFinalScreen\(game, \{ boardGameLink \}\);\s*if \(isCurrent\(\)\) onFinished\(choice\);/);
     for (const cleaned of ['hideDice()', 'closeAuction()', 'closeFinalScreen()', 'closeCheatSheet()', 'frameRow(null)', "setStatus('', '')"]) {
         assert.ok(match.slice(match.indexOf('export function leavePalmBeachMatch')).includes(cleaned), `leaving a match runs ${cleaned}`);
     }

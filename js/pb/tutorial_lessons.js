@@ -5,6 +5,8 @@
 //   who: 'SAY'       a bubble with a NEXT button.
 //   who: 'YOU'       the learner must click the thing in "do". Nothing else can be clicked.
 //   who: 'OPPONENT'  Roxana does the thing in "do" by herself. With a text, the bubble is shown while she plays.
+//   who: 'END'       the last bubble of the tutorial, with the buttons in "buttons".
+//   on:  'EVENT'     (SAY only) show this bubble right after the game has shown this event, not at the next click.
 //   do:  { card: 2 }      flip the card at this place in the row (0 = Lagoon, 1 = Waterfront, 2-6 = Block, 7 = Waterfront, 8 = Atlantic)
 //        { reroll: true } press RE-ROLL        { ok: true } press OK in the Diamond trade popup
 //        { bid: 7 }       bid this many Au     { pass: true } press PASS
@@ -86,6 +88,72 @@ export const TUTORIAL_LESSONS = Object.freeze([
             { id: '2.6b', who: 'OPPONENT', do: { pass: true } },
             { id: '2.7', who: 'SAY', point: 'panel:0', text: 'Sold! You pay 9 Au to the Bank and take the card.' },
             { id: '2.8', who: 'SAY', point: 'prestige:0', side: 'right', text: 'Gold is only for bidding. At the end, Prestige Points decide who wins.' }
+        ]
+    },
+    {
+        id: 'diamonds',
+        chapter: 3,
+        title: 'DIAMONDS',
+        learner: LEARNER,
+        opponent: ROXANA,
+        // "A few rounds later": round 5. The learner has 3 Diamonds; the hidden pile has the Tiger on top.
+        setup: {
+            round: 5,
+            players: withHoldings({ gold: 12, rerolls: 0, diamonds: 3, luxury: ['Sports Car'] }, { gold: 10, diamonds: 1, luxury: ['Hotel'] }),
+            rowBonus: { 5: [0, 0, 0, 0, 0, 0, 0, 0, 0] },
+            tradeTop: 'Tiger'
+        },
+        dice: [],
+        parts: ['START_ROUND', 'FLIP_TURN'],
+        steps: [
+            { id: '3.1', who: 'SAY', point: 'diamonds:0', text: 'A few rounds later. You have 3 Diamonds.' },
+            { id: '3.2', who: 'YOU', do: { card: 1 }, text: '4 Diamonds are traded for a Luxury Card, with no auction. Flip a Waterfront card.' },
+            // The game's own popup says "You have 4 diamonds. Trade in for a Luxury Card."; the bubble adds the board game rule.
+            { id: '3.3', who: 'YOU', do: { ok: true }, note: 'At the table, give 4 Diamonds to the Bank and take the top card of the face-down Luxury pile.' },
+            { id: '3.4', who: 'SAY', point: 'won:0', text: 'A Tiger! It is worth 1 Prestige Point and gives you 2 re-roll counters.' },
+            { id: '3.5', who: 'SAY', point: 'diamonds:0', text: 'The trade happens by itself every time you reach 4 Diamonds.' }
+        ]
+    },
+    {
+        id: 'the-ending',
+        chapter: 4,
+        title: 'THE ENDING',
+        learner: LEARNER,
+        opponent: ROXANA,
+        // "The last round": round 8, a short row. Both players have 3 Prestige Points.
+        setup: {
+            round: 8,
+            players: withHoldings({ gold: 14, rerolls: 2, diamonds: 0, luxury: ['Sports Car', 'Tiger'] }, { gold: 9, diamonds: 0, luxury: ['Hotel'] }),
+            rowBonus: { 8: [0, 0, 0, 0, 0] },
+            luxury: { 8: 'Shoes' },
+            auctionMap: 'SPANISH_RIVER'
+        },
+        // The learner's Atlantic roll, Lagoon roll and re-roll.
+        dice: [4, 3, 6],
+        parts: ['START_ROUND', 'FLIPPING', 'LUXURY_AUCTIONS', 'PROPERTY_AUCTION', 'END_GAME'],
+        // Row 8 has 5 cards: 0 = Lagoon, 1 = Waterfront, 2 = Block, 3 = Waterfront, 4 = Atlantic.
+        steps: [
+            { id: '4.1', who: 'SAY', point: 'row', text: 'The last round. Rows 7 and 8 are short, and the Auction Map Card lies at the end.' },
+            { id: '4.2', who: 'SAY', point: 'properties', side: 'above', text: 'It hides which of the 3 Property Cards is sold at the very end. You and Roxana both have 3 Prestige Points.' },
+            { id: '4.3', who: 'YOU', do: { card: 4 }, side: 'above', text: 'Try the Atlantic card: 3 or higher.' },
+            { id: '4.4', who: 'OPPONENT', do: { card: 2 } },
+            { id: '4.5', who: 'YOU', do: { card: 0 }, side: 'above', text: 'Now the Lagoon: 4 or higher.' },
+            { id: '4.6', who: 'YOU', do: { reroll: true }, text: 'Missed. The Tiger gave you re-rolls: use one.' },
+            { id: '4.7', who: 'OPPONENT', do: { card: 1 } },
+            { id: '4.8', who: 'YOU', do: { card: 3 }, side: 'above', text: 'Flip the last card.' },
+            { id: '4.9', who: 'YOU', do: { pass: true }, text: 'The last Luxury Card: Shoes, 1 Prestige Point. You may pass, and save your gold for the Property.' },
+            { id: '4.9b', who: 'OPPONENT', do: { bid: 1 } },
+            { id: '4.10', who: 'SAY', on: 'AUCTION_MAP_FLIPPED', point: 'auction-map', side: 'above', text: 'Now the Auction Map Card is flipped: Spanish River Park, worth 2 Prestige Points.', note: 'At the table, the other two Property Cards go back in the box.' },
+            { id: '4.11', who: 'SAY', on: 'CHARACTER_GOLD', point: 'character:1', text: 'Some characters collect gold before "their" property is sold. Roxana takes 10 Au.' },
+            { id: '4.12', who: 'YOU', do: { bid: 5 }, text: 'You need this card to win. Open with 5 Au.' },
+            { id: '4.12b', who: 'OPPONENT', do: { bid: 10 } },
+            { id: '4.13', who: 'YOU', do: { bid: 15 }, text: 'Raise by 5 again.' },
+            { id: '4.13b', who: 'OPPONENT', do: { bid: 20 } },
+            // Roxana has 21 Au: after this bid the rules make her pass (she cannot afford 22).
+            { id: '4.14', who: 'YOU', do: { bid: 21 }, text: 'Roxana has 21 Au. Bid 21 and she cannot go higher.' },
+            { id: '4.15', who: 'SAY', point: 'final', text: 'The game is over. You have 5 Prestige Points and Roxana has 4: you win!' },
+            { id: '4.16', who: 'SAY', point: 'final', text: 'On a tie, the player with the Property Card wins. After that, the most gold left.' },
+            { id: '4.17', who: 'END', point: 'final', text: 'That is all of Palm Beach. Gather your friends!', buttons: [{ label: 'PLAY A REAL GAME', value: 'PLAY' }, { label: 'CHAPTERS', value: 'CHAPTERS' }] }
         ]
     }
 ]);

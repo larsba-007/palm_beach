@@ -627,7 +627,9 @@ console.log('Running Web Edition regression tests...\n');
     assert.match(css, /\.edition-web #splash-screen button\s*\{\s*white-space:\s*nowrap;\s*font-size:\s*clamp\(20px, 3\.2vw, 40px\);\s*padding:\s*0\.6em 1\.6em;\s*\}/);
     // The original splash button is 40px text with 64px x 24px padding = 1.6em x 0.6em, and 3.2vw >= 40px from 1250px up
     const html = read('index.html');
-    assert.ok(/id="splash-screen"[\s\S]*?text-\[40px\] px-16 py-6/.test(html), 'Steam splash button markup unchanged');
+    // Palm Beach step 2.3: the start screen has two buttons (LEARN TO PLAY, PLAY) with the same size as the old one.
+    assert.ok(/id="splash-screen"[\s\S]*?<div id="splash-buttons">\s*<button id="splash-learn-btn"[\s\S]*?<button id="splash-play-btn"/.test(html), 'the start screen has its two buttons');
+    assert.match(css, /#splash-buttons button \{[^}]*padding: 24px 64px;[^}]*font-size: 40px;/, 'Steam: 40px text with 64px x 24px padding, as before');
     assert.equal(64 / 40, 1.6);
     assert.equal(24 / 40, 0.6);
     assert.ok(0.032 * 1250 >= 40 && 0.032 * 1249 < 40.0001);
@@ -751,14 +753,20 @@ console.log('Running Web Edition regression tests...\n');
     const start = css.match(/\.edition-web #v3-start-match\s*\{([^}]*)\}/)[1];
     const cssPx = (prop) => Number((start.match(new RegExp(`${prop}:\\s*(\\d+)px`)) || [])[1]);
 
-    // Same size, same row, a 60px gap, centered on the 2840px plate: THE BOARD GAME | START MATCH
+    // Same size, same row, 60px gaps, centered on the 2840px plate: THE BOARD GAME | START MATCH | TUTORIAL
+    // (Palm Beach step 2.3: the TUTORIAL button is back, as a new button that opens the Palm Beach chapter list.)
     assert.deepEqual([px(support, 'w'), px(support, 'h')], [700, 150]);
     assert.deepEqual([cssPx('width'), cssPx('height')], [700, 150]);
     const lefts = [px(support, 'left'), cssPx('left')];
-    assert.deepEqual(lefts, [690, 1450]);
+    const tutorial = btnClass('pb-tutorial-btn');
+    assert.deepEqual([px(tutorial, 'w'), px(tutorial, 'h'), px(tutorial, 'top')], [700, 150, 1280]);
+    lefts.push(px(tutorial, 'left'));
+    assert.deepEqual(lefts, [310, 1070, 1830]);
     assert.deepEqual([px(support, 'top'), cssPx('top')], [1280, 1280]);
     assert.equal(lefts[1] - (lefts[0] + 700), 60);
-    assert.equal(lefts[0], 2840 - (lefts[1] + 700), 'row is centered on the plate');
+    assert.equal(lefts[2] - (lefts[1] + 700), 60);
+    assert.equal(lefts[0], 2840 - (lefts[2] + 700), 'row is centered on the plate');
+    assert.ok(!tutorial.includes('bg-[#F3C80D]'));
     // Start remains the only solid yellow button
     const startMarkup = html.match(/<div id="v3-start-match"[^>]*class="([^"]*)"/)[1];
     assert.ok(startMarkup.includes('bg-[#F3C80D]'));
@@ -766,7 +774,7 @@ console.log('Running Web Edition regression tests...\n');
     // The button is named for what the player gets, and says the same as the data file
     assert.match(html, /<div id="v3-support-btn"[^>]*>THE BOARD GAME<\/div>/);
     assert.equal(SUPPORT_US.buttonLabel, 'THE BOARD GAME');
-    // The Boca tutorial button is still in the markup (it returns in version 2) but hidden
+    // The Boca tutorial button (Boca rules) is still in the markup but hidden
     assert.match(css, /#v3-tutorial-btn,\s*#v3-tutorial-btn \+ div\s*\{\s*display:\s*none\s*!important/);
     // The heading no longer collides with the column labels (subtitle ends well above them)
     assert.match(html, /top-\[80px\][^>]*>READY TO PLAY\?/);

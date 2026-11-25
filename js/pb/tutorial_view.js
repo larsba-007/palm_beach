@@ -11,7 +11,7 @@ import { renderPalmBeachPanels } from './panels.js';
 const BUBBLE_WIDTH = 900;
 // While a lesson runs, clicks on the game's own cards, popups and auction buttons are locked,
 // except for the one thing the learner is asked to click.
-const LOCKED_AREAS = '#grid-container, #pb-dialog-layer, #pb-auction-layer, #pb-luxury-column';
+const LOCKED_AREAS = '#grid-container, #pb-dialog-layer, #pb-auction-layer, #pb-luxury-column, #pb-final-layer';
 
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -33,6 +33,9 @@ export function targetSelector(point, game) {
         case 'auction-card': return '#pb-auction-card';
         case 'auction-bidders': return '#pb-auction-bidders';
         case 'auction-map': return '#pb-auction-map';
+        case 'properties': return '.pb-property-card';
+        case 'won': return `#pb-panel-${seat} .pb-won-card`;
+        case 'final': return '#pb-final';
         default: return null;
     }
 }
@@ -97,11 +100,13 @@ export function createTutorialScreen(lesson, doc = document) {
         const head = doc.createElement('div');
         head.className = 'pb-tutor-head';
         head.textContent = `TUTORIAL ${lesson.chapter} · ${lesson.title}`;
-        const text = doc.createElement('div');
-        text.className = 'pb-tutor-text';
-        text.textContent = step.text;
         bubble.appendChild(head);
-        bubble.appendChild(text);
+        if (step.text) {
+            const text = doc.createElement('div');
+            text.className = 'pb-tutor-text';
+            text.textContent = step.text;
+            bubble.appendChild(text);
+        }
         if (step.note) {
             const note = doc.createElement('div');
             note.className = 'pb-tutor-note';
@@ -113,6 +118,16 @@ export function createTutorialScreen(lesson, doc = document) {
             bubble.appendChild(note);
         }
         let button = null;
+        const choices = [];
+        for (const b of step.buttons || []) {
+            const choice = doc.createElement('button');
+            choice.type = 'button';
+            choice.className = `pb-tutor-choice${choices.length === 0 ? ' pb-tutor-choice-main' : ''}`;
+            choice.textContent = b.label;
+            choice.dataset.value = b.value;
+            bubble.appendChild(choice);
+            choices.push(choice);
+        }
         if (nextButton) {
             button = doc.createElement('button');
             button.type = 'button';
@@ -140,7 +155,7 @@ export function createTutorialScreen(lesson, doc = document) {
         } else {
             ring.style.display = 'none';
         }
-        return { el, button };
+        return { el, button, choices };
     }
 
     return {
@@ -163,6 +178,15 @@ export function createTutorialScreen(lesson, doc = document) {
             allowed = null;
             draw(step, targetSelector(step.point, game), { nextButton: false });
         },
+        /** The last bubble of the tutorial: resolves with the value of the button the learner chose. */
+        choose(step, game) {
+            allowed = null;
+            const drawn = draw(step, targetSelector(step.point, game), { nextButton: false });
+            if (!drawn) return new Promise(() => {});
+            return new Promise(resolve => {
+                drawn.choices.forEach(choice => { choice.onclick = () => { hide(); resolve(choice.dataset.value); }; });
+            });
+        },
         pause: (ms) => wait(ms),
         clear() { allowed = null; hide(); },
         close() {
@@ -177,7 +201,7 @@ export function createTutorialScreen(lesson, doc = document) {
 /**
  * Plays one lesson on screen, through the same match code as a normal game.
  * @param {{game: object, rng: object, lesson: object}} pb  from createLessonGame (tutorial_engine.js)
- * @returns {Promise<void>} resolves when the lesson is finished
+ * @returns {Promise<string|null>} resolves when the lesson is finished, with the learner's choice if it ends with buttons
  */
 export async function runPalmBeachLesson(pb, { isCurrent = () => true } = {}) {
     const screen = createTutorialScreen(pb.lesson);
@@ -187,13 +211,15 @@ export async function runPalmBeachLesson(pb, { isCurrent = () => true } = {}) {
     renderPalmBeachPanels(pb.game);
     // If the learner leaves in the middle (RESIGN), the match simply stops and never comes back here:
     // the one who leaves calls pb.closeTutorial() (see leavePalmBeachTable in js/game.js).
+    let choice = null;
     await runPalmBeachMatch(pb, {
         isCurrent,
         guide,
         play: async (game, askPlayer, { emit }) => {
             await playLessonParts(pb, askPlayer, { emit });
-            await guide.finish(game);
+            choice = await guide.finish(game);
         }
     });
     screen.close();
+    return choice;
 }

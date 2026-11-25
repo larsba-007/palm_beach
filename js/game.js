@@ -2884,9 +2884,8 @@ async function runBotTurn(bot) {
 
 /** PALM BEACH: ends the match on the table and goes back to the menu (or straight into a new match). */
 /**
- * PALM BEACH tutorial (step 2.2): plays one lesson on the table, then the next one, then goes back to the menu.
- * Step 2.2 has no button for it yet (the TUTORIAL button comes in step 2.3): it is started from a table that is
- * already on screen, with window.startPalmBeachLesson('flip-cards').
+ * PALM BEACH tutorial: plays one lesson on the table, then the next one. After the last lesson the learner
+ * chooses: PLAY A REAL GAME (the party menu) or CHAPTERS (the party menu with the chapter list open).
  */
 export function startPalmBeachLesson(lessonId = TUTORIAL_LESSONS[0].id) {
     if (state.pb && state.pb.closeTutorial) state.pb.closeTutorial();
@@ -2898,14 +2897,32 @@ export function startPalmBeachLesson(lessonId = TUTORIAL_LESSONS[0].id) {
         renderPalmBeachTable(pb.game);
         renderPalmBeachPanels(pb.game);
     };
-    runPalmBeachLesson(pb, { isCurrent: () => state.pb === pb }).then(() => {
+    runPalmBeachLesson(pb, { isCurrent: () => state.pb === pb }).then((choice) => {
         if (state.pb !== pb) return;
         const next = nextLesson(lessonId);
-        if (next) startPalmBeachLesson(next.id);
-        else leavePalmBeachTable(false);
-    }).catch(() => {});
+        if (next) { startPalmBeachLesson(next.id); return; }
+        leavePalmBeachTable(false);
+        if (choice === 'CHAPTERS' && window.app && window.app.openPalmBeachChapters) setTimeout(() => window.app.openPalmBeachChapters(), 150);
+    }).catch((error) => { console.error('[Palm Beach tutorial]', error); });
 }
-if (typeof window !== 'undefined') window.startPalmBeachLesson = startPalmBeachLesson;
+
+/** Shows the table screen (from the start screen or the party menu) and starts the tutorial at this lesson. */
+export function enterPalmBeachTutorial(lessonId = TUTORIAL_LESSONS[0].id) {
+    state.mode = 'GAME';
+    state.gameStarted = true;
+    state.activeGambitId = null;
+    state.isGameOver = false;
+    const menus = document.getElementById('ui-v2-container');
+    if (menus) menus.style.display = 'none';
+    const gameUI = document.getElementById('game-ui');
+    if (gameUI) {
+        gameUI.style.display = '';
+        gameUI.classList.remove('opacity-0', 'pointer-events-none');
+    }
+    startPalmBeachLesson(lessonId);
+    centerBoardView();
+    setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+}
 
 export function leavePalmBeachTable(playAgain = false) {
     if (state.pb && state.pb.closeTutorial) state.pb.closeTutorial();

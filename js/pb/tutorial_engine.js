@@ -177,6 +177,7 @@ export function answerOf(step, request, game) {
  *   prompt(step, answer, game)  shows a bubble and lets the learner click only the thing the step is about
  *   show(step, game)         shows a bubble while the opponent plays (no click)
  *   pause(ms)                a short wait, so the learner can follow the opponent
+ *   choose(step, game)       the last bubble, with the step's buttons; resolves with the chosen button's value
  *   clear()                  takes the bubble away
  */
 export function createLessonGuide(lesson, screen) {
@@ -186,6 +187,8 @@ export function createLessonGuide(lesson, screen) {
         `Tutorial ${lesson.id} is out of step at ${step ? step.id : 'the end'}: the script ${step ? `expects ${step.who} to answer ${requestTypeOf(step)}` : 'has no more steps'}, `
         + `but the game asked player ${request.playerId} for ${request.type}.`);
 
+    // Bubbles with a NEXT button. A bubble marked "on: EVENT" belongs right after that event (see onEvent);
+    // if its event did not come, it is shown at the next question instead, so no text is ever lost.
     async function sayAll(game) {
         while (index < steps.length && steps[index].who === 'SAY') {
             const step = steps[index++];
@@ -213,11 +216,24 @@ export function createLessonGuide(lesson, screen) {
             }
             return answer;
         },
-        /** After the last part of the game: the closing bubbles. */
+        /** Called after the screen has shown an event: shows the bubbles that belong to that moment. */
+        async onEvent(event, game) {
+            while (index < steps.length && steps[index].who === 'SAY' && steps[index].on === event.type) {
+                const step = steps[index++];
+                await screen.say(step, game);
+            }
+        },
+        /**
+         * After the last part of the game: the closing bubbles. Returns the learner's choice if the lesson
+         * ends with buttons (who: 'END'), otherwise null.
+         */
         async finish(game) {
             await sayAll(game);
+            let choice = null;
+            if (index < steps.length && steps[index].who === 'END') choice = await screen.choose(steps[index++], game);
             screen.clear();
             if (index < steps.length) throw new Error(`Tutorial ${lesson.id} ended before step ${steps[index].id}.`);
+            return choice;
         },
         stepsDone: () => index
     };
@@ -229,8 +245,9 @@ export function createLessonGuide(lesson, screen) {
  */
 export async function playLesson(pb, guide, askOnScreen = async () => true, { emit = () => {} } = {}) {
     const askPlayer = (request, game) => guide.ask(request, game, askOnScreen);
-    await playLessonParts(pb, askPlayer, { emit });
-    await guide.finish(pb.game);
+    const emitAndGuide = async (event, game) => { await emit(event, game); await guide.onEvent(event, game); };
+    await playLessonParts(pb, askPlayer, { emit: emitAndGuide });
+    pb.choice = await guide.finish(pb.game);
     if (pb.rng.rollsLeft() > 0) throw new Error(`Tutorial ${pb.lesson.id}: ${pb.rng.rollsLeft()} of the fixed dice were never rolled.`);
     return pb.game;
 }

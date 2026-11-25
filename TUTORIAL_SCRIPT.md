@@ -1,6 +1,6 @@
 # Palm Beach tutorial: the script (step 2.1)
 
-**Status: proposal from Claude, waiting for Lars's approval.** Nothing is built yet.
+**Status: approved by Lars, 25 Nov 2026, and built (steps 2.2 and 2.3).** A test checks that the game's bubble texts are the ones in this file, word for word: change a text here AND in `js/pb/tutorial_lessons.js`.
 Lars: change any text directly in this file, or tell Claude what to change.
 
 ## Decided by Lars (25 Nov 2026)
@@ -105,7 +105,7 @@ In the tables: **You** = the learner (Bright Shell). "Click" is what the learner
 | 4.14 | Roxana has 21 Au. Bid 21 and she cannot go higher. | The RAISE +1 button | Click RAISE +1. Roxana passes | You 7 Au, 5 Prestige Points |
 | 4.15 | The game is over. You have 5 Prestige Points and Roxana has 4: you win! | The final scoring screen | Click NEXT | |
 | 4.16 | On a tie, the player with the Property Card wins. After that, the most gold left. | The final scoring screen | Click NEXT | |
-| 4.17 | That is all of Palm Beach. Gather your friends! | | Buttons: PLAY A REAL GAME · BACK TO MENU | |
+| 4.17 | That is all of Palm Beach. Gather your friends! | The final scoring screen | Buttons: PLAY A REAL GAME (goes to the party menu) · CHAPTERS (the party menu with the chapter list open) | |
 
 **Board game rule (shown with 4.10):** At the table, the other two Property Cards go back in the box.
 

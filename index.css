@@ -3143,6 +3143,126 @@ input[type=range]::-webkit-slider-runnable-track {
     50% { opacity: 0.45; }
 }
 
+/* The last bubble of the tutorial: two buttons side by side. */
+.pb-tutor-choice {
+    width: 380px;
+    height: 100px;
+    margin: 32px 20px 0 0;
+    border-radius: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 900;
+    font-size: 34px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+}
+.pb-tutor-choice:hover { background: rgba(255, 255, 255, 0.3); }
+.pb-tutor-choice-main { background: #F3C80D; border-color: #F3C80D; color: #0f172a; }
+.pb-tutor-choice-main:hover { background: #ffd92e; }
+
+/* The chapter list on the party menu (js/pb/tutorial_menu.js). */
+#pb-chapters-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 500;
+}
+#pb-chapters {
+    position: absolute;
+    background-color: rgba(38, 56, 92, 0.97);
+    font-family: 'Overpass', sans-serif;
+    color: #ffffff;
+    text-align: center;
+}
+#pb-chapters > div { position: absolute; left: 100px; width: 1300px; }
+.pb-chapters-title { font-weight: 900; font-size: 84px; letter-spacing: 0.12em; color: #F3C80D; }
+.pb-chapters-intro { font-weight: 300; font-size: 42px; line-height: 1.25; }
+.pb-chapters-hint { font-weight: 300; font-size: 32px; color: rgba(255, 255, 255, 0.7); }
+.pb-chapters-row {
+    position: absolute;
+    left: 200px;
+    width: 1100px;
+    height: 124px;
+    border-radius: 62px;
+    border: 4px solid rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 900;
+    font-size: 46px;
+    letter-spacing: 0.08em;
+    text-align: left;
+    padding-left: 150px;
+    cursor: pointer;
+}
+.pb-chapters-row:hover { border-color: #F3C80D; background: rgba(255, 255, 255, 0.25); }
+.pb-chapters-row-first { background: #F3C80D; border-color: #F3C80D; color: #0f172a; }
+.pb-chapters-row-first:hover { background: #ffd92e; }
+.pb-chapters-number { position: absolute; left: 60px; top: 0; line-height: 116px; font-size: 56px; }
+#pb-chapters-close {
+    position: absolute;
+    left: 550px;
+    width: 400px;
+    height: 100px;
+    border-radius: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.6);
+    background: transparent;
+    color: #ffffff;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 900;
+    font-size: 38px;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+}
+#pb-chapters-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+/* The start screen: LEARN TO PLAY and PLAY. (The start screen is not on the 4K canvas: it fills the window.) */
+#splash-buttons {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 96px;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+#splash-buttons button {
+    min-width: 360px;
+    padding: 24px 64px;
+    border-radius: 16px;
+    border: 4px solid #F3C80D;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 900;
+    font-size: 40px;
+    line-height: 1.1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.3s;
+}
+#splash-buttons button:hover { transform: scale(1.05); }
+#splash-buttons button span {
+    display: block;
+    font-weight: 400;
+    font-size: 0.45em;
+    letter-spacing: 0.14em;
+    padding-top: 0.3em;
+    opacity: 0.85;
+}
+#splash-learn-btn { background: rgba(15, 23, 42, 0.72); color: #ffffff; }
+#splash-play-btn { background: #F3C80D; color: #ffffff; box-shadow: 0 0 30px rgba(243, 200, 13, 0.5); }
+/* Small windows: the Web edition already scales the text of the start screen's buttons (see ".edition-web #splash-screen button"). */
+@media (max-width: 900px) {
+    #splash-buttons { gap: 16px; bottom: 60px; }
+    #splash-buttons button { min-width: 0; }
+}
+
 /* Rewards flying to the player's panel. */
 .pb-flyer { z-index: 1500; }
 .pb-flyer-gold {
@@ -3447,7 +3567,7 @@ html:not(.edition-web) .web-only {
 .edition-web #v3-setup-random { top: 360px; left: 1720px; width: 600px; }
 .edition-web #v3-setup-pair { top: 530px; left: 1720px; width: 600px; }
 .edition-web #v3-setup-open { top: 700px; left: 1720px; width: 600px; }
-.edition-web #v3-start-match { top: 1280px; left: 1450px; width: 700px; height: 150px; }
+.edition-web #v3-start-match { top: 1280px; left: 1070px; width: 700px; height: 150px; }
 
 /* ---- Web Party Edition: tap-to-preview in Open Draft (touch screens have no hover) ----
    The previewed card gets the same enlargement as the hover state. */

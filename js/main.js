@@ -2,6 +2,8 @@
 
 import { GameConfig } from './config.js';
 import { state, loadProfile, saveProfile } from './state.js';
+import { enterPalmBeachTutorial } from './game.js';
+import { openChapterList, closeChapterList } from './pb/tutorial_menu.js';
 import { startGame, buyLuxury, nextTurn, startTurnCycle, processMove, triggerAuction, finalizePlayerSetup, initGame, handleFlip, auctionLoop, rotateAuctionTurn, assignBotCharacters, confirmReroll, cancelReroll, confirmResign, log, checkLineBonuses, handleGambit2Step10Progress } from './game.js';
 import { setupBoard, initPlayerCards, updateUI, updateCardVisuals, setupAuctionVisuals, animateCellFlip, flyTextAnimation, flyCardAnimation, rollDiceVisual, getCharacterCardStyle, flyTextAnimation as flyText, loadHighScores, getLuxuryCardStyle, playAuctionBonuses, animateAuctionWin, highlightBotButton, animateJaegaSetup, updateAuctionUI, renderNewsFeed, renderCharacterGrid, selectGalleryItem, openCharacterGallery, openBotGallery, openCompendiumCharacter, openCompendiumVisitor, showGambitBrief, closeGambitBrief, showGambitObjectivesModal, closeGambitObjectivesModal, showObjectiveImpossibleModal, closeObjectiveImpossibleModal, quitFromImpossibleObjective, showCompendium, closeCompendium, setCompendiumTab, setCompendiumMenuState, runTutorialStep, dismissLandmarkDossier, showLandmarkDossier, showResignModal, closeResignModal, showAbout, closeAbout, renderPropertyCompendium, selectPropertyItem, renderCompendiumCharacterCard, renderCompendiumVisitorCard } from './ui.js';
 import { AchievementManager } from './AchievementManager.js';
@@ -5062,6 +5064,18 @@ const app = {
     },
 
     // Web Party Edition: the Tutorial button plays the guided first Gambit
+    // PALM BEACH tutorial (step 2.3). From the start screen (LEARN TO PLAY) or from the party menu's chapter list.
+    startPalmBeachTutorial: (lessonId) => {
+        const splash = document.getElementById('splash-screen');
+        if (splash && !splash.classList.contains('opacity-0')) app.enterGame();     // leaves the start screen, starts the sound
+        closeChapterList();
+        enterPalmBeachTutorial(lessonId);
+    },
+    openPalmBeachChapters: () => {
+        openChapterList(document.getElementById('panel-2-setup'), (lessonId) => app.startPalmBeachTutorial(lessonId));
+    },
+    closePalmBeachChapters: () => closeChapterList(),
+
     startWebTutorial: () => {
         // Hide the party menu first: while it is open, setVariation/setSetupMode apply the custom-match
         // unlock checks and would block the tutorial's Red Reef with a "LOCKED" message
