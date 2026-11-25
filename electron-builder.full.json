@@ -1,6 +1,6 @@
 {
-  "appId": "com.bocaraton.game",
-  "productName": "Gold Coast Gambits",
+  "appId": "com.backhansgames.palmbeach",
+  "productName": "Palm Beach",
   "directories": {
     "output": "dist/full-game"
   },

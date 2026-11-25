@@ -1,6 +1,6 @@
 {
-  "appId": "com.bocaraton.game.demo",
-  "productName": "Gold Coast Gambits Demo",
+  "appId": "com.backhansgames.palmbeach.demo",
+  "productName": "Palm Beach Demo",
   "directories": {
     "output": "dist/demo-game"
   },

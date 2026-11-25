@@ -27,7 +27,7 @@ const record = (ok, name, detail = '') => {
 const run = (command, args) => spawnSync(command, args, { cwd: root, encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 });
 const tail = (text, lines = 12) => String(text || '').trim().split(/\r?\n/).slice(-lines).join('\n');
 
-console.log('Boca Raton check: tests, three builds, secret scan, Steam files\n');
+console.log('Palm Beach check: tests, three builds, secret scan, Steam files\n');
 
 // ---- 1. Tests ------------------------------------------------------------------------------
 console.log('--- 1. Tests');
@@ -41,7 +41,7 @@ for (const file of testFiles) {
 
 // ---- 2. Builds -----------------------------------------------------------------------------
 console.log('\n--- 2. Builds (into a temporary folder; dist/ and dist-web/ are not touched)');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'boca-check-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'palm-beach-check-'));
 const editions = [
     { name: 'Steam Demo', args: [], expects: 'demo' },
     { name: 'Steam Full', args: ['--mode', 'full'], expects: 'full' },
@@ -87,17 +87,15 @@ if (fs.existsSync(webOut)) {
     record(false, 'Web build has no keys, passwords or Steam code', 'the Web build is missing, nothing to scan');
 }
 
-// ---- 4. Steam files identical to main ------------------------------------------------------
-console.log('\n--- 4. Steam files unchanged');
-const steamFiles = ['electron-main.js', 'electron-builder.demo.json', 'electron-builder.full.json', 'publish_mac.sh', 'publish_win.sh', 'steam', '.env.full'];
-const hasMain = run('git', ['rev-parse', '--verify', '--quiet', 'main']).status === 0;
-if (!hasMain) {
-    record(false, 'Steam files are identical to main', 'no local "main" branch to compare with');
-} else {
-    const diff = run('git', ['diff', '--name-only', 'main', '--', ...steamFiles]);
-    const changed = String(diff.stdout || '').trim().split(/\r?\n/).filter(Boolean);
-    record(diff.status === 0 && changed.length === 0, 'Steam files are identical to main', changed.length ? `changed: ${changed.join(', ')}` : '');
-}
+// ---- 4. Steam and Electron files still in place ----------------------------------------------
+// Boca compared these files with the "main" branch (the Web work was not allowed to change Steam).
+// Palm Beach is its own repository where "main" is the working branch, so that comparison says nothing.
+// Here the check is that nobody deleted the parts the Steam version needs later (see CLAUDE.md).
+console.log('\n--- 4. Steam and Electron files in place');
+const steamFiles = ['electron-main.js', 'electron-builder.demo.json', 'electron-builder.full.json', 'publish_mac.sh', 'publish_win.sh',
+    'steam', 'build', '.env.full', 'js/AchievementManager.js', 'js/SaveManager.js'];
+const missing = steamFiles.filter(f => !fs.existsSync(path.join(root, f)));
+record(missing.length === 0, 'Steam and Electron files are in place', missing.length ? `missing: ${missing.join(', ')}` : '');
 
 // ---- Summary -------------------------------------------------------------------------------
 try { fs.rmSync(tmp, { recursive: true, force: true }); } catch { /* temporary folder, best effort */ }

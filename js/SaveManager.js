@@ -10,7 +10,7 @@ import { GameConfig } from './config.js';
  * read or overwrite a save of another edition hosted on the same domain.
  */
 export function getSaveKey(isWeb) {
-    return isWeb ? 'bocaRatonWebSave' : 'bocaRatonSaveGame';
+    return isWeb ? 'palmBeachWebSave' : 'palmBeachSaveGame';
 }
 const SAVE_KEY = getSaveKey(GameConfig.isWeb);
 
@@ -172,7 +172,7 @@ export const SaveManager = {
             if (GameConfig.isWeb) {
                 // Web: only wipe this game's own keys (the domain may host other things)
                 localStorage.removeItem(SAVE_KEY);
-                localStorage.removeItem('dontShowTutorialRecommended');
+                localStorage.removeItem('palmBeachDontShowTutorialRecommended');
             } else {
                 localStorage.clear();
             }

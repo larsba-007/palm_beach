@@ -28,7 +28,7 @@ if (!gotTheLock) {
 
 // Override userData path to ensure demo and full version use the same save directory
 const appDataPath = app.getPath('appData');
-const unifiedUserDataPath = join(appDataPath, 'boca-raton-save');
+const unifiedUserDataPath = join(appDataPath, 'palm-beach-save');
 app.setPath('userData', unifiedUserDataPath);
 
 
@@ -44,11 +44,13 @@ app.commandLine.appendSwitch('disable-features', 'CalculateNativeWinOcclusion');
 // 2. Initialize Steamworks immediately early in the process lifecycle
 // Note: It MUST be hooked before the main game window and graphics device are created.
 let steamClient = null;
-let steamAppId = 4307400; // Default to Full version App ID (4307400)
+// PLACEHOLDER: 4307400 (full) and 4547980 (demo) are the BOCA RATON / Gold Coast Gambits App IDs.
+// Palm Beach has no Steam App IDs yet. Lars supplies them in phase 2. Do not publish with these.
+let steamAppId = 4307400; // PLACEHOLDER (Boca Raton full)
 
 // Detect if we are running the Demo version
 if (app.getName().toLowerCase().includes('demo')) {
-  steamAppId = 4547980; // Demo App ID (4547980)
+  steamAppId = 4547980; // PLACEHOLDER (Boca Raton demo)
 }
 
 // Explicitly set Steam environment variables so steamworks.js/Steamworks SDK resolves correctly

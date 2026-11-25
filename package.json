@@ -1,9 +1,9 @@
 {
-  "name": "2026-01-03-v06-boca-raton",
-  "productName": "Boca Raton Board Game",
+  "name": "palm-beach",
+  "productName": "Palm Beach Board Game",
   "private": true,
   "version": "1.0.0",
-  "description": "Boca Raton Board Game - Demo Version",
+  "description": "Palm Beach Board Game (digital version)",
   "author": "Backhans Games",
   "type": "module",
   "main": "electron-main.js",
@@ -30,8 +30,8 @@
     "dist": "electron-builder --win --x64"
   },
   "build": {
-    "appId": "com.bocaraton.game",
-    "productName": "Boca Raton Board Game",
+    "appId": "com.backhansgames.palmbeach",
+    "productName": "Palm Beach Board Game",
     "win": {
       "icon": "public/assets/icon.png",
       "target": [

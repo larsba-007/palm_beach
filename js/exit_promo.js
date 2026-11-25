@@ -9,6 +9,7 @@ export const EXIT_PROMO = {
     },
     steam: {
         image: new URL(/* @vite-ignore */ '../assets/steam_logob@2x.webp', import.meta.url).href,
+        // PLACEHOLDER: this is the Boca Raton (Gold Coast Gambits) Steam page. Palm Beach has no Steam page yet.
         link: "https://store.steampowered.com/app/4307400/Gold_Coast_Gambits_Boca_Raton__Palm_Beach/"
     }
 };

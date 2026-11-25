@@ -21,6 +21,7 @@ export const NEWS_POSTS = [
         date: "",
         image: new URL(/* @vite-ignore */ '../assets/steam_logob.png', import.meta.url).href,
         image2x: new URL(/* @vite-ignore */ '../assets/steam_logob@2x.png', import.meta.url).href,
+        // PLACEHOLDER: this is the Boca Raton (Gold Coast Gambits) Steam page. Palm Beach has no Steam page yet.
         link: "https://store.steampowered.com/app/4307400/Gold_Coast_Gambits_Boca_Raton__Palm_Beach/",
         text: ""
     },

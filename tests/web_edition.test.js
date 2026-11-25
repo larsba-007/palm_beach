@@ -122,9 +122,9 @@ console.log('Running Web Edition regression tests...\n');
 
 // Test 8: Web has its own save slot; Steam/Demo/browser Demo keep the original key
 {
-    assert.equal(getSaveKey(true), 'bocaRatonWebSave');
-    assert.equal(getSaveKey(false), 'bocaRatonSaveGame');
-    console.log('✓ Test 8 Passed: Web save key is separate; every other edition keeps "bocaRatonSaveGame".');
+    assert.equal(getSaveKey(true), 'palmBeachWebSave');
+    assert.equal(getSaveKey(false), 'palmBeachSaveGame');
+    console.log('✓ Test 8 Passed: Web save key is separate; every other edition keeps "palmBeachSaveGame".');
 }
 
 // Test 9: Existing (non-web) save/load round trip still uses the original key, and wipe still clears everything
@@ -132,8 +132,8 @@ console.log('Running Web Edition regression tests...\n');
     store.clear();
     store.set('unrelated-key', 'x');
     await SaveManager.saveData({ progression: { highestGambitCompleted: 3 } });
-    assert.ok(store.has('bocaRatonSaveGame'), 'non-web save must be written to bocaRatonSaveGame');
-    assert.ok(!store.has('bocaRatonWebSave'), 'non-web build must not touch the web save slot');
+    assert.ok(store.has('palmBeachSaveGame'), 'non-web save must be written to palmBeachSaveGame');
+    assert.ok(!store.has('palmBeachWebSave'), 'non-web build must not touch the web save slot');
     const loaded = await SaveManager.loadData();
     assert.equal(loaded.progression.highestGambitCompleted, 3);
     assert.equal(loaded.audio.musicVolume, 0.8, 'defaults are still merged in');

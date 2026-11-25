@@ -1988,7 +1988,7 @@ const app = {
     confirmTutorialRecommended: () => {
         const cb = document.getElementById('dont-show-tutorial-cb');
         if (cb && cb.checked) {
-            localStorage.setItem('dontShowTutorialRecommended', 'true');
+            localStorage.setItem('palmBeachDontShowTutorialRecommended', 'true');
         }
         app.closeTutorialRecommendedModal();
         app.goToSetupV2(true);
@@ -4171,6 +4171,7 @@ const app = {
     },
 
     openWishlist: () => {
+        // PLACEHOLDER: this is the Boca Raton (Gold Coast Gambits) Steam page. Palm Beach has no Steam page yet.
         const url = 'https://store.steampowered.com/app/4307400/Gold_Coast_Gambits_Boca_Raton__Palm_Beach/';
         if (GameConfig.isElectron) {
             try {
@@ -5131,7 +5132,7 @@ const app = {
         if (!bypassReminder && !GameConfig.isWeb) {
             const cleared = (state.playerProfile && Array.isArray(state.playerProfile.clearedGambits)) ? state.playerProfile.clearedGambits : [];
             const first4Completed = [1, 2, 3, 4].every(id => cleared.includes(id));
-            const dontShow = localStorage.getItem('dontShowTutorialRecommended') === 'true';
+            const dontShow = localStorage.getItem('palmBeachDontShowTutorialRecommended') === 'true';
 
             if (!first4Completed && !dontShow) {
                 app.showTutorialRecommendedModal();

@@ -113,9 +113,10 @@ export const loadProfile = async () => {
     // 1. Try to load from SaveManager (File)
     const data = await SaveManager.loadData();
     
-    // 2. Migration: If file is new/default but localStorage has data, migrate it
-    const legacy = localStorage.getItem('bocaRatonProfile');
-    const legacyScores = localStorage.getItem('boca_scores');
+    // 2. Migration (inherited from Boca Raton): switched off for Palm Beach.
+    // Palm Beach must never read Boca Raton saves ('bocaRatonProfile', 'boca_scores') in the same browser.
+    const legacy = null;
+    const legacyScores = null;
 
     if (data.progression.highestGambitCompleted === 0 && (legacy || legacyScores)) {
         try {
