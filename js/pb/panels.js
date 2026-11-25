@@ -103,13 +103,16 @@ export function renderPalmBeachPanels(game, doc = document) {
             panel.appendChild(v);
         });
 
-        // Cards won: the Property Card first, then Luxury Cards in the order they were won.
+        // Cards won, in true size: the Property Card first, then Luxury Cards in the order they were won.
+        // More than 5 overlap (see panelLayout in layout.js).
         f.won.forEach((card, n) => {
-            const el = box(doc, 'pb-won-card', { ...L.wonCard(n), width: L.thumb, height: L.thumb });
+            const pos = L.wonCard(n, f.won.length);
+            const el = box(doc, 'pb-won-card', { left: pos.left, top: pos.top, width: L.wonSize, height: L.wonSize });
+            el.style.zIndex = String(pos.zIndex);
             el.title = `${card.name}: ${card.points} Prestige Point${card.points === 1 ? '' : 's'}`;
             el.dataset.cardId = card.id;
-            if (card.kind === 'PROPERTY') paint(el, PROPERTY_SPRITE_URL, scaleSprite(propertyFrontSprite(card.id), L.thumb));
-            else paint(el, LUXURY_CARD_SPRITE_URL, scaleSprite(luxuryFrontSprite(card.spriteIndex), L.thumb));
+            if (card.kind === 'PROPERTY') paint(el, PROPERTY_SPRITE_URL, scaleSprite(propertyFrontSprite(card.id), L.wonSize));
+            else paint(el, LUXURY_CARD_SPRITE_URL, scaleSprite(luxuryFrontSprite(card.spriteIndex), L.wonSize));
             panel.appendChild(el);
         });
 

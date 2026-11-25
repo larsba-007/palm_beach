@@ -97,13 +97,23 @@ export function panelLayout(playerCount) {
     const statsTop = diamondsTop + 78;
     const statRow = 58;
     const wonTop = statsTop + 3 * statRow + 16;
-    const thumbGap = 8;
-    const thumb = Math.floor((width - 2 * thumbGap) / 3);    // 3 won cards per line
+    // Cards won (Lars, 25 Nov 2026): shown in true size (250 px, like the cards on the table and like Boca Raton),
+    // one under the other. Up to 5 lie fully visible; with more than 5 they overlap, as in Boca: the first card
+    // lies on top and each later card shows its lower part.
+    const wonSize = Math.min(CARD, width);                     // 250 px; a little smaller only in the narrow 5-player panels
+    const wonGap = 8;
+    const top = 16;
+    const hostTop = 16;                                         // #left-panel-cards starts 16 px below the top of the table
+    const wonRoom = 2160 - 16 - hostTop - top - wonTop;        // from the first won card down to 16 px above the bottom of the table
     return {
-        width, gap, top: 16, nameHeight, cardTop, cardHeight, diamondsTop, statsTop, statRow, wonTop, thumb, thumbGap,
+        width, gap, top, hostTop, nameHeight, cardTop, cardHeight, diamondsTop, statsTop, statRow, wonTop, wonSize, wonGap, wonRoom,
         left: (seat) => seat * (width + gap),        // inside #left-panel-cards (1118 px wide, 16 px from the screen edge)
-        /** Position of the n-th won card (0, 1, 2, ...) inside the panel. */
-        wonCard: (n) => ({ left: (n % 3) * (thumb + thumbGap), top: wonTop + Math.floor(n / 3) * (thumb + thumbGap) })
+        /** Position of the n-th won card (0, 1, 2, ...) of "total" cards, inside the panel. */
+        wonCard: (n, total) => {
+            const full = wonSize + wonGap;
+            const step = total <= 1 ? 0 : Math.min(full, (wonRoom - wonSize) / (total - 1));
+            return { left: Math.round((width - wonSize) / 2), top: wonTop + Math.round(n * step), zIndex: total - n };
+        }
     };
 }
 

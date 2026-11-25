@@ -88,12 +88,35 @@ await check('Panels for 2, 3, 4 and 5 players fit side by side in the left side 
         // Diamonds lie under the character card (PLAN.md, table layout point 7).
         assert.ok(p.diamondsTop >= p.cardTop + p.cardHeight);
         assert.ok(p.statsTop > p.diamondsTop && p.wonTop > p.statsTop);
-        // Room for every card a player could win (10 auctions + 7 trades + the property) above RESIGN and the settings wheel.
-        const last = p.wonCard(17);
-        assert.ok(p.top + last.top + p.thumb < 1980, `${count} players: 18 won cards fit above the bottom buttons`);
-        assert.ok(p.wonCard(2).left + p.thumb <= p.width, 'three won cards per line fit in the panel');
         assert.ok(Math.abs(p.cardHeight / p.width - 1200 / 700) < 0.005, 'the character card keeps its shape');
     }
+});
+
+await check('Won cards are shown in true size; up to 5 lie fully visible, more than 5 overlap like in Boca Raton', () => {
+    const p = L.panelLayout(4);
+    assert.equal(p.wonSize, 250, 'true size: the same 250 px as the cards on the table');
+    assert.ok(p.wonCard(0, 1).left >= 0 && p.wonCard(0, 1).left + p.wonSize <= p.width, 'the card fits inside the panel');
+    const bottomOfTable = 2160 - 16;
+    for (let total = 1; total <= 18; total++) {
+        const cards = Array.from({ length: total }, (_, n) => p.wonCard(n, total));
+        const last = cards[total - 1];
+        assert.ok(p.hostTop + p.top + last.top + p.wonSize <= bottomOfTable, `${total} cards: the last card is still on the table`);
+        const steps = cards.slice(1).map((c, i) => c.top - cards[i].top);
+        if (total <= 5) {
+            assert.ok(steps.every(step => step >= p.wonSize), `${total} cards: none overlaps`);
+        } else {
+            assert.ok(steps.every(step => step < p.wonSize && step >= 50), `${total} cards: they overlap, and at least 50 px of each stays visible`);
+        }
+        // As in Boca: the first card lies on top.
+        assert.ok(cards.every((c, i) => i === 0 || c.zIndex < cards[i - 1].zIndex));
+    }
+    // The four small controls moved to the top-right corner, so nothing lies under the won cards.
+    const css = fs.readFileSync('index.css', 'utf8');
+    assert.match(css, /#board-wrapper\.pb-table #resign-btn \{\s*left: 50px;\s*top: 106px;/);
+    assert.match(css, /#board-wrapper\.pb-table #settings-cog-btn \{\s*right: auto;\s*left: 332px;\s*top: 72px;/);
+    assert.ok(!css.includes('left: -3350px'), 'RESIGN and the settings wheel are no longer in the bottom-left corner');
+    // 5 players (not offered in the web menu yet): the cards shrink to the narrower panel.
+    assert.equal(L.panelLayout(5).wonSize, 214);
 });
 
 await check('Character pictures and small won cards come from the right place in their sprite sheets', () => {

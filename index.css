@@ -2802,17 +2802,26 @@ input[type=range]::-webkit-slider-runnable-track {
     display: none !important;
 }
 
-/* The Luxury Cards now fill the right sidebar from top to bottom, so RESIGN and the settings wheel
-   move to the bottom-left corner of the table. (The sidebar starts 3400 px from the left edge.) */
-#board-wrapper.pb-table #settings-cog-btn {
-    right: auto;
-    left: -3350px;
-    bottom: 48px;
+/* The top-right corner holds the four small controls, above the Luxury Cards:
+   COMPENDIUM, REWARDS and RESIGN under each other, and the settings wheel beside them.
+   (The Luxury Cards fill the right side below 160 px, and the players' won cards need the whole left side.) */
+#board-wrapper.pb-table #compendium-btn {
+    top: 10px;
 }
 #board-wrapper.pb-table #resign-btn {
-    left: -3160px;
-    bottom: 68px;
+    left: 50px;
+    top: 106px;
+    bottom: auto;
     transform: none;
+    translate: none;        /* Tailwind centres this button with the "translate" property */
+    font-weight: 900;
+    line-height: 48px;
+}
+#board-wrapper.pb-table #settings-cog-btn {
+    right: auto;
+    left: 332px;
+    top: 72px;
+    bottom: auto;
 }
 
 #pb-luxury-column {
@@ -2929,10 +2938,11 @@ input[type=range]::-webkit-slider-runnable-track {
 .pb-stat-gold { color: #F3C80D; }
 
 .pb-won-card {
+    box-sizing: border-box;
     border-radius: 6px;
     border: 1px solid #333333;
     background-color: #ffffff;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.4);
 }
 
 /* Version 1 has no tutorial (it comes in version 2): the Boca tutorial button and its caption are hidden. */
@@ -3302,7 +3312,7 @@ input[type=range]::-webkit-slider-runnable-track {
 /* "? REWARDS" under COMPENDIUM in the top-right corner. */
 #pb-rules-btn {
     position: absolute;
-    top: 104px;
+    top: 58px;
     left: 50px;
     background: transparent;
     border: none;

@@ -225,6 +225,14 @@ End of game and polish.
 4. In Netlify, open the **Palm Beach** site → Deploys → drag the `dist-web` folder onto the drop area. Never the Boca Raton site.
 5. Open the site and play a short game.
 
+## After Lars's first play-test (25 Nov 2026): "It works fine"
+Two things from Lars, both done:
+1. **Won cards in true size, like Boca Raton.** A player's Luxury Cards and Property Card are now shown at 250 px (the same size as the cards on the table), one under the other in the player's panel. Up to 5 lie fully visible. **With more than 5 they overlap, as in Boca:** the first card lies on top and each later card shows its lower part, where the points are.
+   - To make room, the four small controls moved to the **top-right corner**: COMPENDIUM, REWARDS and RESIGN under each other, with the settings wheel beside them. RESIGN and the wheel used to be bottom left.
+2. **"Do players have to activate their power?" No.** All five version 1 characters have powers that work by themselves: Roxana and Carina get their bonus when they roll high enough, Mr. Flagler trades at 3 Diamonds, Bright Shell has low initiative numbers, Skip flips Atlantic cards without a roll. Only Kingston and Edith (locked in version 1) use a power at the start of the game.
+
+`npm run check`: ALL 23 CHECKS PASSED. `dist-web` rebuilt after this change.
+
 ## Next
 Version 1 is ready for Lars's own play-test and upload. After that: version 2 (tutorial), step 2.1: agree on the lessons.
 
