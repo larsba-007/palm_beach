@@ -283,7 +283,7 @@ Lars chose option A: two choices on the start screen.
 - **The end:** the last bubble has two buttons, PLAY A REAL GAME (the party menu) and CHAPTERS (the party menu with the chapter list open). The script said "BACK TO MENU"; in the web edition that is the same place as PLAY A REAL GAME, so Claude made the second button CHAPTERS. `TUTORIAL_SCRIPT.md` is updated.
 - Bubbles 4.10 and 4.11 come right after the Auction Map Card is flipped and after Roxana collects her gold, before the auction window opens.
 - In the tutorial the final scoring screen has no PLAY AGAIN button.
-- `tests/pb_tutorial.test.js`: 13 checks (all four chapters end on the script's numbers; every text equals the script). `npm run check`: ALL 24 CHECKS PASSED. `dist-web` rebuilt by the check.
+- `tests/pb_tutorial.test.js`: 13 checks (all four chapters end on the script's numbers; every text equals the script). `npm run check`: ALL 24 CHECKS PASSED. (Correction, 26 Nov: the check does NOT rebuild `dist-web`; it builds into a temporary folder. `dist-web` was rebuilt by hand with `npm run build:web` in step 2.4.)
 - Browser: played from LEARN TO PLAY through all four chapters with an automatic clicker (no errors), CHAPTERS opens the list, starting at chapter 3 from the list works, and a normal match starts and plays after the tutorial.
 
 Not checked: a human playing it at reading speed (is 2.4 seconds enough for the bubbles shown while Roxana plays?), Safari/Firefox/iPad, sound during the tutorial.
@@ -308,3 +308,31 @@ Lars reported: (1) the first message was gone before he could read it, (2) the g
 - The small version text on the start screen is dark now, so it can be read on the light photo.
 - **Party menu background too** (Lars: "use it there too"): `public/assets/board_game.webp` is the same photo, cut to 2560 x 1440 (354 KB). The Boca photo is kept in `_to_delete/boca_art/board_game_boca.webp`. The photo has a white table, so a dark layer (68 %) lies over it; without it the menu's white texts could not be read. The strength is one number in `index.css` ("party menu background picture").
 - Still Boca's: the popup banner (`public/assets/board_game_support_us.webp`, 2560 x 900).
+
+## Version 2, step 2.4: release check (26 Nov 2026)
+
+**`dist-web` is built and ready for Lars to upload** (51 MB, built 26 Nov with `npm run build:web`).
+
+Important correction: `npm run check` does **not** rebuild `dist-web` (it builds into a temporary folder). Before this step `dist-web` was still the build of 25 Nov 20:49: without the tutorial and **with the re-roll freeze**. Always run `npm run build:web` before an upload.
+
+Checked on the built version (`dist-web`, served locally), with a robot that clicks only what is really on top at each spot, as a mouse does:
+
+| What | Result |
+|---|---|
+| `npm run check` | ALL 24 CHECKS PASSED |
+| Tutorial from LEARN TO PLAY, all 41 bubbles, to PLAY A REAL GAME | Passed, no errors, nothing covered |
+| Full match, 2 players, Random | 8 rounds, final scoring, back to the party menu. 1 re-roll taken, 1 refused, 3 Diamond trades |
+| Full match, 3 players, Random | 8 rounds. 4 re-rolls taken, 5 refused, 3 Diamond trades |
+| Full match, 4 players, Random | 8 rounds. 1 re-roll taken, 1 refused, 2 Diamond trades |
+| Re-roll popup in a normal match (the version 1 freeze) | RE-ROLL and NO THANKS both clickable, 13 times in all |
+| Outside addresses | The game loads nothing from outside (all 90 requests went to its own address). Outside addresses exist only as links the player can click: Kickstarter, backhansgames.com, Steam, a Google form, Discord |
+| Tablet size, landscape (1024 x 768) | Start screen buttons and the tutorial bubble fit and can be clicked |
+| JavaScript errors | None in any of the runs |
+
+Notes:
+- The landmark popup's CLOSE button lies under a click-anywhere layer. Clicking CLOSE still closes the popup (the layer does it), so players notice nothing.
+- One false alarm during the check: with the browser tab in the background the table is not drawn to size. It is correct as soon as the tab is in front.
+
+Not checked: Pick 2 and Open Draft with the mouse-style robot (they passed in step 1.7 and their code is unchanged), Safari, Firefox, a real iPad, phone size, sound, human reading speed beyond Lars's own play-through.
+
+Still Boca's in the build: the popup banner picture, and the texts waiting for Lars's approval (popup, Compendium rules, character stories).
