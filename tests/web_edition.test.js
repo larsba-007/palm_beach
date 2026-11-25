@@ -662,18 +662,18 @@ console.log('Running Web Edition regression tests...\n');
     assert.deepEqual([w, h], [2560, 1440], `board_game.webp is ${w}x${h}`);
     assert.ok(b.length < 1024 * 1024, 'stays under 1 MB so the first visit is not slowed down');
 
-    // CSS: scoped to the Web edition and to the open party menu, "cover", centered, no dark layer
+    // CSS: scoped to the Web edition and to the open party menu, "cover", centered, with a dark layer
     const css = read('index.css');
     const m = css.match(/\.edition-web #ui-v2-container:has\(#panel-2-setup:not\(\.hidden\)\)\s*\{([^}]*)\}/);
     assert.ok(m, 'party menu background rule exists');
-    assert.match(m[1], /background-image:\s*url\('\/assets\/board_game\.webp'\);/);
+    // Palm Beach: the photo has a white table, so a dark layer lies over it (else the white menu texts cannot be read).
+    assert.match(m[1], /background-image:\s*linear-gradient\(rgba\(15, 23, 42, 0\.68\), rgba\(15, 23, 42, 0\.68\)\), url\('\/assets\/board_game\.webp'\);/);
     assert.match(m[1], /background-size:\s*cover;/);
     assert.match(m[1], /background-position:\s*center;/);
     assert.match(m[1], /background-repeat:\s*no-repeat;/);
-    assert.ok(!/gradient|rgba/.test(m[1]), 'no dark layer for now');
     // The picture is only referenced from that Web-scoped rule
     const urlRefs = [...css.matchAll(/url\('\/assets\/board_game\.webp'\)/g)].length;
-    assert.equal(urlRefs, 2, 'one real url() plus the example inside the comment');
+    assert.equal(urlRefs, 1, 'one url(), in the Web-scoped rule');
     assert.equal(css.indexOf("url('/assets/board_game.webp')") > css.indexOf('Web Party Edition: party menu background picture'), true, 'only after the Web section header');
 
     // Preloaded while the splash screen is showing, Web only (Steam builds never request it)

@@ -3590,11 +3590,11 @@ html:not(.edition-web) .web-only {
    A full-window photo (public/assets/board_game.webp, 2560x1440) behind the semi-transparent plate.
    'cover' fills the window and trims the edges on non-16:9 windows, centered. The rule only applies while the
    party menu (#panel-2-setup) is open, so the Open Draft, compendium and game screens keep their own look.
-   No dark layer for now. To add one later, put it first in the background list, for example:
-   background-image: linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.35)), url('/assets/board_game.webp'); */
+   Palm Beach: the photo shows the game on a white table, so a dark layer lies over it (the first item in the
+   background list). Without it the menu's white texts cannot be read. Change 0.68 to make it lighter or darker. */
 .edition-web #ui-v2-container:has(#panel-2-setup:not(.hidden)) {
   background-color: #1b1b1d;
-  background-image: url('/assets/board_game.webp');
+  background-image: linear-gradient(rgba(15, 23, 42, 0.68), rgba(15, 23, 42, 0.68)), url('/assets/board_game.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
