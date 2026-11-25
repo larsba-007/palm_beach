@@ -306,4 +306,5 @@ Lars reported: (1) the first message was gone before he could read it, (2) the g
 - Lars played the tutorial once and found no bugs.
 - `public/assets/splash.webp` is now Lars's photo of the Palm Beach board game on the table (`A6701627_BGG.jpg`, 3000 x 2003, 634 KB as .webp). The Boca picture is kept in `_to_delete/boca_art/splash_boca.webp`.
 - The small version text on the start screen is dark now, so it can be read on the light photo.
-- Still Boca's: the party menu background (`public/assets/tournament.webp` and `tournament@2x.webp`, a photo of the Boca Raton board) and the popup banner.
+- **Party menu background too** (Lars: "use it there too"): `public/assets/board_game.webp` is the same photo, cut to 2560 x 1440 (354 KB). The Boca photo is kept in `_to_delete/boca_art/board_game_boca.webp`. The photo has a white table, so a dark layer (68 %) lies over it; without it the menu's white texts could not be read. The strength is one number in `index.css` ("party menu background picture").
+- Still Boca's: the popup banner (`public/assets/board_game_support_us.webp`, 2560 x 900).
