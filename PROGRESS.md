@@ -300,3 +300,10 @@ Lars reported: (1) the first message was gone before he could read it, (2) the g
 - **Why Claude's checks missed it:** the automatic clicker pressed buttons directly, which works even when something lies on top. The check now clicks only what is really on top at that spot, like a mouse, and RE-ROLL was also clicked with a real mouse click.
 - **No tutorial text goes away by itself any more.** Roxana's two bubbles (1.5 and 1.12) now wait for NEXT. The game's own short messages ("ROUND 1: BRIGHT SHELL STARTS (30)") stay twice as long during the tutorial.
 - `tests/pb_tutorial.test.js`: 14 checks. `npm run check`: ALL 24 CHECKS PASSED.
+
+## New start screen picture (26 Nov 2026)
+
+- Lars played the tutorial once and found no bugs.
+- `public/assets/splash.webp` is now Lars's photo of the Palm Beach board game on the table (`A6701627_BGG.jpg`, 3000 x 2003, 634 KB as .webp). The Boca picture is kept in `_to_delete/boca_art/splash_boca.webp`.
+- The small version text on the start screen is dark now, so it can be read on the light photo.
+- Still Boca's: the party menu background (`public/assets/tournament.webp` and `tournament@2x.webp`, a photo of the Boca Raton board) and the popup banner.
