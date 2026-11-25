@@ -28,8 +28,11 @@ The code started as a copy of the Boca Raton game. It is changed step by step (`
 
 Palm Beach is round-based: 8 rounds, initiative, a flipping phase and an auction every round. Boca's `js/game.js` (2,900 lines) is built around free turns, so it is **not** bent into Palm Beach. Instead:
 
-- **A new rules engine in `js/rules/`** (step 1.1): small files with no screen code, each with tests. Setup, rounds and initiative, flipping, Diamonds and the automatic trade, auctions, scoring.
-- **One "ask the player" point.** Every decision (which card, re-roll or not, bid or pass) goes through one place. Version 1 answers with clicks, version 2 with a tutorial script, version 3 with an AI. The engine never assumes a human.
+- **The rules engine in `js/rules/`** (done in step 1.1): small files with no screen code, tested by `tests/pb_*.test.js`.
+  `data.js` (cards, characters, numbers), `rng.js` (shuffle and die, repeatable from a seed), `setup.js`, `initiative.js`, `flipping.js`, `diamonds.js`, `auction.js`, `scoring.js`, and `engine.js` (the whole game). Import everything from `js/rules/index.js`.
+- **One "ask the player" point.** Every decision (which card, re-roll or not, bid or pass) goes through the `askPlayer(request, game)` function given to `playGame`. Version 1 answers with clicks, version 2 with a tutorial script, version 3 with an AI. The engine never assumes a human. The list of requests is at the top of `js/rules/engine.js`.
+- **Events.** The engine tells the screen what happened through `emit(event, game)` (card flipped, die rolled, bid made, ...) and waits for it, so an animation can finish before the game goes on.
+- **The engine is not connected to the screen yet.** That happens in steps 1.2–1.5.
 - **The screen code** (`js/ui.js`, `js/main.js`) is reused where it fits: the scaling canvas, card and dice animations, the bidding window, landmark pop-ups, audio, the party menu.
 - **The rules are shared code**, so the Steam editions get them without a rewrite. Web-only behaviour stays behind `GameConfig.isWeb`.
 

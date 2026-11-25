@@ -46,7 +46,13 @@ Run one test file alone:
 node tests/web_edition.test.js
 ```
 
-The ten test files that came with the Boca code test Boca behaviour (drafts, the web menu, save keys, Boca regressions). Palm Beach rule tests are added from step 1.1. Boca tests are removed only together with the Boca code they test.
+The ten test files that came with the Boca code test Boca behaviour (drafts, the web menu, save keys, Boca regressions). Boca tests are removed only together with the Boca code they test.
+
+The Palm Beach rules are tested by the four `tests/pb_*.test.js` files (`tests/pb_helpers.js` is shared help, not a test). Each check is named after the rule it tests. To read a whole scripted game, round by round:
+
+```bash
+node tests/pb_full_game.test.js
+```
 
 ## 4. Tools
 

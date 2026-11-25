@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.0 done except the GitHub backup** (waiting for Lars). Next: step 1.1, after Lars has tried 1.0.
+- **Current step: 1.1 done** (rules engine and tests). Next: step 1.2, after Lars has looked at 1.1.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -30,7 +30,7 @@
 ## Version 1 characters (changed by Lars 25 Nov 2026, replaces decision 1 in PLAN.md)
 **Roxana, Mr. Flagler, Bright Shell, Carina, Skip.** The other five are locked. (Ms. Post is out, Roxana is in. Edith and Kingston stay out: secret peeks don't work on a shared screen.) `PLAN.md` still lists the old five: Lars to update it, or tell Claude Code to.
 
-## Step 1.0 (25 Nov 2026): done, except GitHub
+## Step 1.0 (25 Nov 2026): done
 - Git repository started. First commit `7da64a8` = the Boca web snapshot + Palm Beach art (the reference point for "how Boca did it").
 - Renamed to Palm Beach: app name, browser tab title, the title at the top of the table (`palm_beach_logo.webp`), About text, Electron product names.
 - Own save keys: `palmBeachWebSave`, `palmBeachSaveGame`, Electron folder `palm-beach-save`. Boca's old save migration is switched off, so Boca saves are never read.
@@ -39,15 +39,42 @@
 - `npm run check`: ALL 15 CHECKS PASSED. Its fourth check now confirms the Steam and Electron files are still in the project (Boca compared them with its `main` branch, which means nothing here).
 - New tool `scripts/png-to-webp.cjs` (this Mac has no cwebp).
 - Moved to `_to_delete/`: two empty stray files from the project root, and a nameless `.webp` from `public/assets/`.
-- **Not done: GitHub.** The `gh` tool is not installed on this Mac, so Lars creates an empty private repository on github.com and gives Claude Code its address.
+- **GitHub backup:** the private repository `larsba-007/palm_beach` on github.com, branch `main`. Push after every step with `git push`.
 - **Not changed: the splash picture.** Its title ("Boca Raton and Palm Beach / Gold Coast Gambits") is part of the picture.
 - `CLAUDE.md` still mentions `docs/CLAUDE_BOCA_INHERITED.md` and says the docs are not rewritten yet. Lars to update, or tell Claude Code to.
 
+## Step 1.1 (25 Nov 2026): done
+The Palm Beach rules engine, with no screen code, in `js/rules/`:
+
+| File | What it holds |
+|---|---|
+| `data.js` | The 64 Map Cards and their bonus circles, 17 Luxury Cards, 3 Property Cards, the 10 characters (powers, counters, initiative), the numbers (5 Au, 8 rounds, 4 Diamonds) |
+| `rng.js` | Shuffling and the die. A game can be replayed exactly from its seed. |
+| `setup.js` | Laying out a new game |
+| `initiative.js` | Who starts each round, turn order |
+| `flipping.js` | Die rolls, rewards, bonus circles, character powers, re-rolls |
+| `diamonds.js` | The Automatic Diamond Trade, Luxury Cards with re-rolls |
+| `auction.js` | One auction: bid, raise, pass |
+| `scoring.js` | Prestige Points and the tiebreaker |
+| `engine.js` | The whole game: 8 rounds, auctions, Property Auction, scoring. Every decision goes through one "ask the player" point. |
+
+- **Tests:** 59 named checks in four files (`tests/pb_*.test.js`), each tied to a rule in the rulebook or to one of Lars's answers. A scripted 4-player game is printed round by round: `node tests/pb_full_game.test.js`. 1,000 more games (1–5 players, all 10 characters, all variations) are played and audited in the same file.
+- `npm run check`: ALL 19 CHECKS PASSED.
+- **Nothing on screen has changed.** The game in the browser still plays by Boca rules until steps 1.2–1.5 connect the screen to the new engine.
+- All 10 characters and all three variations are in the engine (the tests need them); version 1 will only offer the five chosen characters and Lake Worth.
+- Not built: the solo Automa (version 3).
+
+### Choices made in step 1.1 that Lars should know
+1. **Re-roll only after a miss** (Lars's answer 7). The rulebook says "whenever you roll". So Roxana or Carina cannot spend a re-roll on a successful roll to hunt for a 5–6 bonus.
+2. **A player who cannot afford the next bid passes automatically**, without being asked.
+3. **The last player left may still buy for 1 Au** when everyone before them passed.
+4. **Nobody may skip a turn** in the flipping phase: you must choose a face-down card in the row.
+5. **Clockwise = the order of the seats** in the party menu (player 1, 2, 3, 4).
+
 ## Next
-Step 1.1 in `PLAN.md` (rules engine, no screen), after Lars has tried step 1.0 and said OK.
+Step 1.2 in `PLAN.md` (the table on screen), after Lars has looked at step 1.1 and said OK.
 
 ## Open questions for Lars
-- **GitHub:** create an empty private repository and give Claude Code its address (or install `gh`).
 - **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.
 - **Luxury, Property and Auction Map Card pictures** are Boca's files: are they the same as the printed Palm Beach cards? (See `docs/ASSETS.md`.)
 - Support popup texts (`SUPPORT_POPUP.md`): approve before step 1.6.

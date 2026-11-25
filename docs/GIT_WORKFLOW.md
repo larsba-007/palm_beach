@@ -7,7 +7,7 @@
 - This folder is its own git repository, started 25 Nov 2026. It has no connection to the Boca Raton repository.
 - One branch: `main`.
 - **The first commit (`7da64a8`) is the reference point** for "how Boca did it": the untouched Boca web code plus the Palm Beach art. See an original file with `git show 7da64a8:js/game.js`.
-- Backup: a **private GitHub repository** for Palm Beach. Push after every finished step. Never force-push.
+- Backup: the **private GitHub repository** `larsba-007/palm_beach` (remote name `origin`). Push after every finished step. Never force-push.
 
 ## 2. How the work is saved
 
