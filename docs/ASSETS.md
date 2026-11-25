@@ -11,6 +11,7 @@ Everything the game shows or plays is in `public/assets/`. Pictures are `.webp`.
 | `map_cards_front.webp` | 2000 × 2000 | The 64 Map Card fronts, 8 × 8 cards of 250 px, with the yellow +5, +2 and +1 circles. Card number = row × 8 + column. |
 | `character_cards_print.webp` | 3500 × 2400 | The 10 Palm Beach character cards, 5 × 2 cards of 700 × 1200. Order: Edith, Roxana, Addison, Mr. Flagler, Kingston / Ms. Post, Eric, Bright Shell, Carina, Skip. |
 | `diamond.webp` | 358 × 258 | The Diamond, transparent. Not used on screen yet. |
+| `pb_map_cards_back.webp` | 1250 × 250 | The five Map Card backs in a row: Lagoon, Waterfront Lagoon, Block, Waterfront Atlantic, Atlantic. Made with `scripts/make-sprite.cjs` from `assets_source/palm_beach_print/other/BACK_MAP_*.png`. |
 | `palm_beach_logo.webp` | 1440 × 240 | The PALM BEACH title, transparent. Shown at the top of the table. Made from `assets_source/palm_beach_print/other/LOGO_palm_beach_gold.png`. |
 
 ## 2. Still Boca Raton art (to check or replace)
@@ -18,7 +19,7 @@ Everything the game shows or plays is in `public/assets/`. Pictures are `.webp`.
 | File | Size | Used for | What is needed |
 |---|---|---|---|
 | `splash.webp` | 3840 × 2160 | The first screen | **The title in the picture says "Boca Raton and Palm Beach / Gold Coast Gambits".** Lars: a new picture, 3840 × 2160 `.webp`, under 1 MB, or the same photo without text so the Palm Beach logo can be laid on top. |
-| `map_cards_back.webp` | 1000 × 250 | The four Map Card backs | The Waterfront back shows +4 Au. Step 1.2: make new backs from `assets_source/palm_beach_print/other/BACK_MAP_*.png` (they show the Diamond). |
+| `map_cards_back.webp` | 1000 × 250 | The four Boca Map Card backs | Replaced on the Palm Beach table by `pb_map_cards_back.webp`. Still used by the Boca tutorial. |
 | `luxury_cards_front.webp` | 750 × 1750 | The 17 Luxury Cards | Lars to confirm they match the printed Palm Beach cards (same 17 cards in both games?). |
 | `luxury_card_back.webp` | 250 × 250 | Luxury Card back | Compare with `BACK_LUX_1_TIGER.png` in step 1.2. |
 | `property_cards_front.webp` | 750 × 250 | The 3 Property Cards | Lars to confirm. |

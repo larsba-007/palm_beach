@@ -2760,6 +2760,85 @@ input[type=range]::-webkit-slider-runnable-track {
 .edition-web .steam-only {
   display: none !important;
 }
+/* =====================================================================================
+   PALM BEACH TABLE (js/pb/table.js). Added to #board-wrapper as the class "pb-table".
+   Everything is placed with absolute pixel positions on the 3840 x 2160 canvas.
+   ===================================================================================== */
+
+/* The board is a plain 2250 x 2000 area; cards are placed by js/pb/layout.js (not by the Boca grid). */
+#board-wrapper.pb-table #grid-container {
+    display: block;
+    position: relative;
+}
+
+/* Boca parts that Palm Beach does not have: two mid-board auctions, three priced Luxury piles, campaign objective. */
+#board-wrapper.pb-table #auction-A,
+#board-wrapper.pb-table #auction-B,
+#board-wrapper.pb-table #deck-container-0,
+#board-wrapper.pb-table #deck-container-1,
+#board-wrapper.pb-table #deck-container-2,
+#board-wrapper.pb-table #luxury-decks-title,
+#board-wrapper.pb-table #objective-btn {
+    display: none !important;
+}
+
+/* The Luxury Cards now fill the right sidebar from top to bottom, so RESIGN and the settings wheel
+   move to the bottom-left corner of the table. (The sidebar starts 3400 px from the left edge.) */
+#board-wrapper.pb-table #settings-cog-btn {
+    right: auto;
+    left: -3350px;
+    bottom: 48px;
+}
+#board-wrapper.pb-table #resign-btn {
+    left: -3160px;
+    bottom: 68px;
+    transform: none;
+}
+
+#pb-luxury-column {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 430px;
+    height: 2160px;
+    pointer-events: none;
+}
+
+.pb-card {
+    box-sizing: border-box;
+    background-color: #ffffff;
+    border: 1px solid #333333;
+    user-select: none;
+}
+
+.pb-luxury-card,
+.pb-property-card {
+    border-radius: 6px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+
+.pb-auction-map {
+    z-index: 2;
+}
+
+/* The number 2 on the top card of a stack of two Luxury Cards (rows 4 and 6). */
+.pb-stack-count {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #ffffff;
+    color: #0f172a;
+    font-family: 'Overpass', sans-serif;
+    font-weight: 900;
+    font-size: 40px;
+    line-height: 64px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
 /* ---- Web Party Edition: party menu ----
    Hide rule for the variation/visitor picker, show rule for web-only elements, and the layout of the
    shared setup elements. All positions are absolute pixel coordinates inside the 2840x1660 .v2-panel

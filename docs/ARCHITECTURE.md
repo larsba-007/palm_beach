@@ -32,7 +32,8 @@ Palm Beach is round-based: 8 rounds, initiative, a flipping phase and an auction
   `data.js` (cards, characters, numbers), `rng.js` (shuffle and die, repeatable from a seed), `setup.js`, `initiative.js`, `flipping.js`, `diamonds.js`, `auction.js`, `scoring.js`, and `engine.js` (the whole game). Import everything from `js/rules/index.js`.
 - **One "ask the player" point.** Every decision (which card, re-roll or not, bid or pass) goes through the `askPlayer(request, game)` function given to `playGame`. Version 1 answers with clicks, version 2 with a tutorial script, version 3 with an AI. The engine never assumes a human. The list of requests is at the top of `js/rules/engine.js`.
 - **Events.** The engine tells the screen what happened through `emit(event, game)` (card flipped, die rolled, bid made, ...) and waits for it, so an animation can finish before the game goes on.
-- **The engine is not connected to the screen yet.** That happens in steps 1.2–1.5.
+- **The Palm Beach screen code is in `js/pb/`.** `layout.js` holds every position on the table as plain numbers (tested without a browser). `table.js` draws the table from the engine's game object (done in step 1.2). `initGame()` in `js/game.js` calls it for a normal match and does not start the Boca turn cycle.
+- **Clicks are not connected yet.** That happens in steps 1.4–1.5.
 - **The screen code** (`js/ui.js`, `js/main.js`) is reused where it fits: the scaling canvas, card and dice animations, the bidding window, landmark pop-ups, audio, the party menu.
 - **The rules are shared code**, so the Steam editions get them without a rewrite. Web-only behaviour stays behind `GameConfig.isWeb`.
 

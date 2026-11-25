@@ -4,6 +4,7 @@ import { CHARACTERS, AUCTION_SLOTS, PROPERTY_CARDS, FISCAL_TYPES, LUXURY_PREFS, 
 import { landmarkData } from './landmarks.js';
 import { audioMgr } from './audio.js';
 import { state } from './state.js';
+import { createPalmBeachGame, renderPalmBeachTable, clearPalmBeachTable } from './pb/table.js';
 import { setupBoard, initPlayerCards, updateUI, updateCardVisuals, animateCellFlip, flyTextAnimation, flyCardAnimation, rollDiceVisual, getCharacterCardStyle, loadHighScores, setupAuctionVisuals, showAuctionBonusPopup, animateAuctionWin, triggerWaveAnimation, animateJaegaSetup, animateRoxanaSetup, showVariationSplash, centerBoardView, highlightTargetCell, clearTargetHighlight, showTurnBanner, hideDiceOverlay } from './ui.js';
 import * as Debug from './debug.js';
 import { TutorialManager } from './tutorial.js';
@@ -424,6 +425,18 @@ export function initGame() {
     setupBoard();
     initPlayerCards();
     updateUI();
+
+    // PALM BEACH (step 1.2): a normal match shows the Palm Beach table instead of the Boca board.
+    // The Boca turn cycle is not started: nothing is clickable until steps 1.4 and 1.5 connect the rules engine.
+    if (state.mode !== 'TUTORIAL' && !state.activeGambitId) {
+        state.pb = createPalmBeachGame(state.players);
+        if (typeof window !== 'undefined') window.pb = state.pb;
+        renderPalmBeachTable(state.pb.game);
+        document.getElementById('game-ui').classList.remove('opacity-0', 'pointer-events-none');
+        centerBoardView();
+        return;
+    }
+    clearPalmBeachTable();
 
     if (state.mode === 'TUTORIAL') {
         document.getElementById('game-ui').classList.remove('opacity-0', 'pointer-events-none');

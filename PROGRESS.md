@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.1 done** (rules engine and tests). Next: step 1.2, after Lars has looked at 1.1.
+- **Current step: 1.2 done** (the table on screen). Next: step 1.3, after Lars has tried 1.2.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -64,15 +64,40 @@ The Palm Beach rules engine, with no screen code, in `js/rules/`:
 - All 10 characters and all three variations are in the engine (the tests need them); version 1 will only offer the five chosen characters and Lake Worth.
 - Not built: the solo Automa (version 3).
 
-### Choices made in step 1.1 that Lars should know
+### Choices made in step 1.1 (1–4 confirmed by Lars 25 Nov 2026; 5 explained, waiting for his OK)
 1. **Re-roll only after a miss** (Lars's answer 7). The rulebook says "whenever you roll". So Roxana or Carina cannot spend a re-roll on a successful roll to hunt for a 5–6 bonus.
 2. **A player who cannot afford the next bid passes automatically**, without being asked.
 3. **The last player left may still buy for 1 Au** when everyone before them passed.
 4. **Nobody may skip a turn** in the flipping phase: you must choose a face-down card in the row.
 5. **Clockwise = the order of the seats** in the party menu (player 1, 2, 3, 4).
 
+## Step 1.2 (25 Nov 2026): done
+The Palm Beach table is on screen. Start a match from the party menu to see it. Nothing is clickable yet.
+
+- **Board:** rows 1–6 with 9 cards, rows 7–8 with 5 cards (Lagoon, Waterfront, Block ... Waterfront, Atlantic), all face down. The cards are dealt by the rules engine, so every match has a new layout.
+- **Auction Map Card:** at the end of rows 7 and 8, face down, with the **3 Property Cards on it, side by side, face up** (Mar-a-Lago IV, Gulf Stream III, Spanish River II).
+- **Luxury Cards:** one face-down card to the right of each row. Rows 4 and 6 have two stacked: the lower card shows a little to the right, and the top card carries the number 2.
+- **Not drawn:** the Bank's Diamonds and the pile of 7 Luxury Cards for Diamond trades. They are in the game.
+- **Title:** PALM BEACH at the top.
+- **Card backs:** new file `pb_map_cards_back.webp` from the print art, with its own back for Waterfront on the Atlantic side (Boca showed "Waterfront Lagoon" on both sides).
+- **Moved:** RESIGN and the settings wheel are now in the bottom-left corner, because the Luxury Cards fill the right side from top to bottom. COMPENDIUM stays top right.
+- **Switched off on the Palm Beach table:** Boca's two mid-board auctions, the three Luxury piles with prices, the campaign OBJECTIVE button.
+- New code: `js/pb/layout.js` (positions, pure and tested) and `js/pb/table.js` (drawing). 11 new checks in `tests/pb_table_layout.test.js`. `npm run check`: ALL 20 CHECKS PASSED.
+- Checked in the browser at 1920 × 1080 and 1366 × 768.
+
+### Still Boca on screen after step 1.2 (comes in step 1.3)
+- The player panels top left: Boca counters (Extra Turns), Boca starting values, no Diamonds.
+- The characters you can pick: still the Boca demo slots (Edith, Ms. Post, Bright Shell, Carina, Skip), not the five chosen for version 1.
+- The Boca tutorial button still starts the Boca tutorial with the Boca board.
+
+### Choices made in step 1.2 that Lars should look at
+1. The 3 Property Cards lie **face up** on the Auction Map Card (everyone knows which three exist).
+2. Luxury Cards are the same size as the Map Cards (250 px), so they touch each other down the right side.
+3. RESIGN and the settings wheel moved to the bottom-left corner.
+4. The Waterfront card backs still show "+4 Au" beside the Diamond, as printed (the rulebook explains it).
+
 ## Next
-Step 1.2 in `PLAN.md` (the table on screen), after Lars has looked at step 1.1 and said OK.
+Step 1.3 in `PLAN.md` (characters and player panels), after Lars has tried step 1.2 and said OK.
 
 ## Open questions for Lars
 - **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.
