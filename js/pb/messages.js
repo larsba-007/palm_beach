@@ -41,3 +41,77 @@ export function rewardText(reward) {
     if (reward.gold) parts.push(`${reward.gold} Au`);
     return parts.join(' + ');
 }
+
+// ---- Auctions (step 1.5) ----------------------------------------------------------------------------
+// Lars, 25 Nov 2026: "You always have to bid at least +1 Au. Use the same system as for Boca":
+// buttons that raise the highest bid by 1, 3 or 5 Au, and a button to pass.
+export const RAISE_STEPS = Object.freeze([1, 3, 5]);
+
+/**
+ * The buttons a bidder gets. A raise the player cannot afford is shown but switched off.
+ * @param {{highBid: number, highBidder: number|null, minBid: number, maxBid: number}} request  the engine's BID request
+ */
+export function bidChoices(request) {
+    const base = request.highBidder === null ? 0 : request.highBid;
+    const first = request.highBidder === null;
+    return RAISE_STEPS.map(step => {
+        const amount = base + step;
+        return {
+            step,
+            amount,
+            label: first ? `BID ${amount}` : `RAISE +${step}`,
+            hint: `${amount} Au`,
+            enabled: amount >= request.minBid && amount <= request.maxBid
+        };
+    });
+}
+
+export function auctionTitle(game, kind) {
+    return kind === 'PROPERTY' ? 'PROPERTY AUCTION' : `LUXURY AUCTION · ROUND ${game.round}`;
+}
+
+export function cardLine(card) {
+    return `${card.name.toUpperCase()} · ${card.points} PRESTIGE POINT${card.points === 1 ? '' : 'S'}`;
+}
+
+export function highBidText(game, auction) {
+    if (auction.highBidder === null) return { amount: 'NO BID YET', who: 'The lowest bid is 1 Au' };
+    return { amount: `${auction.highBid} Au`, who: `Highest bid: ${nameOf(game, auction.highBidder)}` };
+}
+
+export function bidTurnText(game, request) {
+    return `${nameOf(game, request.playerId).toUpperCase()}: BID OR PASS. YOU HAVE ${request.maxBid} Au.`;
+}
+
+/** One line per player in bidding order: still in, passed, or holding the highest bid. */
+export function bidderStatuses(game, auction) {
+    return auction.order.map(seat => ({
+        playerId: seat,
+        name: nameOf(game, seat),
+        gold: game.players[seat].gold,
+        status: auction.highBidder === seat ? 'HIGHEST' : (auction.active.includes(seat) ? 'IN' : 'PASSED'),
+        isTurn: auction.turn === seat
+    }));
+}
+
+export function auctionWonText(game, e) {
+    return `${nameOf(game, e.playerId).toUpperCase()} WINS ${e.kind === 'PROPERTY' ? '' : 'THE '}${e.card.name.toUpperCase()} FOR ${e.price} Au`;
+}
+
+export function auctionUnsoldText(e) {
+    return e.kind === 'PROPERTY'
+        ? `NOBODY BID. NO ONE GETS ${e.card.name.toUpperCase()}.`
+        : `NOBODY BID. THE ${e.card.name.toUpperCase()} IS REMOVED FROM THE GAME.`;
+}
+
+export function forcedPassText(game, playerId) {
+    return `${nameOf(game, playerId).toUpperCase()} CANNOT AFFORD A HIGHER BID AND PASSES`;
+}
+
+/** The lines of the end-of-game box (the full scoring screen is step 1.6). */
+export function gameOverText(result) {
+    const names = result.winners.map(id => result.scores[id].name);
+    const how = { POINTS: 'most Prestige Points', PROPERTY: 'tie, won by the Property Card', GOLD: 'tie, won by most gold left', SHARED: 'shared victory' }[result.decidedBy];
+    const scores = result.scores.map(s => `${s.name}: ${s.prestige} Prestige Points, ${s.gold} Au`).join('  ·  ');
+    return { title: `${names.join(' & ').toUpperCase()} WIN${names.length === 1 ? 'S' : ''}`, text: `${scores}. (${how}.)` };
+}

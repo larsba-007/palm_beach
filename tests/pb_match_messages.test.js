@@ -77,9 +77,4 @@ await check('Landmark cards are the 12 cards with a +2 or +1 circle', async () =
     }
 });
 
-await check('Step 1.4 only: nobody bids yet, and the code says so (auctions come in step 1.5)', () => {
-    const match = fs.readFileSync('js/pb/match.js', 'utf8');
-    assert.match(match, /case 'BID':\s*\/\/ Step 1\.4: no auctions yet[\s\S]{0,160}return \{ action: 'PASS' \};/);
-});
-
 console.log('\nAll flipping-on-screen checks passed.');

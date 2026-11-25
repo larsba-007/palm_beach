@@ -3070,6 +3070,142 @@ input[type=range]::-webkit-slider-runnable-track {
     content: '\2605\00a0';
 }
 
+/* ---- Palm Beach auction window (js/pb/auction_view.js) ----------------------------------------- */
+#pb-auction-layer {
+    position: absolute;
+    left: 1150px;
+    top: 0;
+    width: 2680px;
+    height: 2160px;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1250;
+}
+#pb-auction {
+    position: absolute;
+    left: 125px;
+    top: 430px;
+    width: 2000px;
+    height: 1040px;
+    background-color: rgba(38, 56, 92, 0.94);
+    font-family: 'Overpass', sans-serif;
+    color: #ffffff;
+}
+.pb-auction-card {
+    position: absolute;
+    left: 80px;
+    top: 200px;
+    width: 640px;
+    height: 640px;
+    background-repeat: no-repeat;
+    background-color: #ffffff;
+    border-radius: 14px;
+    border: 3px solid #F3C80D;
+    box-shadow: 0 0 60px rgba(243, 200, 13, 0.5), 0 25px 60px rgba(0, 0, 0, 0.5);
+}
+.pb-auction-title {
+    position: absolute;
+    left: 80px;
+    top: 60px;
+    width: 1840px;
+    font-weight: 900;
+    font-size: 64px;
+    line-height: 80px;
+    letter-spacing: 0.08em;
+    color: #F3C80D;
+}
+.pb-auction-cardline {
+    position: absolute;
+    left: 800px;
+    top: 200px;
+    width: 1120px;
+    font-weight: 700;
+    font-size: 44px;
+    line-height: 56px;
+    letter-spacing: 0.04em;
+}
+.pb-auction-amount {
+    position: absolute;
+    left: 800px;
+    top: 280px;
+    width: 1120px;
+    font-weight: 900;
+    font-size: 120px;
+    line-height: 140px;
+    color: #F3C80D;
+}
+.pb-auction-who {
+    position: absolute;
+    left: 800px;
+    top: 420px;
+    width: 1120px;
+    font-weight: 300;
+    font-size: 44px;
+    line-height: 56px;
+}
+.pb-auction-bidders {
+    position: absolute;
+    left: 800px;
+    top: 510px;
+    width: 1120px;
+    height: 150px;
+}
+.pb-bidder {
+    position: absolute;
+    top: 0;
+    height: 150px;
+    box-sizing: border-box;
+    border-radius: 16px;
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    text-align: center;
+    overflow: hidden;
+}
+.pb-bidder-name { font-weight: 900; font-size: 30px; line-height: 50px; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0 8px; }
+.pb-bidder-status { font-weight: 900; font-size: 34px; line-height: 46px; }
+.pb-bidder-gold { font-weight: 300; font-size: 28px; line-height: 40px; color: #F3C80D; }
+.pb-bidder-passed { opacity: 0.4; }
+.pb-bidder-highest { border-color: #F3C80D; background: rgba(243, 200, 13, 0.18); }
+.pb-bidder-turn { border-color: #ffffff; box-shadow: 0 0 0 5px #ffffff; }
+.pb-auction-turn {
+    position: absolute;
+    left: 800px;
+    top: 700px;
+    width: 1120px;
+    font-weight: 900;
+    font-size: 40px;
+    line-height: 56px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pb-auction-buttons {
+    position: absolute;
+    left: 800px;
+    top: 790px;
+    width: 1120px;
+    height: 170px;
+}
+.pb-bid-btn {
+    position: absolute;
+    top: 0;
+    width: 260px;
+    height: 170px;
+    border-radius: 24px;
+    border: 4px solid #F3C80D;
+    background: #F3C80D;
+    color: #0f172a;
+    font-family: 'Overpass', sans-serif;
+    cursor: pointer;
+    padding: 0;
+}
+.pb-bid-btn:hover { background: #ffd92e; }
+.pb-bid-btn:disabled { background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.35); cursor: not-allowed; }
+.pb-bid-btn-pass { background: rgba(255, 255, 255, 0.12); border-color: rgba(255, 255, 255, 0.6); color: #ffffff; }
+.pb-bid-btn-pass:hover { background: rgba(255, 255, 255, 0.28); }
+.pb-bid-btn-label { font-weight: 900; font-size: 42px; line-height: 60px; letter-spacing: 0.04em; pointer-events: none; }
+.pb-bid-btn-hint { font-weight: 400; font-size: 28px; line-height: 36px; pointer-events: none; }
+
 /* The number 2 on the top card of a stack of two Luxury Cards (rows 4 and 6). */
 .pb-stack-count {
     position: absolute;

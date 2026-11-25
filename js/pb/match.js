@@ -4,16 +4,19 @@
 // through emit. This file answers the questions with the players' clicks (hot seat: everyone uses the same
 // screen) and turns the events into what you see and hear.
 //
-// Step 1.4: the card flipping phase of all 8 rounds. The auctions are step 1.5: until then nobody bids,
-// so every card goes unsold.
+// Steps 1.4 and 1.5: the card flipping phase, the Luxury Auctions and the Property Auction: a complete game.
 
 import { playGame } from '../rules/engine.js';
-import { nameOf, diamondTradeMessage, rerollMessage, roundStartMessage, statusText } from './messages.js';
+import {
+    nameOf, diamondTradeMessage, rerollMessage, roundStartMessage, statusText,
+    auctionWonText, auctionUnsoldText, forcedPassText, gameOverText
+} from './messages.js';
+import { openAuction, updateAuction, askBid, closeAuction } from './auction_view.js';
 import { renderPalmBeachTable, paintMapCard } from './table.js';
 import { renderPalmBeachPanels } from './panels.js';
 import {
-    wait, rollDice, hideDice, flipMapCard, flyGold, flyDiamond, showLandmark, revealLuxuryCard,
-    showDialog, showToast, setStatus, frameRow
+    wait, rollDice, hideDice, flipMapCard, flyGold, flyDiamond, showLandmark, revealLuxuryCard, revealWonCard,
+    showDialog, showToast, setStatus, frameRow, playSound
 } from './effects.js';
 
 // ---- Running a match ------------------------------------------------------------------------------------
@@ -64,8 +67,8 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
                 return showDialog({ title: m.title, text: m.text, buttons: [{ label: m.ok, value: true, primary: true }] });
             }
             case 'BID':
-                // Step 1.4: no auctions yet. Everyone passes, so the card goes unsold. Step 1.5 replaces this.
-                return { action: 'PASS' };
+                // The auction window asks the bidder: raise the highest bid by 1, 3 or 5 Au, or pass.
+                return askBid(request, game);
             default:
                 return true;
         }
@@ -124,13 +127,39 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
                 await showToast(`ROW ${e.round} IS COMPLETE`, 1200);
                 break;
             case 'AUCTION_START':
-                refreshStatus();
-                break;
-            case 'AUCTION_UNSOLD':
-                // Step 1.4 only: the auctions are not built yet.
+                // The round's Luxury Card is turned face up beside its row, then the auction window opens.
+                frameRow(null);
                 renderPalmBeachTable(game);
                 refreshPanels();
-                await showToast(e.kind === 'PROPERTY' ? 'THE PROPERTY AUCTION COMES IN STEP 1.5' : `${e.card.name.toUpperCase()}: THE AUCTION COMES IN STEP 1.5`, 1500);
+                refreshStatus();
+                await wait(e.kind === 'LUXURY' ? 700 : 300);
+                playSound('auction_alert');
+                openAuction(game, e.kind, e.card);
+                break;
+            case 'BID':
+                playSound('bid');
+                refreshPanels();
+                updateAuction(game);
+                await wait(250);
+                break;
+            case 'PASS':
+                playSound('fold');
+                updateAuction(game);
+                if (e.forced) await showToast(forcedPassText(game, e.playerId), 1500);
+                else await wait(250);
+                break;
+            case 'AUCTION_WON':
+                await showToast(auctionWonText(game, e), 1700);
+                closeAuction();
+                renderPalmBeachTable(game);
+                await revealWonCard(e.card, e.playerId, { kind: e.kind, hold: 900 });
+                refreshPanels();
+                break;
+            case 'AUCTION_UNSOLD':
+                await showToast(auctionUnsoldText(e), 2000);
+                closeAuction();
+                renderPalmBeachTable(game);
+                refreshPanels();
                 break;
             case 'AUCTION_MAP_FLIPPED':
                 renderPalmBeachTable(game);
@@ -141,11 +170,13 @@ export async function runPalmBeachMatch(pb, { isCurrent = () => true } = {}) {
                 await showToast(`${nameOf(game, e.playerId).toUpperCase()} COLLECTS ${e.gold} Au`, 1600);
                 break;
             case 'GAME_OVER': {
+                closeAuction();
                 renderPalmBeachTable(game);
                 refreshPanels();
                 refreshStatus();
-                const lines = e.result.scores.map(s => `${s.name}: ${s.prestige} Prestige Points, ${s.gold} Au`).join('  ·  ');
-                await showDialog({ title: 'ALL 8 ROUNDS PLAYED', text: `${lines}. The final scoring screen comes in step 1.6.`, buttons: [{ label: 'OK', value: true, primary: true }] });
+                playSound('winner_song');
+                const m = gameOverText(e.result);       // the full scoring screen is step 1.6
+                await showDialog({ title: m.title, text: m.text, buttons: [{ label: 'OK', value: true, primary: true }] });
                 break;
             }
             default:

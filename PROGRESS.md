@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.4 done** (the flipping phase can be played). Next: step 1.5, after Lars has tried 1.4.
+- **Current step: 1.5 done** (a complete game can be played). Next: step 1.6, after Lars has tried 1.5.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -132,7 +132,7 @@ The card flipping phase of all 8 rounds can be played, hot seat. The rules engin
 - Checked in the browser: a whole 3-player game played to the end by an automatic clicker with no errors (all 64 cards flipped, Diamond trades happened), and the re-roll and Diamond trade popups looked at by hand.
 
 ### Not in step 1.4 (on purpose)
-- **No auctions yet.** Until step 1.5 nobody bids, so every Luxury Card and the Property Card go unsold, with the message "the auction comes in step 1.5". Points can only come from Diamond trades.
+- **No auctions yet** (added in step 1.5).
 - **No final scoring screen** (step 1.6): only a simple box with the points.
 - **A match is not saved.** Reloading the page or leaving the match ends it.
 
@@ -141,8 +141,27 @@ The card flipping phase of all 8 rounds can be played, hot seat. The rules engin
 2. The landmark pop-up covers the Luxury Cards on the right while it is open.
 3. The "new Luxury Card" moment: is it enough, or should it be bigger?
 
+## Step 1.5 (25 Nov 2026): done
+A complete game can be played from start to finish: 8 rounds of flipping, 10 Luxury Auctions, the Property Auction, a winner.
+
+- **Luxury Auction after each row:** the round's Luxury Card is turned face up beside its row, then the auction window opens. In rounds 4 and 6 the two cards are auctioned one after the other; the start player opens both.
+- **The auction window** shows the card large, its Prestige Points, the highest bid and who made it, and every player as IN, PASSED or BID n, with their gold.
+- **Bidding uses the Boca system** (Lars's answer): buttons that raise the highest bid by 1, 3 or 5 Au, and PASS. The first bidder sees BID 1, BID 3, BID 5. A raise the player cannot afford is switched off.
+- **Passing:** once you pass you are out of that auction. A player who cannot afford a higher bid passes automatically, with a message.
+- **Winning:** the winner pays, the card appears large and flies to their panel; re-rolls on the card are added at once.
+- **Nobody bids:** the Luxury Card is removed from the game, with a message.
+- **Property Auction after round 8:** the Auction Map Card is flipped, the other two Property Cards are removed, characters collect their gold (with a message), then the property is auctioned the same way. If nobody bids, nobody gets it.
+- **End:** a box names the winner, everyone's Prestige Points and gold, and how a tie was decided. (The proper final scoring screen is step 1.6.)
+- New code: `js/pb/auction_view.js`; auction words in `js/pb/messages.js`. 7 new checks in `tests/pb_auction_view.test.js`, including 200 whole games bid only through the buttons. `npm run check`: ALL 22 CHECKS PASSED.
+- Checked in the browser: one auction bid by hand (bids, a pass, a forced pass, the win), then a whole 3-player game played to the end by an automatic clicker with no errors. The Property Card was sold and a winner was named.
+
+### For Lars to look at after step 1.5
+1. **Raising by 1, 3 or 5** is the Boca system. A Property Auction with 60 Au on each side takes many clicks. Want a bigger step too (for example +10)?
+2. After the end box, the table stays as it is. RESIGN (bottom left) goes back to the menu. A proper end screen with PLAY AGAIN is step 1.6.
+3. Not tried by hand: games with 2, 4 and 5 players through the auctions (the tests cover them; the browser run was 3 players).
+
 ## Next
-Step 1.5 in `PLAN.md` (Luxury Auctions and the Property Auction), after Lars has tried step 1.4 and said OK.
+Step 1.6 in `PLAN.md` (final scoring screen, round and phase indicator, sounds, cheat sheet, small-window notice, support popup, tidy the party menu and the Compendium), after Lars has tried step 1.5 and said OK.
 
 ## Open questions for Lars
 - **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.

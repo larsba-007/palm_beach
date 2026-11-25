@@ -2,14 +2,14 @@
 // Every effect returns a Promise that finishes when the effect is over, so the game waits for it.
 // Screen code only: the rules are in js/rules/.
 
-import { CARD_SPRITE_URL, LUXURY_CARD_SPRITE_URL } from '../data.js';
+import { CARD_SPRITE_URL, LUXURY_CARD_SPRITE_URL, PROPERTY_SPRITE_URL } from '../data.js';
 import { audioMgr } from '../audio.js';
 import { landmarkData } from '../landmarks.js';
 import { showLandmarkDossier } from '../ui.js';
 import { state } from '../state.js';
 import { PB_MAP_BACK_URL } from './table.js';
 import { DIAMOND_URL } from './panels.js';
-import { luxuryFrontSprite } from './layout.js';
+import { luxuryFrontSprite, propertyFrontSprite } from './layout.js';
 
 const BACK_ORDER = ['LAGOON', 'WF_LAGOON', 'BLOCK', 'WF_ATLANTIC', 'ATLANTIC'];
 
@@ -21,6 +21,7 @@ export function wait(ms) {
 
 const zoom = () => state.zoom || 1;
 const play = (sound) => { try { audioMgr.play(sound); } catch { /* sound is never allowed to stop the game */ } };
+export const playSound = play;
 
 // ---- The die ---------------------------------------------------------------------------------------
 /** Rolls the die on screen and shows the result. */
@@ -150,8 +151,12 @@ export function showLandmark(card) {
 }
 
 // ---- A new Luxury Card (Automatic Diamond Trade) ----------------------------------------------------------
-/** The "new Luxury Card" moment: the card appears large in the middle of the table, then flies to the player's panel. */
-export async function revealLuxuryCard(card, playerId) {
+/**
+ * A player gets a card: it appears large in the middle of the table, then flies to the player's panel.
+ * Used for the "new Luxury Card" moment after a Diamond trade, and when a card is won at auction.
+ * @param {{kind?: 'LUXURY'|'PROPERTY', hold?: number}} [options]  hold = how long the card stays in the middle (ms)
+ */
+export async function revealWonCard(card, playerId, { kind = 'LUXURY', hold = 1700 } = {}) {
     const board = document.getElementById('grid-container');
     const panel = document.getElementById(`pb-panel-${playerId}`);
     if (!board) return;
@@ -159,10 +164,11 @@ export async function revealLuxuryCard(card, playerId) {
     const size = 620 * zoom();
     const el = document.createElement('div');
     el.className = 'pb-luxury-reveal';
-    const sprite = luxuryFrontSprite(card.spriteIndex);
+    const sprite = kind === 'PROPERTY' ? propertyFrontSprite(card.id) : luxuryFrontSprite(card.spriteIndex);
     const f = size / 250;
-    el.style.backgroundImage = `url('${LUXURY_CARD_SPRITE_URL}')`;
-    el.style.backgroundSize = `${750 * f}px ${1750 * f}px`;
+    const [w, h] = sprite.size.split(' ').map(v => parseFloat(v) * f);
+    el.style.backgroundImage = `url('${kind === 'PROPERTY' ? PROPERTY_SPRITE_URL : LUXURY_CARD_SPRITE_URL}')`;
+    el.style.backgroundSize = `${w}px ${h}px`;
     el.style.backgroundPosition = `${sprite.x * f}px ${sprite.y * f}px`;
     el.style.width = `${size}px`;
     el.style.height = `${size}px`;
@@ -175,7 +181,7 @@ export async function revealLuxuryCard(card, playerId) {
     await wait(30);
     el.style.transform = 'scale(1) rotate(0deg)';
     el.style.opacity = '1';
-    await wait(1700);
+    await wait(hold);
     if (panel) {
         const p = panel.getBoundingClientRect();
         el.style.transition = 'all 0.7s cubic-bezier(0.5, 0, 0.3, 1)';
@@ -186,6 +192,11 @@ export async function revealLuxuryCard(card, playerId) {
         await wait(720);
     }
     el.remove();
+}
+
+/** The "new Luxury Card" moment after a Diamond trade. */
+export function revealLuxuryCard(card, playerId) {
+    return revealWonCard(card, playerId, { kind: 'LUXURY' });
 }
 
 // ---- Popups and messages (inside the scaled table, placed with absolute pixels) -----------------------------
