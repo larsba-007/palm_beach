@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev:web"],
       "port": 5173
+    },
+    {
+      "name": "palm-beach-web-built",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "preview:web"],
+      "port": 4173
     }
   ]
 }

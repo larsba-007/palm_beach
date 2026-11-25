@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.6 done** (end of game and polish). Next: step 1.7, the release check, after Lars has tried 1.6.
+- **Current step: 1.7 done** (release check; `dist-web` built, not uploaded). Version 1 is waiting for Lars's play-test, pictures and upload.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -183,8 +183,50 @@ End of game and polish.
 5. **Compendium "Board game" page:** still the Boca text and photos, with one sentence changed to name Palm Beach.
 6. Not done by hand: the PLAY AGAIN button at the end of a full game (the same code was run directly and worked).
 
+## Step 1.7 (25 Nov 2026): release check done, `dist-web` built. NOT uploaded (Lars uploads).
+
+### Checked and passed
+- **`npm run check`:** ALL 23 CHECKS PASSED (20 test files, the three builds, the secret scan, Steam files in place).
+- **Play-throughs in the browser** (development version, fastest speed setting, played to the end by an automatic clicker through the real buttons, no errors in any of them):
+
+  | Players | Draft | Result |
+  |---|---|---|
+  | 2 | Random | Played to the final screen and back to the party menu |
+  | 3 | Pick 2 | All 64 cards flipped, 3 Diamond trades, 1 unsold card, Gulf Stream sold, a winner named |
+  | 4 | Open Draft | All 64 cards flipped, 4 Diamond trades, Mar-a-Lago sold, a winner named |
+
+- **`dist-web` built** with `npm run build:web`: 51 MB, 80 files.
+- **Secret scan of that exact `dist-web`:** no keys, passwords or Steam code.
+- **The built version tried in the browser** (`npm run preview:web`): starts as the web edition, a match starts, cards flip, no file fails to load, the save key is `palmBeachWebSave`.
+- **Remote addresses:** the only one the page loads by itself is Google Fonts. The others (Kickstarter, Steam, backhansgames.com) are links that open only on a click.
+
+### Fixed during the check
+- Removed the list of remote addresses for packages the game never loads (`@google/genai`, `vite`, `@tailwindcss/vite`, `electron`) from `index.html`.
+- Hid the "Bot turn speed" setting (version 1 has no AI players).
+- The die on screen now follows the "Dice speed" setting.
+
+### NOT checked (Claude Code cannot)
+- **Safari, Firefox, a real iPad or phone.** Only the built-in Chromium browser was used. Audio start, fullscreen and touch should be tried there.
+- **A full game clicked by hand by people.** The play-throughs were automatic and at the fastest speed, so nobody has judged the pace or the feel.
+- **5 players:** not offered in the web menu (2–4), so not played on screen; the rules tests cover it.
+- **Licences** of the music, sounds and stock pictures inherited from Boca: there is no list in the project.
+
+### Lars decides before uploading
+1. **Three pictures still show Boca Raton:** the splash screen (the title "Boca Raton and Palm Beach / Gold Coast Gambits" is part of the picture), the party-menu background and the popup banner. Files and sizes: see step 1.6 above and `docs/ASSETS.md`.
+2. **Texts written or proposed by Claude:** the popup texts (`js/support_links.js`), the Compendium rules (`js/pb/rules_text.js`), the character stories (`js/characters.js`).
+3. **Google Fonts:** the page fetches the Overpass font from Google, which sends each visitor's IP address to Google (matters in the EU). Hosting the font files in the game removes this; it needs the four font files downloaded once.
+4. **The Compendium "Board game" page** still has the Boca text and photos.
+5. **The Steam link in the popup** goes to the Boca Raton (Gold Coast Gambits) store page, on purpose.
+
+### How Lars uploads
+1. `npm run check` (must end with ALL CHECKS PASSED).
+2. `npm run build:web` (writes a fresh `dist-web/`).
+3. Optional: `npm run play:web:build` to try exactly that build.
+4. In Netlify, open the **Palm Beach** site → Deploys → drag the `dist-web` folder onto the drop area. Never the Boca Raton site.
+5. Open the site and play a short game.
+
 ## Next
-Step 1.7 in `PLAN.md` (release check: play-through with 2, 3 and 4 players, the checklist in `docs/WEB_EDITION.md` section 8, build `dist-web`), after Lars has tried step 1.6 and said OK.
+Version 1 is ready for Lars's own play-test and upload. After that: version 2 (tutorial), step 2.1: agree on the lessons.
 
 ## Open questions for Lars
 - **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.

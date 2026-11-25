@@ -35,7 +35,9 @@ export async function rollDice(result) {
     cube.classList.add('spinning');
     if (msg) { msg.style.opacity = '0'; msg.innerText = ''; }
     try { audioMgr.startDiceLoop(); } catch { /* no sound */ }
-    await wait(650);
+    // How long the die spins follows the DICE SPEED setting.
+    const spin = (typeof window !== 'undefined' && window.getDiceDuration) ? window.getDiceDuration() * 2 : 650;
+    await new Promise(resolve => setTimeout(resolve, spin));
     cube.classList.remove('spinning');
     try { audioMgr.stopDiceLoop(); } catch { /* no sound */ }
     const faces = { 1: [0, 0], 2: [0, 180], 3: [0, -90], 4: [0, 90], 5: [-90, 0], 6: [90, 0] };

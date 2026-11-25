@@ -3298,10 +3298,12 @@ input[type=range]::-webkit-slider-runnable-track {
 #pb-rules-btn:hover { color: #DA795A; }
 
 /* Compendium: tabs that only make sense in Boca Raton are hidden in Palm Beach version 1:
-   Visitors (Boca's AI opponents), Member Profile (Boca campaign statistics) and Lore (an empty page). */
+   Visitors (Boca's AI opponents), Member Profile (Boca campaign statistics) and Lore (an empty page).
+   The "Bot turn speed" setting is hidden too: version 1 has no AI players. */
 #comp-tab-BOTS,
 #comp-tab-PROFILE,
-#comp-tab-LORE {
+#comp-tab-LORE,
+#setting-bot-turn-speed {
     display: none !important;
 }
 

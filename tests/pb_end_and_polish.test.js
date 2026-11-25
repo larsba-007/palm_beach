@@ -81,7 +81,7 @@ await check('Compendium rules are the Palm Beach rules, with no Boca Raton rule 
 
 await check('Compendium: Boca-only tabs are hidden, and the Block Bonus text matches Palm Beach', () => {
     const css = fs.readFileSync('index.css', 'utf8');
-    assert.match(css, /#comp-tab-BOTS,\s*#comp-tab-PROFILE,\s*#comp-tab-LORE\s*\{\s*display:\s*none\s*!important/);
+    assert.match(css, /#comp-tab-BOTS,\s*#comp-tab-PROFILE,\s*#comp-tab-LORE,\s*#setting-bot-turn-speed\s*\{\s*display:\s*none\s*!important/);
     const html = fs.readFileSync('index.html', 'utf8');
     assert.ok(html.includes('9 Block Bonus Cards</strong> among the 32 Block cards'));
     assert.ok(!html.includes('BONUS CARD COUNTS'), 'the Boca column counts are gone');
