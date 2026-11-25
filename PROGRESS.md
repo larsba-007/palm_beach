@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.0** (not started).
+- **Current step: 1.0 done except the GitHub backup** (waiting for Lars). Next: step 1.1, after Lars has tried 1.0.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -30,11 +30,26 @@
 ## Version 1 characters (changed by Lars 25 Nov 2026, replaces decision 1 in PLAN.md)
 **Roxana, Mr. Flagler, Bright Shell, Carina, Skip.** The other five are locked. (Ms. Post is out, Roxana is in. Edith and Kingston stay out: secret peeks don't work on a shared screen.) `PLAN.md` still lists the old five: Lars to update it, or tell Claude Code to.
 
+## Step 1.0 (25 Nov 2026): done, except GitHub
+- Git repository started. First commit `7da64a8` = the Boca web snapshot + Palm Beach art (the reference point for "how Boca did it").
+- Renamed to Palm Beach: app name, browser tab title, the title at the top of the table (`palm_beach_logo.webp`), About text, Electron product names.
+- Own save keys: `palmBeachWebSave`, `palmBeachSaveGame`, Electron folder `palm-beach-save`. Boca's old save migration is switched off, so Boca saves are never read.
+- Boca's Steam App IDs (4307400, 4547980) and Steam store links marked `PLACEHOLDER` in the code. `js/steam_appid.txt` still holds 4307400 (the file can only hold a number).
+- Docs rewritten for Palm Beach: `README.md`, `docs/ARCHITECTURE.md`, `WEB_EDITION.md`, `DEVELOPMENT.md`, `TESTING_EDITIONS.md`, `STEAM_VERSIONS.md`, `ASSETS.md`, `GIT_WORKFLOW.md`, `GAME_RULES.md` (now a pointer to the Palm Beach rules). The Boca originals are in `_to_delete/boca_docs/`.
+- `npm run check`: ALL 15 CHECKS PASSED. Its fourth check now confirms the Steam and Electron files are still in the project (Boca compared them with its `main` branch, which means nothing here).
+- New tool `scripts/png-to-webp.cjs` (this Mac has no cwebp).
+- Moved to `_to_delete/`: two empty stray files from the project root, and a nameless `.webp` from `public/assets/`.
+- **Not done: GitHub.** The `gh` tool is not installed on this Mac, so Lars creates an empty private repository on github.com and gives Claude Code its address.
+- **Not changed: the splash picture.** Its title ("Boca Raton and Palm Beach / Gold Coast Gambits") is part of the picture.
+- `CLAUDE.md` still mentions `docs/CLAUDE_BOCA_INHERITED.md` and says the docs are not rewritten yet. Lars to update, or tell Claude Code to.
+
 ## Next
-Step 1.0 in `PLAN.md`.
+Step 1.1 in `PLAN.md` (rules engine, no screen), after Lars has tried step 1.0 and said OK.
 
 ## Open questions for Lars
-- OK to start step 1.0?
+- **GitHub:** create an empty private repository and give Claude Code its address (or install `gh`).
+- **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.
+- **Luxury, Property and Auction Map Card pictures** are Boca's files: are they the same as the printed Palm Beach cards? (See `docs/ASSETS.md`.)
 - Support popup texts (`SUPPORT_POPUP.md`): approve before step 1.6.
 - Photos: party-menu background and a Palm Beach banner for the popup (before step 1.6).
 - The Netlify site for palmbeach.backhansgames.com (before step 1.7).
