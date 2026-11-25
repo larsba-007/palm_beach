@@ -45,7 +45,7 @@ Palm Beach will need a sound for getting a Diamond and for the Diamond trade (st
 
 ## 5. Look and fonts
 
-Font: Overpass (loaded from Google Fonts; see the privacy note in `WEB_EDITION.md`). Glass panels, colours and card sizes: `DESIGN_RECIPE.md`. Palm Beach brand colours: `docs/palm_beach/color-palette.md`.
+Font: Overpass, hosted with the game in `public/assets/fonts/` (`overpass-latin.woff2`, `overpass-latin-ext.woff2`; one variable font for all weights; SIL Open Font License 1.1). It is declared at the top of `index.css`. Glass panels, colours and card sizes: `DESIGN_RECIPE.md`. Palm Beach brand colours: `docs/palm_beach/color-palette.md`.
 
 ## 6. Licences
 

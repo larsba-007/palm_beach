@@ -124,4 +124,21 @@ await check('Sounds: round start, turn change, dice, flip, gold, bids, pass, win
     assert.ok(effects.includes('startDiceLoop') && effects.includes('stopDiceLoop'));
 });
 
+await check('Privacy: the font is hosted with the game, and the page fetches nothing from other servers by itself', () => {
+    const html = fs.readFileSync('index.html', 'utf8');
+    const css = fs.readFileSync('index.css', 'utf8');
+    const noComments = (text) => text.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
+    assert.ok(!/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(noComments(html) + noComments(css)), 'no Google Fonts address is left');
+    assert.ok(!/<script[^>]+type="importmap"/.test(html), 'no import map with remote addresses');
+    assert.ok(!/<(script|link|img)[^>]+(src|href)="https?:\/\//.test(noComments(html)), 'no script, stylesheet or picture is loaded from another server');
+    assert.equal([...css.matchAll(/@font-face\s*\{[^}]*font-family:\s*'Overpass'/g)].length, 2);
+    assert.ok(css.includes('font-weight: 200 900;'), 'one variable font covers every weight the game uses (200, 400, 700, 900)');
+    for (const file of ['overpass-latin.woff2', 'overpass-latin-ext.woff2']) {
+        assert.ok(css.includes(`url('/assets/fonts/${file}')`), `${file} is used`);
+        const bytes = fs.readFileSync(`public/assets/fonts/${file}`);
+        assert.equal(bytes.toString('ascii', 0, 4), 'wOF2', `${file} is a WOFF2 font`);
+        assert.ok(bytes.length > 20000 && bytes.length < 200000);
+    }
+});
+
 console.log('\nAll end-of-game and polish checks passed.');

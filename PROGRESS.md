@@ -198,7 +198,7 @@ End of game and polish.
 - **`dist-web` built** with `npm run build:web`: 51 MB, 80 files.
 - **Secret scan of that exact `dist-web`:** no keys, passwords or Steam code.
 - **The built version tried in the browser** (`npm run preview:web`): starts as the web edition, a match starts, cards flip, no file fails to load, the save key is `palmBeachWebSave`.
-- **Remote addresses:** the only one the page loads by itself is Google Fonts. The others (Kickstarter, Steam, backhansgames.com) are links that open only on a click.
+- **Remote addresses:** none is loaded by the page itself (the font is hosted with the game since the font change below). Kickstarter, Steam and backhansgames.com are links that open only on a click.
 
 ### Fixed during the check
 - Removed the list of remote addresses for packages the game never loads (`@google/genai`, `vite`, `@tailwindcss/vite`, `electron`) from `index.html`.
@@ -214,7 +214,7 @@ End of game and polish.
 ### Lars decides before uploading
 1. **Three pictures still show Boca Raton:** the splash screen (the title "Boca Raton and Palm Beach / Gold Coast Gambits" is part of the picture), the party-menu background and the popup banner. Files and sizes: see step 1.6 above and `docs/ASSETS.md`.
 2. **Texts written or proposed by Claude:** the popup texts (`js/support_links.js`), the Compendium rules (`js/pb/rules_text.js`), the character stories (`js/characters.js`).
-3. **Google Fonts:** the page fetches the Overpass font from Google, which sends each visitor's IP address to Google (matters in the EU). Hosting the font files in the game removes this; it needs the four font files downloaded once.
+3. ~~Google Fonts~~ **Done 25 Nov (Lars said yes):** the Overpass font is now hosted with the game (`public/assets/fonts/`, two files, 85 KB together; free to use under the SIL Open Font License). The page no longer fetches anything from another server by itself. Checked in the built version: the font loads from the game's own address and no outside address is contacted. `dist-web` was rebuilt and scanned again after this change.
 4. **The Compendium "Board game" page** still has the Boca text and photos.
 5. **The Steam link in the popup** goes to the Boca Raton (Gold Coast Gambits) store page, on purpose.
 

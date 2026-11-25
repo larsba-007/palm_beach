@@ -81,7 +81,7 @@ CSS marker classes: `.steam-only` and `.hide-on-web` hide an element on the web;
 
 1. `npm run check` passes, and the secret scan is run on the exact `dist-web` that is uploaded.
 2. Licences of the music, sounds and art are fine for the web (`ASSETS.md`).
-3. Privacy: the page loads the Overpass font from Google Fonts, which sends each visitor's IP address to Google (matters in the EU). Hosting the font ourselves removes this. The game stores only `localStorage`: no cookies, no accounts, no statistics.
+3. Privacy, done in step 1.7: the Overpass font is hosted with the game (`public/assets/fonts/`), so the page fetches nothing from other servers by itself. The game stores only `localStorage`: no cookies, no accounts, no statistics.
 4. Done in step 1.7: the list of remote addresses for packages the game never loads was removed from `index.html`.
 5. Nothing on screen says Boca Raton or Gold Coast Gambits by mistake (splash picture, popup, links).
 6. Play through with 2, 3 and 4 players in all three draft modes.
