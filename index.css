@@ -2821,6 +2821,106 @@ input[type=range]::-webkit-slider-runnable-track {
     z-index: 2;
 }
 
+/* ---- Palm Beach player panels (js/pb/panels.js): left side of the table --------------------- */
+#left-panel-cards.pb-panels {
+    display: block;
+    position: relative;
+    width: 1118px;
+    height: 2100px;
+}
+/* The character card grows when the pointer is on it, also over the board. */
+#board-wrapper.pb-table #left-sidebar .overflow-y-auto {
+    overflow: visible;
+}
+
+.pb-panel {
+    position: absolute;
+    font-family: 'Overpass', sans-serif;
+    color: #ffffff;
+}
+
+.pb-panel-name {
+    box-sizing: border-box;
+    padding: 0 10px;
+    border-radius: 14px;
+    background: rgba(38, 56, 92, 0.6);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    font-weight: 900;
+    font-size: 30px;
+    line-height: 56px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* The player whose turn it is. */
+.pb-panel-current .pb-panel-name {
+    background: #F3C80D;
+    border-color: #F3C80D;
+    color: #0f172a;
+}
+
+.pb-panel-card {
+    border-radius: 14px;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+    transform-origin: top left;
+    transition: transform 0.2s ease-out;
+    cursor: zoom-in;
+}
+.pb-panel-card:hover {
+    transform: scale(2.6);
+    z-index: 600;
+}
+
+.pb-diamond {
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.32;
+    filter: grayscale(1);
+}
+.pb-diamond.pb-diamond-held {
+    opacity: 1;
+    filter: none;
+}
+
+.pb-stat-label {
+    box-sizing: border-box;
+    padding-left: 6px;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 58px;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+.pb-stat-value {
+    box-sizing: border-box;
+    padding-right: 6px;
+    font-weight: 900;
+    font-size: 46px;
+    line-height: 58px;
+    text-align: right;
+    pointer-events: none;
+}
+.pb-stat-gold { color: #F3C80D; }
+
+.pb-won-card {
+    border-radius: 6px;
+    border: 1px solid #333333;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Version 1 has no tutorial (it comes in version 2): the Boca tutorial button and its caption are hidden. */
+#v3-tutorial-btn,
+#v3-tutorial-btn + div {
+    display: none !important;
+}
+
 /* The number 2 on the top card of a stack of two Luxury Cards (rows 4 and 6). */
 .pb-stack-count {
     position: absolute;

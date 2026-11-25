@@ -1,133 +1,76 @@
-// characters.js - The Local Roster
-export const CHARACTERS = [
-    { 
-        id: 0, 
-        name: "LEJA", 
-        unlockGambit: 6, 
-        title: "THE POP ARTIST", 
-        ability: "On your turn (no action cost), place the top card of 1 Luxury Pile at the bottom of its pile, flipping the new top card face-up. Any counters on that pile remain.", 
-        type: "SPENDER", 
-        startPowers: 3, 
-        startRerolls: 2, 
-        startExtraTurns: 1, 
-        hometown: "Delray Beach",
-        description: "A vibrant pop artist who is obsessed with colors and spends more time mixing paints than actually painting. They say she once traded a portrait of a local tiger for three bottles of expensive vintage wine."
+// characters.js - The 10 Palm Beach characters, in the shape the menus, the draft and the Compendium expect.
+//
+// The RULES of each character (power, counters, Diamonds, initiative numbers) come from js/rules/data.js,
+// so they are written in one place only. This file adds what the screens need: display name, hometown and story.
+//
+// id = the card's place in public/assets/character_cards_print.webp (5 x 2 cards):
+//   0 Edith, 1 Roxana, 2 Addison, 3 Mr. Flagler, 4 Kingston / 5 Ms. Post, 6 Eric, 7 Bright Shell, 8 Carina, 9 Skip.
+// (Edith sits where Boca's Leja was, Skip where Silviano was.)
+//
+// The stories are short versions of docs/palm_beach/compendium-lore-draft.md, fitted to the Palm Beach powers.
+// DRAFT: Lars approves the final texts.
+
+import { CHARACTERS as RULES_CHARACTERS } from './rules/data.js';
+
+const DISPLAY = {
+    EDITH: {
+        hometown: 'Palm Beach',
+        description: 'Hostess of the most talked-about garden parties on the island, always in pink. She knows what is coming before anyone else, because she has already peeked at the guest list.'
     },
-    { 
-        id: 1, 
-        name: "ROXANA", 
-        unlockGambit: 31, 
-        title: "THE ACTRESS", 
-        ability: "Collect 10 Au before the Spanish River Park auction. On your turn (no action cost), spend 1 counter to force any player to skip their next turn.", 
-        type: "SAVER", 
-        startPowers: 2, 
-        startRerolls: 3, 
-        startExtraTurns: 0, 
-        hometown: "Highland Beach",
-        description: "A dramatic actress who treats every property auction like a stage audition. She believes the best way to win is to make a grand entrance, cry on cue, and hope the other bidders fold out of sheer embarrassment."
+    ROXANA: {
+        hometown: 'Highland Beach',
+        description: 'A screen star who spends the winter season on the coast, far from the studios. She loves the beach at Spanish River Park, and the Atlantic loves her back.'
     },
-    { 
-        id: 2, 
-        name: "ADDISON", 
-        unlockGambit: 26, 
-        title: "THE ARCHITECT", 
-        ability: "Receive 10 Au (instead of 5 Au) when you earn a row or column bonus.", 
-        type: "BALANCED", 
-        startPowers: 0, 
-        startRerolls: 1, 
-        startExtraTurns: 2, 
-        hometown: "Palm Beach",
-        description: "Addison Mizner was the visionary resort architect who defined Florida's Mediterranean Revival style in the 1920s. He transformed Palm Beach and Boca Raton into lavish Spanish-inspired winter playgrounds."
+    ADDISON: {
+        hometown: 'Palm Beach',
+        description: 'In 1925, Palm Beach society architect Addison Mizner set out to turn Boca Raton into "the world\'s most architecturally beautiful playground". His Mediterranean style still shapes the coast.'
     },
-    { 
-        id: 3, 
-        name: "MR. FLAGLER", 
-        unlockGambit: 36, 
-        title: "THE INDUSTRIALIST", 
-        ability: "Start the game with 10 Au. Take a +1 Turn on your first turn (does not spend your +1 Turn counter).", 
-        type: "SAVER", 
-        startPowers: 0, 
-        startRerolls: 2, 
-        startExtraTurns: 1, 
-        hometown: "Palm Beach",
-        description: "Henry Flagler was a visionary industrialist, co-founder of Standard Oil, and builder of the Florida East Coast Railway. He practically created modern Florida, constructing grand hotels and connecting the east coast."
+    FLAGLER: {
+        hometown: 'Palm Beach',
+        description: 'Henry Flagler, co-founder of Standard Oil, brought his Florida East Coast Railway to the shores of Lake Worth in 1894 and opened the Royal Poinciana Hotel the same year. Palm Beach became America\'s winter playground.'
     },
-    { 
-        id: 4, 
-        name: "KINGSTON", 
-        unlockGambit: 11, 
-        title: "THE TENNIS PLAYER", 
-        ability: "After flipping WATERFRONT, receive an extra 1 Au.", 
-        type: "BALANCED", 
-        startPowers: 0, 
-        startRerolls: 2, 
-        startExtraTurns: 2, 
-        hometown: "Gulf Stream",
-        description: "A legendary tennis champion who can hit a ball with pinpoint accuracy but somehow always gets lost on the way to the court. He claims his Waterfront bonuses are purely due to aerodynamic racket physics."
+    KINGSTON: {
+        hometown: 'Gulf Stream',
+        description: 'A former champion who now plays the club courts by the ocean. He always seems to know which property is coming up for sale.'
     },
-    { 
-        id: 5, 
-        name: "MS. POST", 
-        unlockGambit: 21, 
-        title: "THE HEIRESS", 
-        ability: "Collect 20 Au before the Mar-a-Lago auction. On your turn (no action cost), place 1 or more counters on any Luxury Piles. For other players, acquiring a card from those piles costs +2 Au per counter.", 
-        type: "SPENDER", 
-        startPowers: 3, 
-        startRerolls: 1, 
-        startExtraTurns: 1, 
-        hometown: "Palm Beach",
-        description: "Marjorie Merriweather Post was a prominent businesswoman, philanthropist, and heiress to the Postum Cereal empire. She built the legendary Mar-a-Lago estate in Palm Beach as a majestic winter retreat."
+    POST: {
+        hometown: 'Palm Beach',
+        description: 'Inspired by Marjorie Merriweather Post, heiress to her father\'s cereal business and builder of Mar-a-Lago. She collected art, gave grand parties and knew the value of everything.'
     },
-    { 
-        id: 6, 
-        name: "ERIC", 
-        unlockGambit: 46, 
-        title: "THE TECH MOGUL", 
-        ability: "On your turn, flip up to 3 Waterfront Cards and receive 8 Au (counts as your turn action). If a flip triggers an Auction, your power ends immediately and any remaining flips are lost.", 
-        type: "SPENDER", 
-        startPowers: 1, 
-        startRerolls: 2, 
-        startExtraTurns: 0, 
-        hometown: "Boca Raton",
-        description: "A software billionaire who made his fortune selling virtual beachfront property. He decided to play the real game to prove that real land is just 'analog NFTs' and should be swept as easily."
+    ERIC: {
+        hometown: 'Boca Raton',
+        description: 'Boca Raton has a tech history: the old IBM campus is today the Boca Raton Innovation Campus. Eric made his fortune in software and has an eye for the best blocks in town.'
     },
-    { 
-        id: 7, 
-        name: "BRIGHT SHELL", 
-        unlockGambit: 0, 
-        title: "JAEGA TRIBE", 
-        ability: "No active power. Starts with 6 Re-rolls.", 
-        type: "BALANCED", 
-        startPowers: 0, 
-        startRerolls: 6, 
-        startExtraTurns: 0, 
-        hometown: "Boca Raton",
-        description: "Bright Shell represents the ancient Jaega tribe, Native Americans who inhabited the coastal barrier reefs of Palm Beach County for thousands of years, thriving on fishing and harvesting the rich marine life."
+    BRIGHT_SHELL: {
+        hometown: 'Boca Raton',
+        description: 'Long before the mansions, the Jaega people lived on these barrier islands and along the lagoon, living from the sea. Bright Shell walks the shoreline at first light, before anyone else is up.'
     },
-    { 
-        id: 8, 
-        name: "CARINA", 
-        unlockGambit: 41, 
-        title: "THE GOLFER", 
-        ability: "Collect 10 Au before the Gulf Stream Golf Course auction. On your turn (no action cost), place 1 or more counters on face-down Blocks or Waterfronts. All except Carina must roll 5 or 6 to flip them.", 
-        type: "RANDOM", 
-        startPowers: 3, 
-        startRerolls: 2, 
-        startExtraTurns: 1, 
-        hometown: "Jupiter",
-        description: "A competitive golfer who treats the Gulf Stream Golf Club like her personal backyard. She is convinced that a solid swing and a lucky visor are worth more than any amount of Standard Oil stock."
+    CARINA: {
+        hometown: 'Jupiter',
+        description: 'A tour professional who knows every green between Palm Beach and Boca Raton. She is at her best by the lagoon, and she is always invited to the Gulf Stream auction.'
     },
-    { 
-        id: 9, 
-        name: "SILVIANO", 
-        unlockGambit: 16, 
-        title: "THE FASHION DESIGNER", 
-        ability: "On your turn (no action cost), spend 1 counter to buy or roll for a Luxury Card.", 
-        type: "SPENDER", 
-        startPowers: 3, 
-        startRerolls: 3, 
-        startExtraTurns: 0, 
-        hometown: "Palm Beach",
-        description: "A high-fashion icon who believes that winning the game is secondary to looking absolutely fabulous while doing it. He never steps onto the Florida sand without a silk scarf and custom sunglasses."
+    SKIP: {
+        hometown: 'Palm Beach',
+        description: 'Skip surfs Reef Road in Palm Beach, known since the 1960s as Florida\'s big-wave spot. Where everyone else hesitates at the Atlantic, he just paddles out.'
     }
-];
+};
+
+export const CHARACTERS = RULES_CHARACTERS
+    .slice()
+    .sort((a, b) => a.slot - b.slot)
+    .map(c => ({
+        id: c.slot,
+        pbId: c.id,                              // the character's id in the rules engine (js/rules/data.js)
+        name: c.name.toUpperCase(),              // the menus compare names in capitals: "MR. FLAGLER", "BRIGHT SHELL"
+        title: c.title.toUpperCase(),
+        ability: c.ability,
+        startPowers: c.powers,
+        startRerolls: c.rerolls,
+        startDiamonds: c.diamonds,
+        startExtraTurns: 0,                      // Palm Beach has no Extra Turns (a Boca Raton rule)
+        initiative: c.initiative,
+        type: 'BALANCED',                        // inherited field (Boca AI temperament); not used in Palm Beach
+        unlockGambit: 0,                         // inherited field (Boca campaign); not used in Palm Beach
+        hometown: DISPLAY[c.id].hometown,
+        description: DISPLAY[c.id].description
+    }));

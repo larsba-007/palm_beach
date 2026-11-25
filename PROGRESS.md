@@ -2,7 +2,7 @@
 
 ## Plan
 - See `PLAN.md`: version 1 hot seat (2-4 players, 5 characters, no tutorial), version 2 + tutorial, version 3 + AI. Steam later.
-- **Current step: 1.2 done** (the table on screen). Next: step 1.3, after Lars has tried 1.2.
+- **Current step: 1.3 done** (characters and player panels). Next: step 1.4, after Lars has tried 1.3.
 
 ## Done (before the first commit, 25 Nov 2026)
 - Project folder set up at `/Users/lars/code/palm_beach`: the game code, `CLAUDE.md`, `PLAN.md`, `SUPPORT_POPUP.md`, the rules in `docs/palm_beach/`, the art sources in `assets_source/`.
@@ -85,7 +85,7 @@ The Palm Beach table is on screen. Start a match from the party menu to see it. 
 - New code: `js/pb/layout.js` (positions, pure and tested) and `js/pb/table.js` (drawing). 11 new checks in `tests/pb_table_layout.test.js`. `npm run check`: ALL 20 CHECKS PASSED.
 - Checked in the browser at 1920 × 1080 and 1366 × 768.
 
-### Still Boca on screen after step 1.2 (comes in step 1.3)
+### Still Boca on screen after step 1.2 (fixed in step 1.3)
 - The player panels top left: Boca counters (Extra Turns), Boca starting values, no Diamonds.
 - The characters you can pick: still the Boca demo slots (Edith, Ms. Post, Bright Shell, Carina, Skip), not the five chosen for version 1.
 - The Boca tutorial button still starts the Boca tutorial with the Boca board.
@@ -96,8 +96,29 @@ The Palm Beach table is on screen. Start a match from the party menu to see it. 
 3. RESIGN and the settings wheel moved to the bottom-left corner.
 4. The Waterfront card backs still show "+4 Au" beside the Diamond, as printed (the rulebook explains it).
 
+## Step 1.3 (25 Nov 2026): done
+The party menu deals Palm Beach characters and the player panels show the Palm Beach game.
+
+- **Five open characters:** Roxana, Mr. Flagler, Bright Shell, Carina, Skip. The other five show "FULL GAME" and cannot be picked. Random, Pick 2 and Open Draft all use these five.
+- **Character texts** (`js/characters.js`) are Palm Beach now. The rules (power, counters, Diamonds, initiative) are read from the rules engine, so they exist in one place only. Leja and Silviano are gone; Edith and Skip are in their slots.
+- **Player panels** (left side), one per player in seating order: name, character card, **Diamonds under the card**, gold (open), Prestige Points, re-rolls, and the cards won (Property Card first).
+  - Diamonds: one place per Diamond needed for the trade (4, Mr. Flagler 3); the player's own are bright, the rest faint.
+  - The character card grows when the pointer is on it, so the power and the initiative numbers can be read.
+  - No Extra Turns, no Powers counter (none of the five has a red counter).
+- **Seating:** seats follow the order of the names in the party menu. The menu now says "in the order you sit, clockwise". Fixed a bug found on the way: the draft shuffled the players and that became the seat order.
+- **Tutorial button hidden** on the party menu (version 1 has no tutorial; Boca's lessons teach Boca rules).
+- New code: `js/pb/panels.js`, panel positions in `js/pb/layout.js`. 8 new checks in `tests/pb_characters_and_panels.test.js`. `npm run check`: ALL 20 CHECKS PASSED.
+- Checked in the browser: Random and Open Draft with 3 and 4 players, Pick 2 with 4 players, panels with gold, Diamonds and won cards filled in by hand.
+
+### For Lars to look at after step 1.3
+1. **Character stories** in `js/characters.js` are short drafts from `docs/palm_beach/compendium-lore-draft.md`, with the Boca-power sentences replaced. They show in the Compendium. Lars approves the texts.
+2. The party menu has two buttons now (SUPPORT US, START MATCH) and an empty place where TUTORIAL was. To be tidied in step 1.6.
+3. The party-menu background photo is still the Boca Raton board.
+4. One Boca test was set aside (`_to_delete/boca_tests/`): it tested Eric's Boca power, which Palm Beach does not have.
+5. The Compendium and the Boca campaign screens were not gone through; they still hold Boca texts in places (step 1.6).
+
 ## Next
-Step 1.3 in `PLAN.md` (characters and player panels), after Lars has tried step 1.2 and said OK.
+Step 1.4 in `PLAN.md` (the flipping phase: clicks, dice, rewards, Diamond trade), after Lars has tried step 1.3 and said OK.
 
 ## Open questions for Lars
 - **Splash picture:** a new `splash.webp` (3840 × 2160, under 1 MB) that says Palm Beach, or the same photo without text.

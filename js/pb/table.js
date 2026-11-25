@@ -29,8 +29,11 @@ export function palmBeachCharacterId(bocaCharacter) {
 /** Creates the Palm Beach game for the players chosen in the party menu, in seating order. */
 export function createPalmBeachGame(menuPlayers, { seed = Date.now(), variation = VARIATIONS.LAKE_WORTH } = {}) {
     const rng = createRng(seed);
+    // Seats go clockwise in the order the names were typed in the party menu (Lars, 25 Nov 2026),
+    // whatever order the draft was held in.
+    const seated = menuPlayers.slice().sort((a, b) => (a.menuSeat ?? 0) - (b.menuSeat ?? 0));
     const game = createGame({
-        players: menuPlayers.map(p => ({ name: p.name, characterId: palmBeachCharacterId(p.character) })),
+        players: seated.map(p => ({ name: p.name, characterId: palmBeachCharacterId(p.character) })),
         rng,
         variation
     });
@@ -86,6 +89,11 @@ export function renderPalmBeachTable(game, doc = document) {
 
     // Switches off the Boca parts of the screen (two mid-board auctions, three priced Luxury piles): see index.css, ".pb-table".
     if (wrapper) wrapper.classList.add('pb-table');
+
+    // Fetch the card fronts now, so a card shows its picture the moment it is flipped.
+    if (typeof Image !== 'undefined') {
+        for (const url of [CARD_SPRITE_URL, LUXURY_CARD_SPRITE_URL, AUCTION_CARD_SPRITE_URL]) new Image().src = url;
+    }
 
     // ---- The board: 8 rows of Map Cards -------------------------------------------------------
     board.innerHTML = '';

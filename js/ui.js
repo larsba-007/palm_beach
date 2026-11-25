@@ -701,6 +701,8 @@ export function updateAuctionUI() {
 
 
 export function updateUI() {
+    // PALM BEACH: while a Palm Beach match is on the table, its own panels (js/pb/panels.js) show the game. The Boca panels are not updated.
+    if (state.pb) return;
     if (state.isGameOver) return;
     if (!state.players || state.players.length === 0) return;
 

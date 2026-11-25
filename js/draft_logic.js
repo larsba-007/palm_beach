@@ -19,7 +19,7 @@ export function getRandomDraftPool(allCharacters = [], unlockManager = null, isW
 
 /**
  * Determines the available character pool for Pick 2 drafting.
- * - In Gambit 10, the pool consists strictly of LEJA and BRIGHT SHELL.
+ * - In Gambit 10, the pool consists strictly of EDITH (Boca: Leja) and BRIGHT SHELL.
  * - In Gambit 15, the pool consists strictly of KINGSTON and BRIGHT SHELL.
  * - In standard matches, filters against the UnlockManager if present.
  *
@@ -30,7 +30,7 @@ export function getRandomDraftPool(allCharacters = [], unlockManager = null, isW
  */
 export function getPick2CandidatePool(activeGambitId, allCharacters = [], unlockManager = null) {
     if (activeGambitId === 10) {
-        return allCharacters.filter(c => c.name === 'LEJA' || c.name === 'BRIGHT SHELL');
+        return allCharacters.filter(c => c.name === 'EDITH' || c.name === 'BRIGHT SHELL');
     }
     if (activeGambitId === 15) {
         return allCharacters.filter(c => c.name === 'KINGSTON' || c.name === 'BRIGHT SHELL');

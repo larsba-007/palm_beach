@@ -46,7 +46,7 @@ const withEdition = (name, fn) => {
     global.window.state = { activeGambitId: null };
     try { return fn(); } finally { global.window.GameConfig = prev.config; global.window.state = prev.state; }
 };
-const DEMO_CHARACTERS = ['BRIGHT SHELL', 'CARINA', 'LEJA', 'MS. POST', 'SILVIANO'];
+const DEMO_CHARACTERS = ['BRIGHT SHELL', 'CARINA', 'MR. FLAGLER', 'ROXANA', 'SKIP'];   // Palm Beach version 1 (Lars, 25 Nov 2026)
 
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 

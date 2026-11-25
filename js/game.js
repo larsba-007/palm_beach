@@ -5,6 +5,7 @@ import { landmarkData } from './landmarks.js';
 import { audioMgr } from './audio.js';
 import { state } from './state.js';
 import { createPalmBeachGame, renderPalmBeachTable, clearPalmBeachTable } from './pb/table.js';
+import { renderPalmBeachPanels, clearPalmBeachPanels } from './pb/panels.js';
 import { setupBoard, initPlayerCards, updateUI, updateCardVisuals, animateCellFlip, flyTextAnimation, flyCardAnimation, rollDiceVisual, getCharacterCardStyle, loadHighScores, setupAuctionVisuals, showAuctionBonusPopup, animateAuctionWin, triggerWaveAnimation, animateJaegaSetup, animateRoxanaSetup, showVariationSplash, centerBoardView, highlightTargetCell, clearTargetHighlight, showTurnBanner, hideDiceOverlay } from './ui.js';
 import * as Debug from './debug.js';
 import { TutorialManager } from './tutorial.js';
@@ -212,6 +213,9 @@ export function startGame() {
     }
 
     // Shuffle turn order
+    // PALM BEACH: remember where each player sits (the order of the names in the party menu = clockwise round the table).
+    // The shuffle below only decides who drafts first.
+    state.players.forEach((p, idx) => { p.menuSeat = idx; });
     shuffle(state.players);
     state.players.forEach((p, idx) => p.id = idx);
 
@@ -428,15 +432,22 @@ export function initGame() {
 
     // PALM BEACH (step 1.2): a normal match shows the Palm Beach table instead of the Boca board.
     // The Boca turn cycle is not started: nothing is clickable until steps 1.4 and 1.5 connect the rules engine.
+    state.pb = null;
     if (state.mode !== 'TUTORIAL' && !state.activeGambitId) {
         state.pb = createPalmBeachGame(state.players);
         if (typeof window !== 'undefined') window.pb = state.pb;
-        renderPalmBeachTable(state.pb.game);
+        // Draws the table and the panels again from the game (call after the game has changed).
+        state.pb.refresh = () => {
+            renderPalmBeachTable(state.pb.game);
+            renderPalmBeachPanels(state.pb.game);
+        };
+        state.pb.refresh();
         document.getElementById('game-ui').classList.remove('opacity-0', 'pointer-events-none');
         centerBoardView();
         return;
     }
     clearPalmBeachTable();
+    clearPalmBeachPanels();
 
     if (state.mode === 'TUTORIAL') {
         document.getElementById('game-ui').classList.remove('opacity-0', 'pointer-events-none');

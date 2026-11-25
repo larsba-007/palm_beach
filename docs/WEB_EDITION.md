@@ -55,7 +55,7 @@ The web edition is chosen by the file `.env.web`, which holds only `VITE_GAME_ED
 - Its own save key: `palmBeachWebSave`.
 - The board centred in the window, a notice for very small windows, tap-to-preview in Open Draft on touch screens.
 
-Still Boca and to be changed: the TUTORIAL button (Boca lessons; hidden until version 2), the Support Us popup texts and banner (step 1.6), the party-menu background photo (Lars), the five open characters (step 1.3), and the whole game after START MATCH (steps 1.1–1.6).
+Still Boca and to be changed: the Support Us popup texts and banner (step 1.6), the party-menu background photo (Lars), and playing the game after START MATCH (steps 1.4–1.6). The TUTORIAL button is hidden until version 2.
 
 CSS marker classes: `.steam-only` and `.hide-on-web` hide an element on the web; `.web-only` shows it only on the web.
 

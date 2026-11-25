@@ -253,7 +253,7 @@ async function runPick2RegressionSuite() {
         
         // 1a. Direct pure helper test
         const rawPool = getPick2CandidatePool(10, CHARACTERS, UnlockManager);
-        assert.deepEqual(rawPool.map(c => c.name).sort(), ['BRIGHT SHELL', 'LEJA']);
+        assert.deepEqual(rawPool.map(c => c.name).sort(), ['BRIGHT SHELL', 'EDITH']);
 
         // 1b. Draft flow test
         const ctx = createDraftContext();
@@ -266,7 +266,7 @@ async function runPick2RegressionSuite() {
         ctx.app.startDraftPhase();
 
         const candidateNames = ctx.state.currentDraftCandidates.map(c => c.name).sort();
-        assert.deepEqual(candidateNames, ['BRIGHT SHELL', 'LEJA']);
+        assert.deepEqual(candidateNames, ['BRIGHT SHELL', 'EDITH']);
         assert.equal(ctx.state.currentDraftCandidates.length, 2);
         console.log('✓ Scenario 1 Passed: Exactly LEJA and BRIGHT SHELL dealt in Gambit 10.');
     }
@@ -407,7 +407,7 @@ async function runPick2RegressionSuite() {
         ];
         ctx.app.startDraftPhase();
         assert.equal(ctx.state.currentDraftCandidates.length, 2);
-        assert.deepEqual(ctx.state.currentDraftCandidates.map(c => c.name).sort(), ['BRIGHT SHELL', 'LEJA']);
+        assert.deepEqual(ctx.state.currentDraftCandidates.map(c => c.name).sort(), ['BRIGHT SHELL', 'EDITH']);
 
         ctx.state.activeGambitId = 15;
         ctx.app.startDraftPhase();

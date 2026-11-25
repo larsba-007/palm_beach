@@ -80,3 +80,41 @@ export function auctionMapFrontSprite(propertyId) {
 
 /** The order the 3 Property Cards lie in on the table: highest first (IV, III, II). */
 export const PROPERTY_TABLE_ORDER = Object.freeze(['MAR_A_LAGO', 'GULF_STREAM', 'SPANISH_RIVER']);
+
+// ---- Player panels (left side of the table, 1150 px wide) ---------------------------------------
+// One panel per player, side by side in seating order. From top to bottom: name, character card,
+// Diamonds (under the character card: Lars's decision), gold / Prestige Points / re-rolls, cards won.
+
+/** Sizes and positions of the player panels for this number of players. Positions inside the left sidebar. */
+export function panelLayout(playerCount) {
+    const wide = playerCount <= 4;
+    const width = wide ? 265 : 214;
+    const gap = wide ? 19 : 12;
+    const cardHeight = Math.round(width * 1200 / 700);       // character cards are 700 x 1200
+    const nameHeight = 60;
+    const cardTop = nameHeight + 10;
+    const diamondsTop = cardTop + cardHeight + 14;
+    const statsTop = diamondsTop + 78;
+    const statRow = 58;
+    const wonTop = statsTop + 3 * statRow + 16;
+    const thumbGap = 8;
+    const thumb = Math.floor((width - 2 * thumbGap) / 3);    // 3 won cards per line
+    return {
+        width, gap, top: 16, nameHeight, cardTop, cardHeight, diamondsTop, statsTop, statRow, wonTop, thumb, thumbGap,
+        left: (seat) => seat * (width + gap),        // inside #left-panel-cards (1118 px wide, 16 px from the screen edge)
+        /** Position of the n-th won card (0, 1, 2, ...) inside the panel. */
+        wonCard: (n) => ({ left: (n % 3) * (thumb + thumbGap), top: wonTop + Math.floor(n / 3) * (thumb + thumbGap) })
+    };
+}
+
+/** Character card picture: public/assets/character_cards_print.webp, 5 x 2 cards. Scaled to the panel width. */
+export function characterSprite(slot, width, height) {
+    return { x: -(slot % 5) * width, y: -Math.floor(slot / 5) * height, size: `${5 * width}px ${2 * height}px` };
+}
+
+/** Scales a 250 px sprite position down to a thumbnail of "size" px. */
+export function scaleSprite(sprite, size) {
+    const f = size / CARD;
+    const [w, h] = sprite.size.split(' ').map(v => parseFloat(v) * f);
+    return { x: sprite.x * f, y: sprite.y * f, size: `${w}px ${h}px` };
+}

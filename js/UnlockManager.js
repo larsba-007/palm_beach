@@ -1,6 +1,10 @@
 import { GAME_VARIATIONS, DRAFT_MODES } from './unlock_data.js';
 import { CHARACTERS } from './data.js';
 import { botRoster } from './bots.js';
+import { V1_CHARACTER_IDS, getCharacter } from './rules/data.js';
+
+// The names of the characters that are open in version 1, in capitals as js/characters.js writes them.
+const V1_CHARACTER_NAMES = V1_CHARACTER_IDS.map(id => getCharacter(id).name.toUpperCase());
 
 export const UnlockManager = {
   
@@ -62,7 +66,8 @@ export const UnlockManager = {
 
     if (!isFullGame) {
       // In the Demo: Whitelisted locals & visitors are ALWAYS unlocked (both in compendium, custom board game, and campaign)
-      const demoChars = ['BRIGHT SHELL', 'LEJA', 'SILVIANO', 'CARINA', 'MS. POST'];
+      // PALM BEACH version 1 (Lars, 25 Nov 2026): Roxana, Mr. Flagler, Bright Shell, Carina, Skip. The other five are locked.
+      const demoChars = V1_CHARACTER_NAMES;
       if (entity.name && demoChars.includes(entity.name.toUpperCase()) && entity.intelligenceLevel === undefined) {
         return true;
       }
