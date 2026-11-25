@@ -243,3 +243,11 @@ Version 1 is ready for Lars's own play-test and upload. After that: version 2 (t
 - Photos: party-menu background and a Palm Beach banner for the popup (before step 1.6).
 - The Netlify site for palmbeach.backhansgames.com (before step 1.7).
 - Steam (later): its own Steam app, or part of Gold Coast Gambits?
+
+## Version 2, step 2.1: the tutorial script (25 Nov 2026)
+
+Lars decided: one short guided game (not text screens), the learner plays Bright Shell against a scripted Roxana, one "Board game rule" note per chapter.
+
+- `TUTORIAL_SCRIPT.md`: Claude's proposal for every bubble text and click, in four chapters (Flip cards, The Luxury Auction, Diamonds, The ending). **Waiting for Lars's approval.** No tutorial code is written yet.
+- Open: where the tutorial starts from (two choices on the start screen, or a button on the party menu). Claude recommends two choices on the start screen, with a small tutorial link kept on the party menu.
+- Next after approval: step 2.2, the tutorial engine.
